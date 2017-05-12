@@ -7,11 +7,16 @@ import java.sql.*;
  * Created by Joseph Losee on 5/8/2017.
  */
 public class SQLManager {
+
+    //SQL Connection information in one convenient package!
     private static String driver   = "com.mysql.jdbc.Driver"; ;
     private static String schema = "U04bqK";
     private static String url = "jdbc:mysql://52.206.157.109/"+schema;
     private static String user = "U04bqK", pass="53688195806";
     private static Connection sqlConnection = null;
+
+
+    private static SQLUser activeUser = null;
 
     //Returns the sql connection object
     public static Connection getSQLConnection(){
@@ -40,16 +45,29 @@ public class SQLManager {
         PreparedStatement prepStatement;
         ResultSet res = null;
         boolean success = false;
-        String query = /*"select * from user where userName="+user+"and password="+pass;//*/"select * from user where userName = ? and password = ?";
+
+        //LOGIN QUERY
+        String loginSQLString = "select * from user where userName = ? and password = ?";
+
+
         try {
-            prepStatement = sqlConnection.prepareStatement(query);
+            //use prepare statement to prevent sql injection
+            prepStatement = getSQLConnection().prepareStatement(loginSQLString);
             prepStatement.setString(1, user);
             prepStatement.setString(2, pass);
             res = prepStatement.executeQuery();
+
+            //password/usesrname should match a single result
             if (res.next()){
+                int userID = res.getInt(1);
+                String userName = res.getString(2);
+
+                //TODO: Make this update the log file for logins
                 System.out.println("User login successful!");
-                System.out.println("UserID: " + res.getInt(1));
-                System.out.println("UserName: " + res.getString(2));
+                System.out.println("UserID: " + userID);
+                System.out.println("UserName: " + userName);
+                activeUser = new SQLUser(userID, userName);
+
                 success = true;
             }
 
@@ -59,10 +77,74 @@ public class SQLManager {
             System.out.println("An generic exception occurred during the prepared statement of login. "+e.getMessage());
         }
 
-//        statement.
-
-        //TODO: return SQL User
         return success;
 
     }
+
+    public static void logout(){
+        activeUser = null;
+
+        //TODO: Call View Manager and close all open windows, then show login window.
+    }
+
+    public static boolean addCustomer(SQLCustomer inCustomer){
+        boolean addSucceed = false;
+
+        String addCustString = "Insert into customer (customerID, customerName, addressId, active, createDate, createdBy) " +
+                                            "VALUES (?, ?, ?, ?, NOW(), ?)";
+        try (PreparedStatement prepStatement = getSQLConnection().prepareStatement(addCustString)){
+            prepStatement.setInt(1, inCustomer.getCustomerID());
+            prepStatement.setString(2, inCustomer.getCustomerName());
+            prepStatement.setInt(3, inCustomer.getAddressID());
+            prepStatement.setInt(4, inCustomer.getActive());//not sure what active is for, but I'll probably just let this be set as a checkbox?
+            prepStatement.setString(5, activeUser.getUserName());
+
+
+            //TODO: Add "active" checkbox to customer form
+            prepStatement.executeQuery();
+            addSucceed=true;
+        }catch(SQLException sqlE){
+            System.out.println("Error creating statement: "+ sqlE.getMessage());
+        }
+
+        return addSucceed;
+    }
+
+    /**
+     *
+     * @param countryName
+     * @return the new countryId or -1 if something went wrong,
+     */
+    private static int addCountry(String countryName){
+        int countryID = -1;
+        String selectCountry = "Select * from country where country=?";
+        String addCountry= "Insert into country (countryId, country, createDate, createdBy) values (?, ?, NOW(), ?)";
+        try (PreparedStatement pstCountryExistQuery = getSQLConnection().prepareStatement(selectCountry)){
+            pstCountryExistQuery.setString(1, countryName);
+            ResultSet rs = pstCountryExistQuery.executeQuery();
+            if (rs.next()){
+                countryID = rs.getInt(1);
+            }else{
+                //find the highest country ID and increment it, because I can't turn on auto-inc in the DB
+                rs = getSQLConnection().createStatement().executeQuery("Select Max(countryId) from Country");
+                if (rs.next()){
+                    countryID=rs.getInt(1);
+                }
+
+                //
+                PreparedStatement pstAddCountry = getSQLConnection().prepareStatement(addCountry);
+                pstAddCountry.setInt(1, ++countryID);
+                pstAddCountry.setString(2, countryName);
+                pstAddCountry.setString(3, activeUser.getUserName());
+                pstAddCountry.executeQuery();
+            }
+
+        }catch (SQLException e){
+            //Handle the sql exception
+        }
+
+        return countryID;
+    }
+
+
 }
