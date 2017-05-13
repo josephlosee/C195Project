@@ -15,7 +15,6 @@ public class SQLManager {
     private static String user = "U04bqK", pass="53688195806";
     private static Connection sqlConnection = null;
 
-
     private static SQLUser activeUser = null;
 
     //Returns the sql connection object
@@ -48,7 +47,6 @@ public class SQLManager {
 
         //LOGIN QUERY
         String loginSQLString = "select * from user where userName = ? and password = ?";
-
 
         try {
             //use prepare statement to prevent sql injection
@@ -146,5 +144,73 @@ public class SQLManager {
         return countryID;
     }
 
+    private static int addCity(String cityName, int countryID){
+        int cityID = -1;
+        String selectCity = "Select * from city where city=? and countryID=?";
+        String addCity = "INSERT INTO city (cityID, city, countryID, createDate, createdBy VALUES (?, ?, ?, NOW(),"+activeUser.getUserName()+" )";
+
+        try(PreparedStatement pstCityExists = sqlConnection.prepareStatement(selectCity)){
+            pstCityExists.setString(1,cityName);
+            pstCityExists.setInt(2, countryID);
+            ResultSet cityPresent = pstCityExists.executeQuery();
+            if (cityPresent.next()){
+                cityID=cityPresent.getInt(1);
+            }
+            else{
+                ResultSet nextID = getSQLConnection().createStatement().executeQuery("Select MAX(cityID) from City");
+                if (nextID.next()){
+                    cityID = nextID.getInt(1);
+                }
+
+                PreparedStatement pstAddCity = sqlConnection.prepareStatement(addCity);
+                pstAddCity.setInt(1, ++cityID);
+                pstAddCity.setString(2, cityName);
+                pstAddCity.setInt(3, countryID);
+                pstAddCity.executeQuery();
+            }
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+
+        return cityID;
+    }
+
+    private static int addAddress(String addressLine1, String addressLine2, String postCode, String phone, int cityID){
+        int addressID = -1;
+
+        String selectAddress = "Select * from address where address=? and address2=? and cityID=? and postCode=? and phone=?";
+        String addAddress="INSERT INTO address (addressID, address, address2, cityID, postCode, phone, createDate, createdBy)"+
+                "VALUES (?, ? , ?, ?, ?, ?, NOW(), "+activeUser.getUserName()+")";
+
+        try(PreparedStatement pstAddrExists = sqlConnection.prepareStatement(selectAddress)){
+            pstAddrExists.setString(1,addressLine1);
+            pstAddrExists.setString(2, addressLine2);
+            pstAddrExists.setInt(3, cityID);
+            pstAddrExists.setString(4, postCode);
+            pstAddrExists.setString(5, phone);
+
+            ResultSet rs = pstAddrExists.executeQuery();
+            if (rs.next()){
+                addressID=rs.getInt(1);
+                //If the address is present.
+            }else{
+                rs=getSQLConnection().createStatement().executeQuery("SELECT MAX(addressID) from address");
+                if (rs.next()) {
+                    addressID = rs.getInt(1);
+                }
+                    PreparedStatement pstAddAddress = sqlConnection.prepareStatement(addAddress);
+                    pstAddAddress.setInt(1, ++addressID);
+                    pstAddAddress.setString(2, addressLine1);
+                    pstAddAddress.setString(3, addressLine2);
+                    pstAddAddress.setInt(4, cityID);
+                    pstAddAddress.setString(5, postCode);
+                    pstAddAddress.setString(6, phone);
+            }
+        }catch (SQLException e){
+            //TODO: Handle
+        }
+
+        return addressID;
+    }
 
 }

@@ -48,11 +48,7 @@ public class SQLCustomer {
     }
 
     public void setCustomerName(String customerName) throws Exception {
-        if (customerName.length()<MAX_NAME_LENGTH){
-            this.customerName.set(customerName);
-        }else{
-            throw new Exception("Customer Name cannot exceed "+MAX_NAME_LENGTH+" characters in length.");
-        }
+        this.customerName.set(customerName);
     }
 
     public String getAddress1() {
