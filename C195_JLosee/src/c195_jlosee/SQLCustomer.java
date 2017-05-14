@@ -18,18 +18,21 @@ public class SQLCustomer {
             MAX_ADDRESS2_LENGTH=50, MAX_CITY_LENGTH=50, MAX_COUNTRY_LENGTH=50,
             MAX_POSTALCODE_LENGTH=10, MAX_PHONE_LENGTH=20;
 
-    SimpleStringProperty customerName, address1, address2, city, postalCode, phone, country;
-    SimpleIntegerProperty customerID;
-    SimpleIntegerProperty addressID;
-    SimpleIntegerProperty cityID;
-    SimpleIntegerProperty countryID;
-    SimpleIntegerProperty active;
+    SimpleStringProperty customerName = new SimpleStringProperty(),address1=new SimpleStringProperty(),
+            address2=new SimpleStringProperty(), city=new SimpleStringProperty(), postalCode=new SimpleStringProperty(), phone=new SimpleStringProperty(),
+            country=new SimpleStringProperty();
+    SimpleIntegerProperty customerID = new SimpleIntegerProperty();
+    SimpleIntegerProperty addressID = new SimpleIntegerProperty();
+    SimpleIntegerProperty cityID = new SimpleIntegerProperty();
+    SimpleIntegerProperty countryID = new SimpleIntegerProperty();
+    SimpleIntegerProperty active = new SimpleIntegerProperty();
 
     public SQLCustomer(){
         this("Doug Wasserman", "123 Boxberry Lane", null, "Greenwich", "91234", "555 555 5555", "United States");
     }
 
     public SQLCustomer(String customerName, String address1, String address2, String city, String postCode, String phone, String country){
+
         this.setCustomerName(customerName);
         this.setCountry(country);
         this.setCity(city);
@@ -48,7 +51,7 @@ public class SQLCustomer {
     public int getActive() {        return active.get();    }
     public SimpleIntegerProperty activeProperty() {        return active;    }
     public void setActive(int active) {        this.active.set(active);    }
-
+//555-888-5431
     //
     //Customer Name getter/setter
     public String getCustomerName() {        return customerName.get();    }

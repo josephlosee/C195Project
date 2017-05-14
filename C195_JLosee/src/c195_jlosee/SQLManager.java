@@ -3,6 +3,7 @@ package c195_jlosee;
 import javafx.collections.ObservableList;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 
 /**
  * ${FILENAME}
@@ -103,13 +104,15 @@ public class SQLManager {
         boolean addSucceed = false;
 
         String addCustString = "Insert into customer (customerID, customerName, addressId, active, createDate, createdBy) " +
-                                            "VALUES (?, ?, ?, ?, NOW(), ?)";
+                                            "VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement prepStatement = getSQLConnection().prepareStatement(addCustString)){
             prepStatement.setInt(1, inCustomer.getCustomerID());
             prepStatement.setString(2, inCustomer.getCustomerName());
             prepStatement.setInt(3, inCustomer.getAddressID());
             prepStatement.setInt(4, inCustomer.getActive());//not sure what active is for, but I'll probably just let this be set as a checkbox?
-            prepStatement.setString(5, activeUser.getUserName());
+            prepStatement.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+            prepStatement.setString(6, activeUser.getUserName());
+
 
 
             //TODO: Add "active" checkbox to customer form
@@ -132,8 +135,10 @@ public class SQLManager {
      */
     public int addCountry(String countryName){
         int countryID = -1;
+        //Quick Debug test:
+        //try
         String selectCountry = "Select * from country where country=?";
-        String addCountry= "Insert into country (countryId, country, createDate, createdBy) values (?, ?, NOW(), ?)";
+        String addCountry= "Insert into country (countryId, country, createDate, createdBy, lastUpdateBy) values (?, ?, ?, ?, ?)";
         try (PreparedStatement pstCountryExistQuery = getSQLConnection().prepareStatement(selectCountry)){
             pstCountryExistQuery.setString(1, countryName);
             ResultSet rs = pstCountryExistQuery.executeQuery();
@@ -141,7 +146,7 @@ public class SQLManager {
                 countryID = rs.getInt(1);
             }else{
                 //find the highest country ID and increment it, because I can't turn on auto-inc in the DB
-                rs = getSQLConnection().createStatement().executeQuery("Select Max(countryId) from Country");
+                rs = getSQLConnection().createStatement().executeQuery("Select Max(countryId) from country");
                 if (rs.next()){
                     countryID=rs.getInt(1);
                 }
@@ -150,12 +155,18 @@ public class SQLManager {
                 PreparedStatement pstAddCountry = getSQLConnection().prepareStatement(addCountry);
                 pstAddCountry.setInt(1, ++countryID);
                 pstAddCountry.setString(2, countryName);
-                pstAddCountry.setString(3, activeUser.getUserName());
-                pstAddCountry.executeQuery();
+                pstAddCountry.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+                pstAddCountry.setString(4, activeUser.getUserName());
+                pstAddCountry.setString(5, activeUser.getUserName());
+                int i = pstAddCountry.executeUpdate();
+
+                //getSQLConnection().commit();
             }
 
         }catch (SQLException e){
             //Handle the sql exception
+
+            System.out.println("SQLException in addCountry: "+ e.getMessage());
         }
 
         return countryID;
@@ -164,7 +175,7 @@ public class SQLManager {
     public int addCity(String cityName, int countryID){
         int cityID = -1;
         String selectCity = "Select * from city where city=? and countryID=?";
-        String addCity = "INSERT INTO city (cityID, city, countryID, createDate, createdBy VALUES (?, ?, ?, NOW(),"+activeUser.getUserName()+" )";
+        String addCity = "INSERT INTO city (cityID, city, countryID, createDate, createdBy, lastUpdateBy) VALUES (?, ?, ?, ?, ?, ?)";
 
         try(PreparedStatement pstCityExists = sqlConnection.prepareStatement(selectCity)){
             pstCityExists.setString(1,cityName);
@@ -174,7 +185,7 @@ public class SQLManager {
                 cityID=cityPresent.getInt(1);
             }
             else{
-                ResultSet nextID = getSQLConnection().createStatement().executeQuery("Select MAX(cityID) from City");
+                ResultSet nextID = getSQLConnection().createStatement().executeQuery("Select MAX(cityID) from city");
                 if (nextID.next()){
                     cityID = nextID.getInt(1);
                 }
@@ -183,10 +194,13 @@ public class SQLManager {
                 pstAddCity.setInt(1, ++cityID);
                 pstAddCity.setString(2, cityName);
                 pstAddCity.setInt(3, countryID);
-                pstAddCity.executeQuery();
+                pstAddCity.setTimestamp(4,new Timestamp(System.currentTimeMillis()));
+                pstAddCity.setString(5, activeUser.getUserName());
+                pstAddCity.setString(6, activeUser.getUserName());
+                pstAddCity.executeUpdate();
             }
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            System.out.println("SQLException in addCity: "+e.getMessage());
         }
 
         return cityID;
@@ -195,9 +209,10 @@ public class SQLManager {
     public int addAddress(String addressLine1, String addressLine2, String postCode, String phone, int cityID){
         int addressID = -1;
 
-        String selectAddress = "Select * from address where address=? and address2=? and cityID=? and postCode=? and phone=?";
-        String addAddress="INSERT INTO address (addressID, address, address2, cityID, postCode, phone, createDate, createdBy)"+
-                "VALUES (?, ? , ?, ?, ?, ?, NOW(), "+activeUser.getUserName()+")";
+        String selectAddress = "Select * from address where address=? and address2=? and cityID=? and postalCode=? and phone=?";
+        String addAddress="INSERT INTO address (addressID, address, address2, cityID, postalCode, phone, createDate, createdBy, lastUpdateBy)"+
+                " VALUES (?, ? , ?, ?, ?, ?, ?, ?, ?)";
+
 
         try(PreparedStatement pstAddrExists = sqlConnection.prepareStatement(selectAddress)){
             pstAddrExists.setString(1,addressLine1);
@@ -205,6 +220,7 @@ public class SQLManager {
             pstAddrExists.setInt(3, cityID);
             pstAddrExists.setString(4, postCode);
             pstAddrExists.setString(5, phone);
+
 
             ResultSet rs = pstAddrExists.executeQuery();
             if (rs.next()){
@@ -222,9 +238,14 @@ public class SQLManager {
                     pstAddAddress.setInt(4, cityID);
                     pstAddAddress.setString(5, postCode);
                     pstAddAddress.setString(6, phone);
+                    pstAddAddress.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+                    pstAddAddress.setString(8, activeUser.getUserName());
+                    pstAddAddress.setString(9, activeUser.getUserName());
+                    pstAddAddress.executeUpdate();
             }
         }catch (SQLException e){
             //TODO: Handle
+            System.out.println("SQLException in addAddres: "+e.getMessage());
         }
 
         return addressID;
