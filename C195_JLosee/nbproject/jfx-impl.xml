@@ -2213,7 +2213,7 @@
                             print("Warning: offlineAllowed not supported by this version of JavaFX SDK deployment Ant task. Please upgrade JavaFX to 2.0.2 or higher.");
                         }
                     }
-                    // native packaging (time consuming, thus applied in explicit build only)
+                    // native packaging (startTime consuming, thus applied in explicit build only)
                     var nativeEnabled = new String(project.getProperty("do.build.native.package"));
                     var nativeType = new String(project.getProperty("javafx.native.bundling.type"));
                     var projStateRun = new String(project.getProperty("project.state.running"));

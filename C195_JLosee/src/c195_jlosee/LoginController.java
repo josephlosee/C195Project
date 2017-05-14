@@ -5,13 +5,17 @@
  */
 package c195_jlosee;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 
 /**
  *
@@ -47,11 +51,20 @@ public class LoginController implements Initializable  {
         //Attempt login, check against SQL database
         //TODO: log failed/successful attempts
         System.out.println("UN: "+loginUN.getText()+"\nPW: "+loginPW.getText());
-        if (SQLManager.login(loginUN.getText(), loginPW.getText())){
+        if (SQLManager.getInstance().login(loginUN.getText(), loginPW.getText())){
             Alert welcome = new Alert(Alert.AlertType.INFORMATION, rb.getString("loginSuccess"));
             welcome.showAndWait();
 
-            ViewManager.showMainView();
+            //ViewManager.showMainView();
+            Stage custStage = new Stage();
+            try {
+                custStage.setScene(new Scene(FXMLLoader.load(getClass().getResource("resources/CustomerView.fxml"))));
+                custStage.show();
+                ViewManager.closeWindowFromEvent(e);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+
         }else{
             //TODO: Log failed attempt in log file
             Alert loginFailed = new Alert(Alert.AlertType.ERROR, rb.getString("loginFailed"));

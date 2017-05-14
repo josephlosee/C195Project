@@ -1,5 +1,7 @@
 package c195_jlosee;
 
+import javafx.collections.ObservableList;
+
 import java.sql.*;
 
 /**
@@ -14,8 +16,20 @@ public class SQLManager {
     private static String url = "jdbc:mysql://52.206.157.109/"+schema;
     private static String user = "U04bqK", pass="53688195806";
     private static Connection sqlConnection = null;
+    private static final SQLManager instance = new SQLManager();
+
+    ObservableList <SQLCustomer> customerList;
+    ObservableList <SQLAppointment> apptList;
 
     private static SQLUser activeUser = null;
+
+    private SQLManager(){
+        sqlConnection = getSQLConnection();
+    }
+
+    public static SQLManager getInstance(){
+        return instance;
+    }
 
     //Returns the sql connection object
     public static Connection getSQLConnection(){
@@ -39,7 +53,7 @@ public class SQLManager {
 
     }
 
-    public static boolean login(String user, String pass){
+    public boolean login(String user, String pass){
         //Sanitize
         PreparedStatement prepStatement;
         ResultSet res = null;
@@ -79,13 +93,13 @@ public class SQLManager {
 
     }
 
-    public static void logout(){
+    public void logout(){
         activeUser = null;
 
         //TODO: Call View Manager and close all open windows, then show login window.
     }
 
-    public static boolean addCustomer(SQLCustomer inCustomer){
+    public boolean addCustomer(SQLCustomer inCustomer){
         boolean addSucceed = false;
 
         String addCustString = "Insert into customer (customerID, customerName, addressId, active, createDate, createdBy) " +
@@ -100,6 +114,9 @@ public class SQLManager {
 
             //TODO: Add "active" checkbox to customer form
             prepStatement.executeQuery();
+
+            //After all is said and done, if no exceptions are encountered, add the customer to the list.
+            customerList.add(inCustomer);
             addSucceed=true;
         }catch(SQLException sqlE){
             System.out.println("Error creating statement: "+ sqlE.getMessage());
@@ -113,7 +130,7 @@ public class SQLManager {
      * @param countryName
      * @return the new countryId or -1 if something went wrong,
      */
-    private static int addCountry(String countryName){
+    public int addCountry(String countryName){
         int countryID = -1;
         String selectCountry = "Select * from country where country=?";
         String addCountry= "Insert into country (countryId, country, createDate, createdBy) values (?, ?, NOW(), ?)";
@@ -144,7 +161,7 @@ public class SQLManager {
         return countryID;
     }
 
-    private static int addCity(String cityName, int countryID){
+    public int addCity(String cityName, int countryID){
         int cityID = -1;
         String selectCity = "Select * from city where city=? and countryID=?";
         String addCity = "INSERT INTO city (cityID, city, countryID, createDate, createdBy VALUES (?, ?, ?, NOW(),"+activeUser.getUserName()+" )";
@@ -175,7 +192,7 @@ public class SQLManager {
         return cityID;
     }
 
-    private static int addAddress(String addressLine1, String addressLine2, String postCode, String phone, int cityID){
+    public int addAddress(String addressLine1, String addressLine2, String postCode, String phone, int cityID){
         int addressID = -1;
 
         String selectAddress = "Select * from address where address=? and address2=? and cityID=? and postCode=? and phone=?";

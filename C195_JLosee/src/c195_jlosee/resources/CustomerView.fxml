@@ -31,7 +31,7 @@
          <children>
             <HBox alignment="CENTER_LEFT">
                <children>
-                  <CheckBox fx:id="activeCB" alignment="CENTER" mnemonicParsing="false" prefHeight="17.0" prefWidth="67.0" text="Active">
+                  <CheckBox fx:id="activeCB" alignment="CENTER" mnemonicParsing="false" onAction="#activeToggled" prefHeight="17.0" prefWidth="67.0" text="Active">
                      <HBox.margin>
                         <Insets />
                      </HBox.margin>
@@ -43,8 +43,8 @@
             </HBox>
             <HBox alignment="CENTER_RIGHT" spacing="15.0">
                <children>
-                  <Button maxHeight="25.0" maxWidth="52.0" minHeight="25.0" minWidth="52.0" mnemonicParsing="false" text="Save" />
-                  <Button maxHeight="25.0" maxWidth="52.0" minHeight="25.0" minWidth="52.0" mnemonicParsing="false" text="Cancel" />
+                  <Button fx:id="saveCust" maxHeight="25.0" maxWidth="52.0" minHeight="25.0" minWidth="52.0" mnemonicParsing="false" onAction="#saveClicked" text="Save" />
+                  <Button fx:id="cancelCust" maxHeight="25.0" maxWidth="52.0" minHeight="25.0" minWidth="52.0" mnemonicParsing="false" onAction="#cancelClicked" text="Cancel" />
                </children>
                <GridPane.margin>
                   <Insets right="23.0" />

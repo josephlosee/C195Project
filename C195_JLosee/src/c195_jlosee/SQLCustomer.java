@@ -25,76 +25,85 @@ public class SQLCustomer {
     SimpleIntegerProperty countryID;
     SimpleIntegerProperty active;
 
-    public int getActive() {
-        return active.get();
+    public SQLCustomer(){
+        this("Doug Wasserman", "123 Boxberry Lane", null, "Greenwich", "91234", "555 555 5555", "United States");
     }
 
-    public SimpleIntegerProperty activeProperty() {
-        return active;
+    public SQLCustomer(String customerName, String address1, String address2, String city, String postCode, String phone, String country){
+        this.setCustomerName(customerName);
+        this.setCountry(country);
+        this.setCity(city);
+        this.setFullAddress(address1, address2, postCode, phone);
     }
 
-    public void setActive(int active) {
-        this.active.set(active);
+    public boolean setFullAddress(String address1, String address2, String postCode, String phone){
+        boolean ret = false;
+        setAddressID(SQLManager.getInstance().addAddress(address1, address2, postCode, phone, this.getCityID()));
+        if (this.getAddressID()>=0){
+            ret = true;
+        }
+        return ret;
     }
 
+    public int getActive() {        return active.get();    }
+    public SimpleIntegerProperty activeProperty() {        return active;    }
+    public void setActive(int active) {        this.active.set(active);    }
 
-
-    public String getCustomerName() {
-        return customerName.get();
-    }
-
-    public SimpleStringProperty customerNameProperty() {
-        return customerName;
-    }
-
-    public void setCustomerName(String customerName) throws Exception {
+    //
+    //Customer Name getter/setter
+    public String getCustomerName() {        return customerName.get();    }
+    public SimpleStringProperty customerNameProperty() {        return customerName;    }
+    public void setCustomerName(String customerName){
         this.customerName.set(customerName);
     }
 
+    //
+    // Address Line 1 getter/Setter
     public String getAddress1() {
         return address1.get();
     }
-
     public SimpleStringProperty address1Property() {
         return address1;
     }
-
     public void setAddress1(String address1) {
         this.address1.set(address1);
     }
 
+    //
+    // Address Line 2 getter/setter
     public String getAddress2() {
         return address2.get();
     }
-
     public SimpleStringProperty address2Property() {
         return address2;
     }
-
     public void setAddress2(String address2) {
         this.address2.set(address2);
     }
 
+    //
+    // City getter/setter
     public String getCity() {
         return city.get();
     }
-
     public SimpleStringProperty cityProperty() {
         return city;
     }
-
     public void setCity(String city) {
-        this.city.set(city);
+        int cityID = SQLManager.getInstance().addCity(city, this.getCountryID());
+
+        if (cityID>=0){
+            this.city.set(city);
+            this.setCityID(cityID);
+        }
     }
 
     public String getPostalCode() {
         return postalCode.get();
     }
-
     public SimpleStringProperty postalCodeProperty() {
         return postalCode;
     }
-
     public void setPostalCode(String postalCode) {
         this.postalCode.set(postalCode);
     }
@@ -102,11 +111,9 @@ public class SQLCustomer {
     public String getPhone() {
         return phone.get();
     }
-
     public SimpleStringProperty phoneProperty() {
         return phone;
     }
-
     public void setPhone(String phone) {
         this.phone.set(phone);
     }
@@ -120,7 +127,12 @@ public class SQLCustomer {
     }
 
     public void setCountry(String country) {
-        this.country.set(country);
+        int countryID = SQLManager.getInstance().addCountry(country);
+        if (countryID >=0){
+            this.country.set(country);
+            this.setCountryID(countryID);
+        }
+
     }
 
     public int getCustomerID() {
