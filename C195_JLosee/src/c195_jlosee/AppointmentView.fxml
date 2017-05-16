@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <VBox layoutX="14.0" layoutY="12.0" prefHeight="355.0" prefWidth="545.0">
+         <children>
+            <HBox>
+               <children>
+                  <TextField prefHeight="25.0" prefWidth="423.0" text="title" />
+               </children>
+            </HBox>
+            <HBox>
+               <children>
+                  <TextField prefHeight="25.0" prefWidth="425.0" text="desc" />
+               </children>
+            </HBox>
+            <HBox>
+               <children>
+                  <TextField prefHeight="25.0" prefWidth="424.0" text="location" />
+               </children>
+            </HBox>
+            <HBox>
+               <children>
+                  <TextField prefHeight="25.0" prefWidth="423.0" text="contact" />
+               </children>
+            </HBox>
+            <HBox>
+               <children>
+                  <TextField prefHeight="25.0" prefWidth="424.0" text="url" />
+               </children>
+            </HBox>
+            <HBox>
+               <children>
+                  <DatePicker promptText="Start Date" />
+                  <TextField promptText="HH:MM" />
+                  <MenuButton mnemonicParsing="false" text="AM/PM/24H">
+                    <items>
+                      <MenuItem mnemonicParsing="false" text="AM" />
+                      <MenuItem mnemonicParsing="false" text="PM" />
+                        <MenuItem mnemonicParsing="false" text="24H" />
+                    </items>
+                  </MenuButton>
+               </children>
+            </HBox>
+            <HBox>
+               <children>
+                  <DatePicker promptText="End Date" />
+                  <TextField promptText="HH:MM" />
+                  <MenuButton mnemonicParsing="false" text="AM/PM/24H">
+                     <items>
+                        <MenuItem mnemonicParsing="false" text="AM" />
+                        <MenuItem mnemonicParsing="false" text="PM" />
+                        <MenuItem mnemonicParsing="false" text="24H" />
+                     </items>
+                  </MenuButton>
+               </children>
+            </HBox>
+            <HBox>
+               <children>
+                  <ComboBox prefWidth="150.0" promptText="Customer" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

@@ -4,6 +4,8 @@ import javafx.collections.ObservableList;
 
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
 
 /**
  * ${FILENAME}
@@ -11,6 +13,7 @@ import java.time.LocalDateTime;
  */
 public class SQLManager {
 
+    //TODO: Add Prepared Statements for SQL Queries up here along with strings for grouped references
     //SQL Connection information in one convenient package!
     private static String driver   = "com.mysql.jdbc.Driver"; ;
     private static String schema = "U04bqK";
@@ -250,5 +253,74 @@ public class SQLManager {
 
         return addressID;
     }
+
+
+    private void populateCustomerList(){
+        //TODO: Select * from customer Join address Using(addressId)  Join city Using (cityId) Join country using (countryId);
+        String allCustQuery = "SELECT * FROM CUSTOMER";
+        SQLCustomer current;
+        try (ResultSet rs = this.sqlConnection.createStatement().executeQuery(allCustQuery)) {
+            try{
+                if(rs.next()){
+                    //TODO: May need to update these to note specific tables, this is UNTESTED as of 5/15
+                    int custId = rs.getInt("customerId");
+                    String custName = rs.getString("customerName");
+                    int addressID = rs.getInt("addressId");
+                    int active = rs.getInt("active");
+                    String address1 = rs.getString("address");
+                    String address2 = rs.getString("address2");
+                    int cityId = rs.getInt("cityId");
+                    String cityName = rs.getString ("city");
+                    int countryId = rs.getInt("countryId");
+                    String country = rs.getString("country");
+
+                }
+            }catch (SQLException e){
+                System.out.println("Error in SQLManager.populateCustomerList() resultSet : "+e.getMessage());
+            }
+        } catch (SQLException e){
+            System.out.println("Error in SQLManager.populateCustomerList() query : "+e.getMessage());
+        }
+    }
+
+    //Probably don't need this after all, just use a join
+    private void parseCustomerAddressInfo(SQLCustomer in){
+        String addrQuery = "Select * FROM address where addressId = ?";
+        String cityQuery = "Select * FROM city where cityId = ?";
+        String countryQuery = "Select * FROM country where cityId = ?";
+        try{
+            sqlConnection.prepareStatement(addrQuery);
+
+        }catch (SQLException e){
+            System.out.println("Error in parseCustomerAddr");
+        }
+    }
+
+    //TODO: Populate appointment list
+    private void populateAppointmentList(){
+        String apptQuery = "Select * from appointment";
+    }
+
+    public ArrayList<SQLAppointment> getCustomersAppointments(SQLCustomer in){
+        String apptQuery = "Select * from appointment";
+    }
+
+    public LocalDateTime canSchedule(int customerId, LocalDateTime start, LocalDateTime end){
+        String scheduleQuery = "Select * from appointment where ? > start or ? < end";
+
+        try{
+            PreparedStatement st = sqlConnection.prepareStatement(scheduleQuery);
+            //I have no idea if this will work, and it will probably need to be changed.
+            st.setTimestamp(1, new Timestamp(start.toEpochSecond((ZoneOffset) ZoneOffset.systemDefault())));
+
+        }catch (SQLException e){
+            System.out.println("SQLException in SQLManager.canSchedule: "+e.getMessage());
+        }
+    }
+
+    //NOTE: Appointment scheduling should be doable by lambda expressions using ForEach. Populate a list of appointments for the selected customer,
+    //Then use a predicate to ensure that the target start dateTime is not before any currently scheduled end dateTimes, and the target dateTime
+    // //is not scheduled for any scheudled starttimes
+
 
 }
