@@ -28,6 +28,11 @@ public class ViewManager {
                 .isPresent();
     }
 
+    public static void showErrorMessage(String errMessage){
+        Alert errorBox = new Alert(Alert.AlertType.ERROR, errMessage);
+        errorBox.showAndWait();
+    }
+
     /**
      * Returns the window associated with an event. I hate casting this much, and this will be used frequently.
      * @param e

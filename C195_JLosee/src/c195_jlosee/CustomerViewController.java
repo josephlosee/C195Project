@@ -39,8 +39,12 @@ public class CustomerViewController implements Initializable{
     @FXML void saveClicked(ActionEvent e){
         /// public SQLCustomer(String customerName, String address1, String address2, String city, String postCode, String phone, String country){
 
-        customerData=new SQLCustomer(custNameField.getText(), AddressLine1Field.getText(), AddressLine2Field.getText(),
-                CityField.getText(), PostalCodeField.getText(),  PhoneField.getText(),countryField.getText());
+        try {
+            customerData=new SQLCustomer(custNameField.getText(), AddressLine1Field.getText(), AddressLine2Field.getText(),
+                    CityField.getText(), PostalCodeField.getText(),  PhoneField.getText(),countryField.getText());
+        }catch (Exception exc){
+            ViewManager.showErrorMessage(exc.getMessage());
+        }
     }
 
     @FXML void cancelClicked(ActionEvent e){

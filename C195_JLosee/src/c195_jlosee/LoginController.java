@@ -94,7 +94,7 @@ public class LoginController implements Initializable  {
                 //DEBUG: Show customer view
                 Stage custStage = new Stage();
                 try {
-                    custStage.setScene(new Scene(FXMLLoader.load(getClass().getResource("resources/CustomerView.fxml"))));
+                    custStage.setScene(new Scene(FXMLLoader.load(getClass().getResource("resources/MainView.fxml"))));
                     custStage.show();
                     ViewManager.closeWindowFromEvent(e);
                 } catch (IOException e1) {

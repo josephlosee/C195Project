@@ -2,6 +2,7 @@ package c195_jlosee;
 
 import javafx.beans.property.SimpleStringProperty;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -11,8 +12,9 @@ import java.time.LocalDateTime;
 public class SQLAppointment {
 
     private SimpleStringProperty date, startTime, title, description, location, contact, url, createdBy, createdDate;
-    private LocalDateTime scheduledDate;
+    private LocalDate scheduledDate;
     private int apptID, customerID;
+    //todo: start tiem, end time
 
     public String getDate() {
         return date.get();
@@ -122,11 +124,11 @@ public class SQLAppointment {
         this.createdDate.set(createdDate);
     }
 
-    public LocalDateTime getScheduledDate() {
+    public LocalDate getScheduledDate() {
         return scheduledDate;
     }
 
-    public void setScheduledDate(LocalDateTime scheduledDate) {
+    public void setScheduledDate(LocalDate scheduledDate) {
         this.scheduledDate = scheduledDate;
     }
 

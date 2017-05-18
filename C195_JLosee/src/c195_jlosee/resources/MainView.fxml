@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.111" fx:controller="c195_jlosee.MainViewController">
+  <columnConstraints>
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+  </rowConstraints>
+   <children>
+      <Button fx:id="addCustButton" mnemonicParsing="false" onAction="#addCustClicked" text="Add Customer" />
+      <Button fx:id="addApptButton" mnemonicParsing="false" onAction="#addApptClicked" text="Add Appointment" GridPane.columnIndex="1" />
+      <Button fx:id="editCustButton" mnemonicParsing="false" onAction="#editCustClicked" text="Edit Customer" GridPane.rowIndex="1" />
+      <Button fx:id="editApptButton" mnemonicParsing="false" onAction="#editApptClicked" text="Edit Appointment" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+      <Button fx:id="reportsButton" mnemonicParsing="false" onAction="#reportsClicked" text="Reports" GridPane.rowIndex="2" />
+      <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#logoutClicked" text="Logout" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+   </children>
+</GridPane>

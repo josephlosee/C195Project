@@ -1,9 +1,11 @@
 package c195_jlosee;
 
+import com.sun.xml.internal.fastinfoset.util.CharArray;
 import javafx.collections.ObservableList;
 
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 
@@ -99,8 +101,6 @@ public class SQLManager {
 
     public void logout(){
         activeUser = null;
-
-        //TODO: Call View Manager and close all open windows, then show login window.
     }
 
     public boolean addCustomer(SQLCustomer inCustomer){
@@ -303,19 +303,58 @@ public class SQLManager {
 
     public ArrayList<SQLAppointment> getCustomersAppointments(SQLCustomer in){
         String apptQuery = "Select * from appointment";
+        int custID = in.getCustomerID();
+        try{
+            PreparedStatement st = getSQLConnection().prepareStatement(apptQuery);
+            st.setInt(1, custID);
+
+            ResultSet rs = st.executeQuery();
+            while (rs.next()){
+                SQLAppointment appt = new SQLAppointment();
+                appt.setApptID(rs.getInt(1));
+                appt.setCustomerID(custID);
+                appt.setTitle(rs.getString("title"));
+                appt.setDescription(rs.getString("description"));
+                appt.setLocation(rs.getString("location"));
+                appt.setContact(rs.getString("contact"));
+                appt.setUrl(rs.getString("url"));
+                //TODO: Add another method for localTime, fix this
+                appt.setStartTime(rs.getTime("start").toString());
+                //TODO: END TIME?
+            }
+        }catch (SQLException e){
+            //TODO
+        }
+
+
+
+        //TODO: STUB
+        return null;
     }
 
     public LocalDateTime canSchedule(int customerId, LocalDateTime start, LocalDateTime end){
-        String scheduleQuery = "Select * from appointment where ? > start or ? < end";
-
+        String scheduleQuery = "Select * from appointment where customerId = ? AND (? > start or ? < end)";
+        LocalDateTime dt = null;
         try{
             PreparedStatement st = sqlConnection.prepareStatement(scheduleQuery);
             //I have no idea if this will work, and it will probably need to be changed.
-            st.setTimestamp(1, new Timestamp(start.toEpochSecond((ZoneOffset) ZoneOffset.systemDefault())));
+            st.setInt(1, customerId);
+            st.setTimestamp(2, new Timestamp(end.toEpochSecond((ZoneOffset) ZoneOffset.systemDefault())));
+            st.setTimestamp(3, new Timestamp(start.toEpochSecond((ZoneOffset) ZoneOffset.systemDefault())));
+            ResultSet rs = st.executeQuery();
+            if (rs.next()){
+                System.out.println((rs.getTime("start").toLocalTime()));
+                System.out.println(rs.getTime("end").toLocalTime());
+
+                //LocalTime start = LocalTime.parse(startTime.toString().toCharArray())
+
+            }
 
         }catch (SQLException e){
             System.out.println("SQLException in SQLManager.canSchedule: "+e.getMessage());
         }
+
+        return dt; //TODO STUB
     }
 
     //NOTE: Appointment scheduling should be doable by lambda expressions using ForEach. Populate a list of appointments for the selected customer,
