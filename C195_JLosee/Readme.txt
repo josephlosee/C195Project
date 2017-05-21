@@ -10,6 +10,7 @@ Requirement A:
 
 Requirement B:
 -Form Created, todo: Validate all input, add customer to DB
+-Made a combobox for the country selection to avoid duplicates in the database.
 
 Requirement C:
 -TODO: ALL
