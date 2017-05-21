@@ -9,7 +9,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <VBox layoutX="14.0" layoutY="12.0" prefHeight="355.0" prefWidth="545.0">
@@ -41,8 +40,8 @@
             </HBox>
             <HBox>
                <children>
-                  <DatePicker promptText="Start Date" />
-                  <TextField promptText="HH:MM" />
+                  <DatePicker fx:id="startDate" promptText="Start Date" />
+                  <TextField fx:id="startTimeField" promptText="HH:MM" />
                   <MenuButton mnemonicParsing="false" text="AM/PM/24H">
                     <items>
                       <MenuItem mnemonicParsing="false" text="AM" />
@@ -50,12 +49,13 @@
                         <MenuItem mnemonicParsing="false" text="24H" />
                     </items>
                   </MenuButton>
+                  <ComboBox fx:id="startZone" prefHeight="25.0" prefWidth="103.0" />
                </children>
             </HBox>
             <HBox>
                <children>
-                  <DatePicker promptText="End Date" />
-                  <TextField promptText="HH:MM" />
+                  <DatePicker fx:id="endDate" promptText="End Date" />
+                  <TextField fx:id="endTime" promptText="HH:MM" />
                   <MenuButton mnemonicParsing="false" text="AM/PM/24H">
                      <items>
                         <MenuItem mnemonicParsing="false" text="AM" />

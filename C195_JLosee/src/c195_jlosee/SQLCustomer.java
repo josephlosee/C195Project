@@ -18,14 +18,14 @@ public class SQLCustomer {
             MAX_ADDRESS2_LENGTH=50, MAX_CITY_LENGTH=50, MAX_COUNTRY_LENGTH=50,
             MAX_POSTALCODE_LENGTH=10, MAX_PHONE_LENGTH=20;
 
-    SimpleStringProperty customerName = new SimpleStringProperty(),address1=new SimpleStringProperty(),
+    private SimpleStringProperty customerName = new SimpleStringProperty(),address1=new SimpleStringProperty(),
             address2=new SimpleStringProperty(), city=new SimpleStringProperty(), postalCode=new SimpleStringProperty(), phone=new SimpleStringProperty(),
             country=new SimpleStringProperty();
-    SimpleIntegerProperty customerID = new SimpleIntegerProperty();
-    SimpleIntegerProperty addressID = new SimpleIntegerProperty();
-    SimpleIntegerProperty cityID = new SimpleIntegerProperty();
-    SimpleIntegerProperty countryID = new SimpleIntegerProperty();
-    SimpleIntegerProperty active = new SimpleIntegerProperty();
+    private SimpleIntegerProperty customerID = new SimpleIntegerProperty();
+    private SimpleIntegerProperty addressID = new SimpleIntegerProperty();
+    private SimpleIntegerProperty cityID = new SimpleIntegerProperty();
+    private SimpleIntegerProperty countryID = new SimpleIntegerProperty();
+    private SimpleIntegerProperty active = new SimpleIntegerProperty();
 
     public SQLCustomer(){
         try {

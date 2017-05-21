@@ -9,6 +9,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 
+import javax.swing.text.View;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,6 +64,7 @@ public class CustomerViewController implements Initializable{
         //countryField.di("Canada");
         PostalCodeField.setText("11111");
         PhoneField.setText("888-555-5555");
+        activeCB.setSelected(false);
     }
 
     @FXML void saveClicked(ActionEvent e){
@@ -79,12 +81,21 @@ public class CustomerViewController implements Initializable{
     }
 
     @FXML void cancelClicked(ActionEvent e){
-
+        String confirmation = "Discard changes?";
+        if (ViewManager.showConfirmationView(confirmation)){
+            ViewManager.closeWindowFromEvent(e);
+        }
     }
 
-    @FXML void activeToggled(ActionEvent e){
-        if (!(isCBChecked)) isCBChecked = true;
-        else isCBChecked = false;
-        activeCB.setSelected(isCBChecked);
+    /*@FXML void activeToggled(ActionEvent e){
+        //activeCB.fire();
+        //System.out.println("Checkbox state: "+activeCB.isSelected());
+    }*/
+
+    @FXML void testClick(){
+        //activeCB.fire();
+        activeCB.setSelected(!activeCB.isSelected());
+        activeCB.fire();
+        System.out.println("Checkbox state: "+activeCB.isSelected());
     }
 }

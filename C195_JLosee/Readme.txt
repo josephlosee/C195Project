@@ -1,7 +1,7 @@
 C195 Software II
 Decision Making Notes
 -Default User Name/Password: test/test
--As setting columns to autoincrement being allowed was not noted, when adding a new tuple to the DB, I instead checked the highest ID, the pre-incremented it as the new id for the given tuple.
+-Made a check on launch to ensure all id columns are set to auto_increment, as this was noted as an option in the course chatter.
 
 Rubric 
 
@@ -11,6 +11,8 @@ Requirement A:
 Requirement B:
 -Form Created, todo: Validate all input, add customer to DB
 -Made a combobox for the country selection to avoid duplicates in the database.
+-TODO: make sure to set active in the customer table, currently do not have this working
+-Todo: edit customer code, view customer code (reuse same view, edit loads in existing, view sets all fields to not editable)
 
 Requirement C:
 -TODO: ALL
@@ -22,7 +24,7 @@ Requirement E:
 -TODO: All, but this is a simple conversion from the SQL dateTime to a zoned datetime based on user system defaults
 
 Requirement F (Exception Controls):
--In progress: overlapping appointments, nonexistent or invalid customer data (See Requirement B)
+-In progress: overlapping appointments, nonexistent or invalid customer data (See Requirement B, completed validation)
 -Done: UN/Password
 
 Requirement G:

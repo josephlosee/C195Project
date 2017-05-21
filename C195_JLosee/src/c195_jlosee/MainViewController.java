@@ -18,6 +18,7 @@ import java.util.ResourceBundle;
  * Created by Joseph Losee on 5/12/2017.
  */
 public class MainViewController implements Initializable{
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //TODO: Nothing at the moment.
@@ -44,12 +45,20 @@ public class MainViewController implements Initializable{
         System.out.println("Edit Customer Button Clicked");
     }
 
+    @FXML public void viewCustClicked(){
+        System.out.println("View Cust button clicked");
+    }
+
     @FXML public void addApptClicked(){
         System.out.println("Add Appt button clicked");
     }
 
     @FXML public void editApptClicked(){
         System.out.println("Edit Appt button clicked");
+    }
+
+    @FXML public void viewApptClicked(){
+        System.out.println("View Appt button clicked");
     }
 
     @FXML public void logoutClicked(ActionEvent e){

@@ -30,20 +30,17 @@
             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <HBox alignment="CENTER_LEFT">
-               <children>
-                  <CheckBox fx:id="activeCB" alignment="CENTER" mnemonicParsing="false" onAction="#activeToggled" prefHeight="17.0" prefWidth="67.0" text="Active">
-                     <HBox.margin>
-                        <Insets />
-                     </HBox.margin>
-                  </CheckBox>
-               </children>
-               <GridPane.margin>
-                  <Insets left="13.0" />
-               </GridPane.margin>
-            </HBox>
             <HBox alignment="CENTER_RIGHT" spacing="15.0">
                <children>
+                  <HBox alignment="CENTER_LEFT" prefHeight="58.0" prefWidth="189.0">
+                     <children>
+                        <CheckBox fx:id="activeCB" alignment="CENTER" mnemonicParsing="false" onMouseClicked="#testClick" prefHeight="17.0" prefWidth="67.0" selected="true" text="Active">
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                        </CheckBox>
+                     </children>
+                  </HBox>
                   <Button fx:id="saveCust" maxHeight="25.0" maxWidth="52.0" minHeight="25.0" minWidth="52.0" mnemonicParsing="false" onAction="#saveClicked" text="Save" />
                   <Button fx:id="cancelCust" maxHeight="25.0" maxWidth="52.0" minHeight="25.0" minWidth="52.0" mnemonicParsing="false" onAction="#cancelClicked" text="Cancel" />
                </children>
