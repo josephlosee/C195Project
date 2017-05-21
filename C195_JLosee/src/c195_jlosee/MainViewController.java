@@ -25,6 +25,19 @@ public class MainViewController implements Initializable{
 
     @FXML public void addCustClicked(){
         System.out.println("Add Customer Button Clicked");
+        Stage stage = new Stage();
+        Parent root = null;
+        try {
+            root = FXMLLoader.load(getClass().getResource("resources/CustomerView.fxml"));
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+
+        Scene scene = new Scene(root);
+
+        stage.setScene(scene);
+        stage.setTitle("Add Customer");
+        stage.show();
     }
 
     @FXML public void editCustClicked(){

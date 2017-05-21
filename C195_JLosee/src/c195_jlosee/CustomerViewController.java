@@ -1,15 +1,18 @@
 package c195_jlosee;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 
-import java.awt.*;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -20,18 +23,44 @@ public class CustomerViewController implements Initializable{
 
     @FXML CheckBox activeCB;
     @FXML Button saveCust, cancelCust;
-    @FXML TextArea custNameField, AddressLine1Field, AddressLine2Field, CityField, countryField, PostalCodeField, PhoneField;
+    @FXML TextArea custNameField;
+    @FXML    TextArea AddressLine1Field;
+    @FXML    TextArea AddressLine2Field;
+    @FXML    TextArea CityField;
+    @FXML    TextArea PostalCodeField;
+    @FXML    TextArea PhoneField;
+    @FXML ComboBox<String> countryField;
     boolean isCBChecked = false;
     SQLCustomer customerData;
+    ObservableList<String> countryList;
 
     public void initialize(URL urlInit, ResourceBundle resourceBundle){
         //TODO: add any init calls here
 
-        //Debug:
+        Locale systemLocale = Locale.getDefault();
+        countryList =  FXCollections.observableList(new ArrayList<>());
+        Arrays.stream(Locale.getISOCountries())
+                .forEach(a -> countryList.add(new Locale("",a).getDisplayCountry()));
+
+
+        int indexOfDefault =0;
+        for (int i =0; i<countryList.size(); i++)
+        {
+            //Set the initial local to the user's default
+            if (countryList.get(i).equalsIgnoreCase(systemLocale.getDisplayCountry())){
+                indexOfDefault=i;
+                break;
+            }
+
+        }
+        countryField.setItems(countryList);
+        countryField.getSelectionModel().select(indexOfDefault);
+
+
         custNameField.setText("Alan Smithee");
         AddressLine1Field.setText("123 Main St.");
         CityField.setText("Anytown");
-        countryField.setText("United States");
+        //countryField.di("Canada");
         PostalCodeField.setText("11111");
         PhoneField.setText("888-555-5555");
     }
@@ -41,7 +70,9 @@ public class CustomerViewController implements Initializable{
 
         try {
             customerData=new SQLCustomer(custNameField.getText(), AddressLine1Field.getText(), AddressLine2Field.getText(),
-                    CityField.getText(), PostalCodeField.getText(),  PhoneField.getText(),countryField.getText());
+                    CityField.getText(), PostalCodeField.getText(),  PhoneField.getText(),countryField.getSelectionModel().getSelectedItem());
+            SQLManager test = SQLManager.getInstance();
+            SQLManager.getInstance().addCustomer(customerData);
         }catch (Exception exc){
             ViewManager.showErrorMessage(exc.getMessage());
         }

@@ -11,6 +11,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.sql.SQLException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -43,9 +44,13 @@ public class C195_JLosee extends Application {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args){
         launch(args);
-
+        try {
+            SQLManager.getSQLConnection().close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -14,6 +14,20 @@ public class SQLAppointment {
     private SimpleStringProperty date, startTime, title, description, location, contact, url, createdBy, createdDate;
     private LocalDate scheduledDate;
     private int apptID, customerID;
+
+    public SQLAppointment(){
+
+    }
+    public SQLAppointment(LocalDateTime dateTime, String title, String descrip, String location, String contact, String URL){
+
+        //TODO stub
+        System.out.println("SQLApptConstructor Stub 1");
+    }
+
+    public SQLAppointment(LocalDateTime dateTime, String title, String descrip, String location, String contact, String URL, String createdBy, String createdDate){
+
+    }
+
     //todo: start tiem, end time
 
     public String getDate() {
@@ -148,14 +162,5 @@ public class SQLAppointment {
         this.customerID = customerID;
     }
 
-    public SQLAppointment(){
 
-    }
-    public SQLAppointment(LocalDateTime dateTime, String title, String descrip, String location, String contact, String URL){
-
-    }
-
-    public SQLAppointment(LocalDateTime dateTime, String title, String descrip, String location, String contact, String URL, String createdBy, String createdDate){
-
-    }
 }

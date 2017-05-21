@@ -37,7 +37,7 @@ public class SQLCustomer {
             e.printStackTrace();
         }
 
-        SQLManager.getInstance().addCustomer(this);
+        //SQLManager.getInstance().addCustomer(this);
 
     }
 
@@ -48,7 +48,7 @@ public class SQLCustomer {
         this.setCity(city);
         this.setFullAddress(address1, address2, postCode, phone);
 
-        SQLManager.getInstance().addCustomer(this);
+        //SQLManager.getInstance().addCustomer(this);
     }
 
     public boolean setFullAddress(String address1, String address2, String postCode, String phone) throws Exception {
@@ -60,7 +60,7 @@ public class SQLCustomer {
         this.setPhone(phone);
 
         setAddressID(SQLManager.getInstance().addAddress(address1, address2, postCode, phone, this.getCityID()));
-        if (this.getAddressID()>=0){
+        if (this.getAddressID()>0){
             ret = true;
         }
         return ret;

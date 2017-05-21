@@ -1,13 +1,21 @@
 package c195_jlosee;
 
 import com.sun.xml.internal.fastinfoset.util.CharArray;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
+import java.time.*;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Timer;
 
 /**
  * ${FILENAME}
@@ -23,13 +31,14 @@ public class SQLManager {
     private static String user = "U04bqK", pass="53688195806";
     private static Connection sqlConnection = null;
     private static final SQLManager instance = new SQLManager();
-
     ObservableList <SQLCustomer> customerList;
     ObservableList <SQLAppointment> apptList;
 
     private static SQLUser activeUser = null;
 
     private SQLManager(){
+        customerList = FXCollections.observableList(new ArrayList<SQLCustomer>());
+        apptList = FXCollections.observableList(new ArrayList<SQLAppointment>());
         sqlConnection = getSQLConnection();
     }
 
@@ -37,7 +46,10 @@ public class SQLManager {
         return instance;
     }
 
-    //Returns the sql connection object
+    /**
+     * Returns the sql connection object if available, or establishes a new connection
+     * @return reference to the sqlConnection
+     */
     public static Connection getSQLConnection(){
 
         //Would use a data source instead, but the SQL server seems to be set up for this.
@@ -49,7 +61,18 @@ public class SQLManager {
             }
 
             try {
+                //Ensure all columns are set to auto_increment, takes about 500ms on launch, but worth it as this program won't have to find and calculate every addressID;
                 sqlConnection = DriverManager.getConnection(url, user, pass);
+                Instant timer = Instant.now();
+                sqlConnection.createStatement().executeUpdate("Alter Table appointment Modify Column appointmentId int(10) not null auto_increment");
+                sqlConnection.createStatement().executeUpdate("Alter Table country Modify Column countryId int(10) not null auto_increment");
+                sqlConnection.createStatement().executeUpdate("Alter Table city Modify Column cityId int(10) not null auto_increment");
+                sqlConnection.createStatement().executeUpdate("Alter Table city Modify Column cityId int(10) not null auto_increment");
+                sqlConnection.createStatement().executeUpdate("Alter Table address Modify Column addressId int(10) not null auto_increment");
+                sqlConnection.createStatement().executeUpdate("Alter Table customer Modify Column customerId int(10) not null auto_increment");
+                Instant timer2 = Instant.now();
+                long nanoTime = timer.toEpochMilli()-timer2.toEpochMilli();
+                System.out.println(nanoTime);
             } catch (SQLException sqlE){
                 System.out.println("SQL Exception Encountered: "+sqlE.getMessage());
             }
@@ -60,6 +83,7 @@ public class SQLManager {
     }
 
     public boolean login(String user, String pass){
+
         //Sanitize
         PreparedStatement prepStatement;
         ResultSet res = null;
@@ -68,6 +92,9 @@ public class SQLManager {
         //LOGIN QUERY
         String loginSQLString = "select * from user where userName = ? and password = ?";
 
+        //TODO: It would be best to not transmit these UN/PW plaintext, but the requirement isn't there and the DB isn't properly set up (pw length 50, instead of 256+).
+        // byte[] passHashed =  hashPassword(pass.toCharArray(), user.to)
+
         try {
             //use prepare statement to prevent sql injection
             prepStatement = getSQLConnection().prepareStatement(loginSQLString);
@@ -75,22 +102,22 @@ public class SQLManager {
             prepStatement.setString(2, pass);
             res = prepStatement.executeQuery();
 
-            //password/usesrname should match a single result
+            //Assumption: password/username matches a single result
             if (res.next()){
                 int userID = res.getInt(1);
                 String userName = res.getString(2);
-
-                //TODO: Make this update the log file for logins
+                /*Debugging code
                 System.out.println("User login successful!");
                 System.out.println("UserID: " + userID);
-                System.out.println("UserName: " + userName);
+                System.out.println("UserName: " + userName);*/
                 activeUser = new SQLUser(userID, userName);
 
                 success = true;
             }
 
         }catch (SQLException sqlE){
-            System.out.println("Error creating statement: "+ sqlE.getMessage());
+            System.out.println("Error creating statement in : "+ sqlE.getMessage());
+            System.out.println(sqlE.getStackTrace());
         }catch (Exception e){
             System.out.println("An generic exception occurred during the prepared statement of login. "+e.getMessage());
         }
@@ -106,26 +133,28 @@ public class SQLManager {
     public boolean addCustomer(SQLCustomer inCustomer){
         boolean addSucceed = false;
 
-        String addCustString = "Insert into customer (customerID, customerName, addressId, active, createDate, createdBy) " +
-                                            "VALUES (?, ?, ?, ?, ?, ?)";
+        String addCustString = "Insert into customer (customerName, addressId, active, createDate, createdBy, lastUpdateBy) " +
+                                            "VALUES ( ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement prepStatement = getSQLConnection().prepareStatement(addCustString)){
-            prepStatement.setInt(1, inCustomer.getCustomerID());
-            prepStatement.setString(2, inCustomer.getCustomerName());
-            prepStatement.setInt(3, inCustomer.getAddressID());
-            prepStatement.setInt(4, inCustomer.getActive());//not sure what active is for, but I'll probably just let this be set as a checkbox?
-            prepStatement.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+            //prepStatement.setInt(1, inCustomer.getCustomerID());
+            prepStatement.setString(1, inCustomer.getCustomerName());
+            prepStatement.setInt(2, inCustomer.getAddressID());
+            prepStatement.setInt(3, inCustomer.getActive());//not sure what active is for, but I'll probably just let this be set as a checkbox?
+            prepStatement.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+            prepStatement.setString(5, activeUser.getUserName());
             prepStatement.setString(6, activeUser.getUserName());
 
 
 
             //TODO: Add "active" checkbox to customer form
-            prepStatement.executeQuery();
+            prepStatement.executeUpdate();
 
             //After all is said and done, if no exceptions are encountered, add the customer to the list.
             customerList.add(inCustomer);
             addSucceed=true;
         }catch(SQLException sqlE){
-            System.out.println("Error creating statement: "+ sqlE.getMessage());
+            System.out.println("Error creating statement in addCustomer: "+ sqlE.getMessage());
+            System.out.println(sqlE.getStackTrace());
         }
 
         return addSucceed;
@@ -141,7 +170,7 @@ public class SQLManager {
         //Quick Debug test:
         //try
         String selectCountry = "Select * from country where country=?";
-        String addCountry= "Insert into country (countryId, country, createDate, createdBy, lastUpdateBy) values (?, ?, ?, ?, ?)";
+        String addCountry= "Insert into country (country, createDate, createdBy, lastUpdateBy) values (?, ?, ?, ?)";
         try (PreparedStatement pstCountryExistQuery = getSQLConnection().prepareStatement(selectCountry)){
             pstCountryExistQuery.setString(1, countryName);
             ResultSet rs = pstCountryExistQuery.executeQuery();
@@ -149,19 +178,18 @@ public class SQLManager {
                 countryID = rs.getInt(1);
             }else{
                 //find the highest country ID and increment it, because I can't turn on auto-inc in the DB
-                rs = getSQLConnection().createStatement().executeQuery("Select Max(countryId) from country");
-                if (rs.next()){
+
+                PreparedStatement pstAddCountry = getSQLConnection().prepareStatement(addCountry);
+                //pstAddCountry.setInt(1, ++countryID);
+                pstAddCountry.setString(1, countryName);
+                pstAddCountry.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+                pstAddCountry.setString(3, activeUser.getUserName());
+                pstAddCountry.setString(4, activeUser.getUserName());
+                int i = pstAddCountry.executeUpdate();
+                rs = pstCountryExistQuery.executeQuery();
+                if(rs.next()){
                     countryID=rs.getInt(1);
                 }
-
-                //
-                PreparedStatement pstAddCountry = getSQLConnection().prepareStatement(addCountry);
-                pstAddCountry.setInt(1, ++countryID);
-                pstAddCountry.setString(2, countryName);
-                pstAddCountry.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-                pstAddCountry.setString(4, activeUser.getUserName());
-                pstAddCountry.setString(5, activeUser.getUserName());
-                int i = pstAddCountry.executeUpdate();
 
                 //getSQLConnection().commit();
             }
@@ -178,7 +206,7 @@ public class SQLManager {
     public int addCity(String cityName, int countryID){
         int cityID = -1;
         String selectCity = "Select * from city where city=? and countryID=?";
-        String addCity = "INSERT INTO city (cityID, city, countryID, createDate, createdBy, lastUpdateBy) VALUES (?, ?, ?, ?, ?, ?)";
+        String addCity = "INSERT INTO city (city, countryID, createDate, createdBy, lastUpdateBy) VALUES (?, ?, ?, ?, ?)";
 
         try(PreparedStatement pstCityExists = sqlConnection.prepareStatement(selectCity)){
             pstCityExists.setString(1,cityName);
@@ -188,19 +216,20 @@ public class SQLManager {
                 cityID=cityPresent.getInt(1);
             }
             else{
-                ResultSet nextID = getSQLConnection().createStatement().executeQuery("Select MAX(cityID) from city");
-                if (nextID.next()){
-                    cityID = nextID.getInt(1);
+                PreparedStatement pstAddCity = sqlConnection.prepareStatement(addCity);
+                //pstAddCity.setInt(1, ++cityID);
+                pstAddCity.setString(1, cityName);
+                pstAddCity.setInt(2, countryID);
+                pstAddCity.setTimestamp(3,new Timestamp(System.currentTimeMillis()));
+                pstAddCity.setString(4, activeUser.getUserName());
+                pstAddCity.setString(5, activeUser.getUserName());
+                pstAddCity.executeUpdate();
+
+                cityPresent=pstCityExists.executeQuery();
+                if (cityPresent.next()){
+                    cityID = cityPresent.getInt(1);
                 }
 
-                PreparedStatement pstAddCity = sqlConnection.prepareStatement(addCity);
-                pstAddCity.setInt(1, ++cityID);
-                pstAddCity.setString(2, cityName);
-                pstAddCity.setInt(3, countryID);
-                pstAddCity.setTimestamp(4,new Timestamp(System.currentTimeMillis()));
-                pstAddCity.setString(5, activeUser.getUserName());
-                pstAddCity.setString(6, activeUser.getUserName());
-                pstAddCity.executeUpdate();
             }
         }catch (SQLException e){
             System.out.println("SQLException in addCity: "+e.getMessage());
@@ -209,12 +238,37 @@ public class SQLManager {
         return cityID;
     }
 
+    /**
+     * hashPassword
+     * Unused, but would be good to use if the DB were better set up
+     * Source: https://www.owasp.org/index.php/Hashing_Java
+     * @param password
+     * @param salt
+     * @param iterations
+     * @param keyLength
+     * @return
+     */
+
+    public static byte[] hashPassword( final char[] password, final byte[] salt, final int iterations, final int keyLength ) {
+
+        try {
+            SecretKeyFactory skf = SecretKeyFactory.getInstance( "PBKDF2WithHmacSHA512" );
+            PBEKeySpec spec = new PBEKeySpec( password, salt, iterations, keyLength );
+            SecretKey key = skf.generateSecret( spec );
+            byte[] res = key.getEncoded( );
+            return res;
+
+        } catch( NoSuchAlgorithmException | InvalidKeySpecException e ) {
+            throw new RuntimeException( e );
+        }
+    }
+
     public int addAddress(String addressLine1, String addressLine2, String postCode, String phone, int cityID){
         int addressID = -1;
 
         String selectAddress = "Select * from address where address=? and address2=? and cityID=? and postalCode=? and phone=?";
-        String addAddress="INSERT INTO address (addressID, address, address2, cityID, postalCode, phone, createDate, createdBy, lastUpdateBy)"+
-                " VALUES (?, ? , ?, ?, ?, ?, ?, ?, ?)";
+        String addAddress="INSERT INTO address (address, address2, cityID, postalCode, phone, createDate, createdBy, lastUpdateBy)"+
+                " VALUES (? , ?, ?, ?, ?, ?, ?, ?)";
 
 
         try(PreparedStatement pstAddrExists = sqlConnection.prepareStatement(selectAddress)){
@@ -230,21 +284,22 @@ public class SQLManager {
                 addressID=rs.getInt(1);
                 //If the address is present.
             }else{
-                rs=getSQLConnection().createStatement().executeQuery("SELECT MAX(addressID) from address");
-                if (rs.next()) {
-                    addressID = rs.getInt(1);
+                PreparedStatement pstAddAddress = sqlConnection.prepareStatement(addAddress);
+                //pstAddAddress.setInt(1, ++addressID);
+                pstAddAddress.setString(1, addressLine1);
+                pstAddAddress.setString(2, addressLine2);
+                pstAddAddress.setInt(3, cityID);
+                pstAddAddress.setString(4, postCode);
+                pstAddAddress.setString(5, phone);
+                pstAddAddress.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+                pstAddAddress.setString(7, activeUser.getUserName());
+                pstAddAddress.setString(8, activeUser.getUserName());
+                pstAddAddress.executeUpdate();
+
+                rs=pstAddrExists.executeQuery();
+                if (rs.next()){
+                    addressID=rs.getInt(1);
                 }
-                    PreparedStatement pstAddAddress = sqlConnection.prepareStatement(addAddress);
-                    pstAddAddress.setInt(1, ++addressID);
-                    pstAddAddress.setString(2, addressLine1);
-                    pstAddAddress.setString(3, addressLine2);
-                    pstAddAddress.setInt(4, cityID);
-                    pstAddAddress.setString(5, postCode);
-                    pstAddAddress.setString(6, phone);
-                    pstAddAddress.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
-                    pstAddAddress.setString(8, activeUser.getUserName());
-                    pstAddAddress.setString(9, activeUser.getUserName());
-                    pstAddAddress.executeUpdate();
             }
         }catch (SQLException e){
             //TODO: Handle
@@ -360,6 +415,37 @@ public class SQLManager {
     //NOTE: Appointment scheduling should be doable by lambda expressions using ForEach. Populate a list of appointments for the selected customer,
     //Then use a predicate to ensure that the target start dateTime is not before any currently scheduled end dateTimes, and the target dateTime
     // //is not scheduled for any scheudled starttimes
+
+    /**
+     *
+     * @return null if no appts in the next 15 minutes are found
+     */
+    public SQLAppointment checkForApptAtLogin(){
+        SQLAppointment appt = null;
+
+        //TODO:
+        Instant instnow = Instant.now();
+        Instant instnowPlus15min = instnow.plus(15, ChronoUnit.MINUTES);
+        Timestamp now = new Timestamp(instnow.getEpochSecond());
+        Timestamp within15Mins = new Timestamp(instnowPlus15min.getEpochSecond());
+
+        try{
+            String usersAppts = "Select * from appointment where createdBy=? and startTime between(?,?)";
+            PreparedStatement userApptSt = sqlConnection.prepareStatement(usersAppts);
+            userApptSt.setString(1, activeUser.getUserName());
+            userApptSt.setTimestamp(2, now);
+            userApptSt.setTimestamp(3, within15Mins);
+
+            ResultSet rs = userApptSt.executeQuery();
+            if (rs.next()){
+
+                appt= new SQLAppointment(LocalDateTime.ofInstant(rs.getTime("start").toInstant(), ZoneId.systemDefault()), rs.getString("title"), rs.getString("description"), rs.getString("location"), rs.getString("contact"), rs.getString("URL"));
+            }
+        }catch (SQLException e){
+            System.out.println("Exception encountered in SQLManager.checkForApptAtLogin: "+ e.getMessage());
+        }
+        return appt;
+    }
 
 
 }
