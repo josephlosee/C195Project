@@ -41,9 +41,15 @@
           <TableColumn editable="false" prefWidth="75.0" text="Customer Name">
             <cellValueFactory><PropertyValueFactory property="customerName" /> </cellValueFactory>
             </TableColumn>
-          <TableColumn editable="false" prefWidth="75.0" text="Phone" />
-            <TableColumn editable="false" prefWidth="75.0" text="City" />
-            <TableColumn editable="false" prefWidth="75.0" text="Country" />
+          <TableColumn editable="false" prefWidth="75.0" text="Phone">
+            <cellValueFactory><PropertyValueFactory property="phone" /> </cellValueFactory>
+        </TableColumn>
+            <TableColumn editable="false" prefWidth="75.0" text="City">
+                <cellValueFactory><PropertyValueFactory property="city" /> </cellValueFactory>
+            </TableColumn>
+            <TableColumn editable="false" prefWidth="75.0" text="Country" >
+                <cellValueFactory><PropertyValueFactory property="country" /> </cellValueFactory>
+            </TableColumn>
         </columns>
       </TableView>
       <TableView prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">

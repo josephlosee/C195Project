@@ -20,7 +20,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * ${FILENAME}
+ * $SQLManager
+ * Singleton for passing all SQL connection and queries.
  * Created by Joseph Losee on 5/8/2017.
  */
 public class SQLManager {
@@ -355,35 +356,49 @@ public class SQLManager {
         //TODO: Select * from customer Join address Using(addressId)  Join city Using (cityId) Join country using (countryId);
         String allCustQuery = "SELECT * FROM customer JOIN address USING (addressId) JOIN city USING (cityId) JOIN country USING(countryId)";
         SQLCustomer current;
-        try (ResultSet rs = this.sqlConnection.createStatement().executeQuery(allCustQuery)) {
-            try{
-                while(rs.next()){
-                    //TODO: May need to update these to note specific tables, this is UNTESTED as of 5/15
-                    current=new SQLCustomer();
-                    int custId = rs.getInt("customerId");
-                    current.setCustomerID(custId);
-                    String custName = rs.getString("customerName");
-                    current.setCustomerName(custName);
-                    int addressID = rs.getInt("addressId");
-                    int active = rs.getInt("active");
-                    String address1 = rs.getString("address");
-                    String address2 = rs.getString("address2");
-                    int cityId = rs.getInt("cityId");
-                    String cityName = rs.getString ("city");
-                    int countryId = rs.getInt("countryId");
-                    String country = rs.getString("country");
+        try{
+            ResultSet rs = this.sqlConnection.createStatement().executeQuery(allCustQuery);
+            while(rs.next()){
 
-                    customerList.add(current);
-                }
-            }catch (SQLException e){
-                System.out.println("Error in SQLManager.populateCustomerList() resultSet : "+e.getMessage());
-            } catch (Exception e) {
-                System.out.println("Change in the database parameters parsing customer records: "+e.getMessage());
-                e.printStackTrace();
+                //Seeing an off-by-one error here
+                //TODO: May need to update these to note specific tables, this is UNTESTED as of 5/15
+                current=new SQLCustomer();
+                int custId = rs.getInt("customerId");
+                current.setCustomerID(custId);
+                String custName = rs.getString("customerName");
+                current.setCustomerName(custName);
+                int addressID = rs.getInt("addressId");
+                current.setAddressID(addressID);
+                int active = rs.getInt("active");
+                current.setActive(active);
+                String address1 = rs.getString("address");
+                current.setAddress1(address1);
+                String address2 = rs.getString("address2");
+                current.setAddress2(address2);
+                int cityId = rs.getInt("cityId");
+                current.setCityID(cityId);
+                String cityName = rs.getString ("city");
+                current.setCity(cityName);
+                int countryId = rs.getInt("countryId");
+                current.setCountryID(countryId);
+                String country = rs.getString("country");
+                current.setCountry(country);
+                String phone = rs.getString("phone");
+                current.setPhone(phone);
+                String postCode = rs.getString("postalCode");
+                current.setPostalCode(postCode);
+                customerList.add(current);
+
             }
-        } catch (SQLException e){
-            System.out.println("Error in SQLManager.populateCustomerList() query : "+e.getMessage());
+        }catch (SQLException e){
+            System.out.println("Error in SQLManager.populateCustomerList() resultSet : "+e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Change in the database parameters parsing customer records: "+e.getMessage());
+            e.printStackTrace();
         }
+
+        customerList.stream()
+                .forEach(System.out::println);
     }
 
     //Probably don't need this after all, just use a join
