@@ -7,6 +7,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.TableView;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -19,8 +20,11 @@ import java.util.ResourceBundle;
  */
 public class MainViewController implements Initializable{
 
+    @FXML
+    TableView customerTable;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        customerTable.setItems(SQLManager.getInstance().getCustomerList());
         //TODO: Nothing at the moment.
     }
 

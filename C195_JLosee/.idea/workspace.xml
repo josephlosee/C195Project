@@ -24,8 +24,8 @@
       <file leaf-file-name="C195_JLosee.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/c195_jlosee/C195_JLosee.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="49" column="0" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
+            <state relative-caret-position="159">
+              <caret line="25" column="0" selection-start-line="25" selection-start-column="0" selection-end-line="32" selection-end-column="9" />
               <folding />
             </state>
           </provider>
@@ -34,40 +34,44 @@
       <file leaf-file-name="SQLManager.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/c195_jlosee/SQLManager.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="592">
-              <caret line="159" column="0" selection-start-line="159" selection-start-column="0" selection-end-line="159" selection-end-column="0" />
+            <state relative-caret-position="170">
+              <caret line="359" column="33" selection-start-line="359" selection-start-column="33" selection-end-line="359" selection-end-column="33" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="docComment;class#SQLManager#0" expanded="false" />
-                <element signature="e#1602#1603#0" expanded="true" />
-                <element signature="e#1633#1634#0" expanded="true" />
-                <element signature="method#getSQLConnection#0;class#SQLManager#0" expanded="false" />
-                <element signature="e#5447#5448#0" expanded="true" />
-                <element signature="e#5480#5481#0" expanded="true" />
-                <element signature="e#15110#15111#0" expanded="true" />
-                <element signature="e#15172#15173#0" expanded="true" />
+                <element signature="e#1686#1687#0" expanded="true" />
+                <element signature="e#1717#1718#0" expanded="true" />
+                <element signature="e#5890#5891#0" expanded="true" />
+                <element signature="e#5923#5924#0" expanded="true" />
+                <element signature="e#14540#14541#0" expanded="true" />
+                <element signature="e#14580#14581#0" expanded="true" />
+                <element signature="e#14645#14646#0" expanded="true" />
+                <element signature="e#14681#14682#0" expanded="true" />
+                <element signature="e#17273#17274#0" expanded="true" />
+                <element signature="e#17335#17336#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SimpleIntegerProperty.java" pinned="false" current-in-tab="false">
-        <entry file="jar://C:/Program Files/Java/jdk1.8.0_131/javafx-src.zip!/javafx/beans/property/SimpleIntegerProperty.java">
+      <file leaf-file-name="CustomerView.fxml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/c195_jlosee/resources/CustomerView.fxml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="201">
-              <caret line="63" column="0" selection-start-line="63" selection-start-column="0" selection-end-line="63" selection-end-column="0" />
-              <folding>
-                <element signature="e#1013#1014#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="663">
+              <caret line="39" column="41" selection-start-line="39" selection-start-column="41" selection-end-line="39" selection-end-column="41" />
+              <folding />
             </state>
+          </provider>
+          <provider editor-type-id="JavaFX-Scene-Builder">
+            <state />
           </provider>
         </entry>
       </file>
       <file leaf-file-name="MainViewController.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/c195_jlosee/MainViewController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="340">
-              <caret line="26" column="39" selection-start-line="26" selection-start-column="39" selection-end-line="26" selection-end-column="39" />
+            <state relative-caret-position="408">
+              <caret line="26" column="75" selection-start-line="26" selection-start-column="75" selection-end-line="26" selection-end-column="75" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -78,8 +82,8 @@
       <file leaf-file-name="CustomerViewController.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/c195_jlosee/CustomerViewController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="658">
-              <caret line="97" column="24" selection-start-line="97" selection-start-column="24" selection-end-line="97" selection-end-column="24" />
+            <state relative-caret-position="250">
+              <caret line="75" column="142" selection-start-line="75" selection-start-column="142" selection-end-line="75" selection-end-column="142" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -90,8 +94,8 @@
       <file leaf-file-name="SQLCustomer.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/c195_jlosee/SQLCustomer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="17">
-              <caret line="43" column="136" selection-start-line="43" selection-start-column="136" selection-end-line="43" selection-end-column="136" />
+            <state relative-caret-position="176">
+              <caret line="30" column="13" selection-start-line="30" selection-start-column="13" selection-end-line="30" selection-end-column="13" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -99,15 +103,12 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CustomerView.fxml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/c195_jlosee/resources/CustomerView.fxml">
+      <file leaf-file-name="MainView.fxml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/c195_jlosee/resources/MainView.fxml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-34">
-              <caret line="7" column="38" selection-start-line="7" selection-start-column="30" selection-end-line="7" selection-end-column="38" />
-              <folding>
-                <marker date="1495397948874" expanded="true" signature="2157:2534" ph="..." />
-                <marker date="1495397948874" expanded="true" signature="2157:2663" ph="..." />
-              </folding>
+            <state relative-caret-position="173">
+              <caret line="38" column="37" selection-start-line="38" selection-start-column="24" selection-end-line="38" selection-end-column="37" />
+              <folding />
             </state>
           </provider>
           <provider editor-type-id="JavaFX-Scene-Builder">
@@ -175,14 +176,14 @@
         <option value="$PROJECT_DIR$/src/c195_jlosee/resources/Login_fr.properties" />
         <option value="$PROJECT_DIR$/src/c195_jlosee/resources/Login_de.properties" />
         <option value="$PROJECT_DIR$/src/c195_jlosee/LoginController.java" />
-        <option value="$PROJECT_DIR$/src/c195_jlosee/resources/MainView.fxml" />
         <option value="$PROJECT_DIR$/src/c195_jlosee/ViewManager.java" />
         <option value="$PROJECT_DIR$/src/c195_jlosee/SQLAppointment.java" />
         <option value="$PROJECT_DIR$/src/c195_jlosee/C195_JLosee.java" />
-        <option value="$PROJECT_DIR$/src/c195_jlosee/SQLManager.java" />
         <option value="$PROJECT_DIR$/src/c195_jlosee/resources/CustomerView.fxml" />
         <option value="$PROJECT_DIR$/src/c195_jlosee/CustomerViewController.java" />
         <option value="$PROJECT_DIR$/src/c195_jlosee/SQLCustomer.java" />
+        <option value="$PROJECT_DIR$/src/c195_jlosee/SQLManager.java" />
+        <option value="$PROJECT_DIR$/src/c195_jlosee/resources/MainView.fxml" />
         <option value="$PROJECT_DIR$/src/c195_jlosee/MainViewController.java" />
       </list>
     </option>
@@ -612,7 +613,7 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.276644" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.276644" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -622,7 +623,7 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.28004536" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.28004536" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -647,30 +648,24 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/c195_jlosee/SQLManager.java</url>
-          <line>423</line>
+          <line>471</line>
           <properties />
           <option name="timeStamp" value="46" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/c195_jlosee/SQLManager.java</url>
-          <line>298</line>
+          <line>329</line>
           <properties />
           <option name="timeStamp" value="52" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/c195_jlosee/SQLManager.java</url>
-          <line>286</line>
+          <line>317</line>
           <properties />
           <option name="timeStamp" value="53" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/c195_jlosee/SQLManager.java</url>
-          <line>133</line>
-          <properties />
-          <option name="timeStamp" value="57" />
-        </line-breakpoint>
       </breakpoints>
-      <option name="time" value="65" />
+      <option name="time" value="70" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="Application">
@@ -716,13 +711,16 @@
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="docComment;class#SQLManager#0" expanded="false" />
-            <element signature="e#1602#1603#0" expanded="true" />
-            <element signature="e#1633#1634#0" expanded="true" />
-            <element signature="method#getSQLConnection#0;class#SQLManager#0" expanded="false" />
-            <element signature="e#5447#5448#0" expanded="true" />
-            <element signature="e#5480#5481#0" expanded="true" />
-            <element signature="e#15110#15111#0" expanded="true" />
-            <element signature="e#15172#15173#0" expanded="true" />
+            <element signature="e#1686#1687#0" expanded="true" />
+            <element signature="e#1717#1718#0" expanded="true" />
+            <element signature="e#5890#5891#0" expanded="true" />
+            <element signature="e#5923#5924#0" expanded="true" />
+            <element signature="e#14540#14541#0" expanded="true" />
+            <element signature="e#14580#14581#0" expanded="true" />
+            <element signature="e#14645#14646#0" expanded="true" />
+            <element signature="e#14681#14682#0" expanded="true" />
+            <element signature="e#17273#17274#0" expanded="true" />
+            <element signature="e#17335#17336#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -981,17 +979,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/c195_jlosee/resources/MainView.fxml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="22" column="73" selection-start-line="22" selection-start-column="71" selection-end-line="22" selection-end-column="85" />
-          <folding />
-        </state>
-      </provider>
-      <provider editor-type-id="JavaFX-Scene-Builder">
-        <state />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/c195_jlosee/SQLUser.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="187">
@@ -1025,7 +1012,7 @@
         <state relative-caret-position="201">
           <caret line="63" column="0" selection-start-line="63" selection-start-column="0" selection-end-line="63" selection-end-column="0" />
           <folding>
-            <element signature="e#1013#1014#0" expanded="true" />
+            <element signature="e#1013#1014#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1060,32 +1047,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/c195_jlosee/C195_JLosee.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="49" column="0" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/c195_jlosee/SQLManager.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="592">
-          <caret line="159" column="0" selection-start-line="159" selection-start-column="0" selection-end-line="159" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="docComment;class#SQLManager#0" expanded="false" />
-            <element signature="e#1602#1603#0" expanded="true" />
-            <element signature="e#1633#1634#0" expanded="true" />
-            <element signature="method#getSQLConnection#0;class#SQLManager#0" expanded="false" />
-            <element signature="e#5447#5448#0" expanded="true" />
-            <element signature="e#5480#5481#0" expanded="true" />
-            <element signature="e#15110#15111#0" expanded="true" />
-            <element signature="e#15172#15173#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://C:/Program Files/Java/jdk1.8.0_131/src.zip!/java/util/function/Consumer.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="202">
@@ -1094,14 +1055,61 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/c195_jlosee/C195_JLosee.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="159">
+          <caret line="25" column="0" selection-start-line="25" selection-start-column="0" selection-end-line="32" selection-end-column="9" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/c195_jlosee/resources/CustomerView.fxml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-34">
-          <caret line="7" column="38" selection-start-line="7" selection-start-column="30" selection-end-line="7" selection-end-column="38" />
+        <state relative-caret-position="663">
+          <caret line="39" column="41" selection-start-line="39" selection-start-column="41" selection-end-line="39" selection-end-column="41" />
+          <folding />
+        </state>
+      </provider>
+      <provider editor-type-id="JavaFX-Scene-Builder">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/c195_jlosee/SQLCustomer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="176">
+          <caret line="30" column="13" selection-start-line="30" selection-start-column="13" selection-end-line="30" selection-end-column="13" />
           <folding>
-            <marker date="1495397948874" expanded="true" signature="2157:2534" ph="..." />
-            <marker date="1495397948874" expanded="true" signature="2157:2663" ph="..." />
+            <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/c195_jlosee/SQLManager.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="359" column="33" selection-start-line="359" selection-start-column="33" selection-end-line="359" selection-end-column="33" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="docComment;class#SQLManager#0" expanded="false" />
+            <element signature="e#1686#1687#0" expanded="true" />
+            <element signature="e#1717#1718#0" expanded="true" />
+            <element signature="e#5890#5891#0" expanded="true" />
+            <element signature="e#5923#5924#0" expanded="true" />
+            <element signature="e#14540#14541#0" expanded="true" />
+            <element signature="e#14580#14581#0" expanded="true" />
+            <element signature="e#14645#14646#0" expanded="true" />
+            <element signature="e#14681#14682#0" expanded="true" />
+            <element signature="e#17273#17274#0" expanded="true" />
+            <element signature="e#17335#17336#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/c195_jlosee/resources/MainView.fxml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="173">
+          <caret line="38" column="37" selection-start-line="38" selection-start-column="24" selection-end-line="38" selection-end-column="37" />
+          <folding />
         </state>
       </provider>
       <provider editor-type-id="JavaFX-Scene-Builder">
@@ -1110,18 +1118,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/c195_jlosee/CustomerViewController.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="658">
-          <caret line="97" column="24" selection-start-line="97" selection-start-column="24" selection-end-line="97" selection-end-column="24" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/c195_jlosee/SQLCustomer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="43" column="136" selection-start-line="43" selection-start-column="136" selection-end-line="43" selection-end-column="136" />
+        <state relative-caret-position="250">
+          <caret line="75" column="142" selection-start-line="75" selection-start-column="142" selection-end-line="75" selection-end-column="142" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -1130,8 +1128,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/c195_jlosee/MainViewController.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="26" column="39" selection-start-line="26" selection-start-column="39" selection-end-line="26" selection-end-column="39" />
+        <state relative-caret-position="408">
+          <caret line="26" column="75" selection-start-line="26" selection-start-column="75" selection-end-line="26" selection-end-column="75" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

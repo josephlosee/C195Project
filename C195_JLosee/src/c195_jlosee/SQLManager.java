@@ -16,6 +16,8 @@ import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Timer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * ${FILENAME}
@@ -122,6 +124,15 @@ public class SQLManager {
             System.out.println("An generic exception occurred during the prepared statement of login. "+e.getMessage());
         }
 
+        ExecutorService populateCustomers = null;
+        try{
+            populateCustomers = Executors.newSingleThreadExecutor();
+            populateCustomers.submit(()->SQLManager.getInstance().populateCustomerList());
+        }finally{
+            if (populateCustomers != null) populateCustomers.shutdown();
+            //shutdown the thread
+        }
+
         return success;
 
     }
@@ -132,27 +143,38 @@ public class SQLManager {
 
     public boolean addCustomer(SQLCustomer inCustomer){
         boolean addSucceed = false;
-
+        String custExists = "Select * from customer where customerName=? and addressId =?";
         String addCustString = "Insert into customer (customerName, addressId, active, createDate, createdBy, lastUpdateBy) " +
                                             "VALUES ( ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement prepStatement = getSQLConnection().prepareStatement(addCustString)){
-            //prepStatement.setInt(1, inCustomer.getCustomerID());
-            prepStatement.setString(1, inCustomer.getCustomerName());
-            prepStatement.setInt(2, inCustomer.getAddressID());
-            prepStatement.setInt(3, inCustomer.getActive());//not sure what active is for, but I'll probably just let this be set as a checkbox?
-            prepStatement.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
-            prepStatement.setString(5, activeUser.getUserName());
-            prepStatement.setString(6, activeUser.getUserName());
+        try {
+            PreparedStatement pstCustomerExists = getSQLConnection().prepareStatement(custExists);
+            pstCustomerExists.setString(1, inCustomer.getCustomerName());
+            pstCustomerExists.setInt(2, inCustomer.getAddressID());
+            ResultSet rs = pstCustomerExists.executeQuery();
+            if (rs.next()){
+                inCustomer.setCustomerID(rs.getInt("customerId"));
+            }else{
+                PreparedStatement pstAddCustomer = getSQLConnection().prepareStatement(addCustString);
+                //pstAddCustomer.setInt(1, inCustomer.getCustomerID());
+                pstAddCustomer.setString(1, inCustomer.getCustomerName());
+                pstAddCustomer.setInt(2, inCustomer.getAddressID());
+                pstAddCustomer.setInt(3, inCustomer.getActive());//not sure what active is for, but I'll probably just let this be set as a checkbox?
+                pstAddCustomer.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+                pstAddCustomer.setString(5, activeUser.getUserName());
+                pstAddCustomer.setString(6, activeUser.getUserName());
 
+                //TODO: Add "active" checkbox to customer form
+                pstAddCustomer.executeUpdate();
+                //After all is said and done, if no exceptions are encountered, add the customer to the list.
+                rs=pstCustomerExists.executeQuery();
+                if (rs.next()) {
+                    inCustomer.setCustomerID(rs.getInt("customerId"));
+                    customerList.add(inCustomer);
+                    addSucceed=true;
+                }
 
-
-            //TODO: Add "active" checkbox to customer form
-            prepStatement.executeUpdate();
-
-            //After all is said and done, if no exceptions are encountered, add the customer to the list.
-            customerList.add(inCustomer);
-            addSucceed=true;
-        }catch(SQLException sqlE){
+            }
+        } catch(SQLException sqlE){
             System.out.println("Error creating statement in addCustomer: "+ sqlE.getMessage());
             System.out.println(sqlE.getStackTrace());
         }
@@ -263,6 +285,15 @@ public class SQLManager {
         }
     }
 
+    /**
+     * Adds the address
+     * @param addressLine1
+     * @param addressLine2
+     * @param postCode
+     * @param phone
+     * @param cityID
+     * @return addressId
+     */
     public int addAddress(String addressLine1, String addressLine2, String postCode, String phone, int cityID){
         int addressID = -1;
 
@@ -309,17 +340,30 @@ public class SQLManager {
         return addressID;
     }
 
+    public ObservableList<SQLCustomer> getCustomerList(){
+        return this.customerList;
+    }
 
+    public ObservableList<SQLAppointment> getAppointmentList(){
+        return this.apptList;
+    }
+
+    /**
+     * Populates the customer list for the table view and other uses
+     */
     private void populateCustomerList(){
         //TODO: Select * from customer Join address Using(addressId)  Join city Using (cityId) Join country using (countryId);
-        String allCustQuery = "SELECT * FROM CUSTOMER";
+        String allCustQuery = "SELECT * FROM customer JOIN address USING (addressId) JOIN city USING (cityId) JOIN country USING(countryId)";
         SQLCustomer current;
         try (ResultSet rs = this.sqlConnection.createStatement().executeQuery(allCustQuery)) {
             try{
-                if(rs.next()){
+                while(rs.next()){
                     //TODO: May need to update these to note specific tables, this is UNTESTED as of 5/15
+                    current=new SQLCustomer();
                     int custId = rs.getInt("customerId");
+                    current.setCustomerID(custId);
                     String custName = rs.getString("customerName");
+                    current.setCustomerName(custName);
                     int addressID = rs.getInt("addressId");
                     int active = rs.getInt("active");
                     String address1 = rs.getString("address");
@@ -329,9 +373,13 @@ public class SQLManager {
                     int countryId = rs.getInt("countryId");
                     String country = rs.getString("country");
 
+                    customerList.add(current);
                 }
             }catch (SQLException e){
                 System.out.println("Error in SQLManager.populateCustomerList() resultSet : "+e.getMessage());
+            } catch (Exception e) {
+                System.out.println("Change in the database parameters parsing customer records: "+e.getMessage());
+                e.printStackTrace();
             }
         } catch (SQLException e){
             System.out.println("Error in SQLManager.populateCustomerList() query : "+e.getMessage());

@@ -60,7 +60,7 @@
             <HBox>
                <children>
                   <Label minWidth="-Infinity" prefHeight="25.0" prefWidth="123.0" text="Customer ID:" />
-                  <Label prefHeight="17.0" prefWidth="92.0" text="Unassigned" />
+                  <Label fx:id="custIdLabel" prefHeight="17.0" prefWidth="92.0" text="Unassigned" />
                </children>
             </HBox>
             <HBox prefHeight="18.0" prefWidth="322.0">

@@ -29,10 +29,12 @@ public class SQLCustomer {
 
     public SQLCustomer(){
         try {
-            this.setCustomerName("Doug Wasserman");
-            this.setFullAddress("123 Boxberry Lane", null, "91234", "555 555 5555");
-            this.setCity("Greenwich");
-            this.setCountry("United States");
+            int testNameLength = SQLManager.getSQLConnection()
+                    .createStatement()
+                    .executeQuery("Select * from customer")
+                    .getMetaData()
+                    .getColumnDisplaySize(2);
+            System.out.println("testing column display size for customerName. Max length: "+testNameLength);
         } catch (Exception e) {
             e.printStackTrace();
         }

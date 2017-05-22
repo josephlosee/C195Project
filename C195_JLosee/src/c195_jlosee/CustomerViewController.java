@@ -24,6 +24,7 @@ public class CustomerViewController implements Initializable{
 
     @FXML CheckBox activeCB;
     @FXML Button saveCust, cancelCust;
+    @FXML Label custIdLabel;
     @FXML TextArea custNameField;
     @FXML    TextArea AddressLine1Field;
     @FXML    TextArea AddressLine2Field;
@@ -73,8 +74,9 @@ public class CustomerViewController implements Initializable{
         try {
             customerData=new SQLCustomer(custNameField.getText(), AddressLine1Field.getText(), AddressLine2Field.getText(),
                     CityField.getText(), PostalCodeField.getText(),  PhoneField.getText(),countryField.getSelectionModel().getSelectedItem());
-            SQLManager test = SQLManager.getInstance();
             SQLManager.getInstance().addCustomer(customerData);
+            custIdLabel.setText(String.valueOf(customerData.getCustomerID()));
+
         }catch (Exception exc){
             ViewManager.showErrorMessage(exc.getMessage());
         }
