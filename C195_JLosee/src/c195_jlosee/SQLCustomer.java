@@ -195,14 +195,14 @@ public class SQLCustomer {
         return phone;
     }
     public void setPhone(String phone) throws Exception {
-        String phoneRegex = "^(\\+[1-9][0-9]*(\\([0-9]*\\)|-[0-9]*-))?[0]?[1-9][0-9\\- ]*$";
+        String phoneRegex = "[xX#0-9\\(\\)\\-*+]{1,20}[^a-wA-wy-zY-Z]";
 
         if (isStringNullOrEmpty(phone)){
             throw new Exception(notNullFieldEmptyMessageFactory("Phone Number"));
         } else if(phone.length() > MAX_PHONE_LENGTH){
             throw new Exception(maxLengthExceptionMessageFactory("Phone Number"));
-        }else if (phone.matches(phoneRegex)){
-            throw new Exception(new Exception("Phone number may contain only numbers 0-9, (), -, #, x, and *"));
+        }else if (!phone.matches(phoneRegex)){
+            throw new Exception(new Exception("Phone number may contain only numbers 0-9, (), -, #, x, + and *\n"+phone));
         }
         this.phone.set(phone);
     }
@@ -269,5 +269,9 @@ public class SQLCustomer {
         this.countryID.set(countryID);
     }
 
+    @Override
+    public String toString(){
+        return this.getCustomerName()+" "+this.getCity()+" "+this.getCountry();
+    }
 
 }

@@ -55,6 +55,20 @@ public class MainViewController implements Initializable{
 
     @FXML public void addApptClicked(){
         System.out.println("Add Appt button clicked");
+
+        Stage stage = new Stage();
+        Parent root = null;
+        try {
+            root = FXMLLoader.load(getClass().getResource("resources/AppointmentView.fxml"));
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+
+        Scene scene = new Scene(root);
+
+        stage.setScene(scene);
+        stage.setTitle("Add Appointment");
+        stage.show();
     }
 
     @FXML public void editApptClicked(){

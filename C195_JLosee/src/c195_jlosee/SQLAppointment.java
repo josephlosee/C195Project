@@ -4,6 +4,8 @@ import javafx.beans.property.SimpleStringProperty;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Map;
 
 /**
  * ${FILENAME}
@@ -14,6 +16,9 @@ public class SQLAppointment {
     private SimpleStringProperty date, startTime, title, description, location, contact, url, createdBy, createdDate;
     private LocalDate scheduledDate;
     private int apptID, customerID;
+
+    //ASSUMPTION: business hours are 8am-6pm
+    private LocalTime businessStart = LocalTime.of(8,0), businessEnd = LocalTime.of(18,0);
 
     public SQLAppointment(){
 
@@ -28,16 +33,18 @@ public class SQLAppointment {
 
     }
 
+    public SQLAppointment(Map<String, String> values){
+
+    }
+
     //todo: start tiem, end time
 
     public String getDate() {
         return date.get();
     }
-
     public SimpleStringProperty dateProperty() {
         return date;
     }
-
     public void setDate(String date) {
         this.date.set(date);
     }

@@ -47,7 +47,7 @@
             <TableColumn editable="false" prefWidth="75.0" text="City">
                 <cellValueFactory><PropertyValueFactory property="city" /> </cellValueFactory>
             </TableColumn>
-            <TableColumn editable="false" prefWidth="75.0" text="Country" >
+            <TableColumn editable="false" prefWidth="75.0" text="Country">
                 <cellValueFactory><PropertyValueFactory property="country" /> </cellValueFactory>
             </TableColumn>
         </columns>
