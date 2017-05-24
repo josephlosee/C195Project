@@ -30,10 +30,9 @@ public class AppointmentViewController implements Initializable {
     DatePicker startDate, endDate;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        //Set test = ZoneId.getAvailableZoneIds();
-        //test.
+
         zones = FXCollections.observableList(new ArrayList<>(ZoneId.getAvailableZoneIds()));
-        zones.stream().forEach(System.out::println);
+        //Debug zones.stream().forEach(System.out::println);
         cbCustomer.setItems(SQLManager.getInstance().getCustomerList());
 
     }

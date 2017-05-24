@@ -34,8 +34,8 @@ public class SQLManager {
     private static String user = "U04bqK", pass="53688195806";
     private static Connection sqlConnection = null;
     private static final SQLManager instance = new SQLManager();
-    ObservableList <SQLCustomer> customerList;
-    ObservableList <SQLAppointment> apptList;
+    private ObservableList <SQLCustomer> customerList;
+    private ObservableList <SQLAppointment> apptList;
 
     private static SQLUser activeUser = null;
 
