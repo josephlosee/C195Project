@@ -160,7 +160,7 @@ public class SQLManager {
                 pstAddCustomer.setString(1, inCustomer.getCustomerName());
                 pstAddCustomer.setInt(2, inCustomer.getAddressID());
                 pstAddCustomer.setInt(3, inCustomer.getActive());//not sure what active is for, but I'll probably just let this be set as a checkbox?
-                pstAddCustomer.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+                pstAddCustomer.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now(ZoneOffset.UTC)));
                 pstAddCustomer.setString(5, activeUser.getUserName());
                 pstAddCustomer.setString(6, activeUser.getUserName());
 
@@ -205,7 +205,7 @@ public class SQLManager {
                 PreparedStatement pstAddCountry = getSQLConnection().prepareStatement(addCountry);
                 //pstAddCountry.setInt(1, ++countryID);
                 pstAddCountry.setString(1, countryName);
-                pstAddCountry.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+                pstAddCountry.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now(ZoneOffset.UTC)));
                 pstAddCountry.setString(3, activeUser.getUserName());
                 pstAddCountry.setString(4, activeUser.getUserName());
                 int i = pstAddCountry.executeUpdate();
@@ -243,7 +243,7 @@ public class SQLManager {
                 //pstAddCity.setInt(1, ++cityID);
                 pstAddCity.setString(1, cityName);
                 pstAddCity.setInt(2, countryID);
-                pstAddCity.setTimestamp(3,new Timestamp(System.currentTimeMillis()));
+                pstAddCity.setTimestamp(3,Timestamp.valueOf(LocalDateTime.now(ZoneOffset.UTC)));
                 pstAddCity.setString(4, activeUser.getUserName());
                 pstAddCity.setString(5, activeUser.getUserName());
                 pstAddCity.executeUpdate();
@@ -323,7 +323,7 @@ public class SQLManager {
                 pstAddAddress.setInt(3, cityID);
                 pstAddAddress.setString(4, postCode);
                 pstAddAddress.setString(5, phone);
-                pstAddAddress.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+                pstAddAddress.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now(ZoneOffset.UTC)));
                 pstAddAddress.setString(7, activeUser.getUserName());
                 pstAddAddress.setString(8, activeUser.getUserName());
                 pstAddAddress.executeUpdate();
@@ -456,9 +456,12 @@ public class SQLManager {
         try{
             PreparedStatement st = sqlConnection.prepareStatement(scheduleQuery);
             //I have no idea if this will work, and it will probably need to be changed.
+
             st.setInt(1, customerId);
-            st.setTimestamp(2, new Timestamp(end.toEpochSecond((ZoneOffset) ZoneOffset.systemDefault())));
-            st.setTimestamp(3, new Timestamp(start.toEpochSecond((ZoneOffset) ZoneOffset.systemDefault())));
+            //Make sure the start time is not before the end time of another appt for the same customer
+            //TODO: Make this actually work, I think righ tnow it's going to fail regardless, will need to reconstruct
+            st.setTimestamp(2, Timestamp.valueOf(end.atOffset(ZoneOffset.UTC).toLocalDateTime()));
+            st.setTimestamp(3, Timestamp.valueOf(start.atOffset(ZoneOffset.UTC).toLocalDateTime()));
             ResultSet rs = st.executeQuery();
             if (rs.next()){
                 System.out.println((rs.getTime("start").toLocalTime()));

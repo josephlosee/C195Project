@@ -55,6 +55,15 @@ public class LoginController implements Initializable  {
 
         langSelect.setItems(supportedLangList);
 
+        if (userLocale.getLanguage() == "fr"){
+            langSelect.getSelectionModel().select(1);
+        }else if (userLocale.getLanguage() == "de"){
+            langSelect.getSelectionModel().select(2);
+        }else{
+            //default selection to 0, English
+            langSelect.getSelectionModel().select(0);
+        }
+
         changeLanguage(userLocale);
 
     }
