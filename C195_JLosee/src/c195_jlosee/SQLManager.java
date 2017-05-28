@@ -494,8 +494,22 @@ public class SQLManager {
             ResultSet rs = userApptSt.executeQuery();
             if (rs.next()){
 
-                appt= new SQLAppointment(LocalDateTime.ofInstant(rs.getTime("start").toInstant(), ZoneId.systemDefault()), rs.getString("title"),
-                        rs.getString("description"), rs.getString("location"), rs.getString("contact"), rs.getString("URL"));
+                LocalDateTime start = rs.getTimestamp("start").toLocalDateTime();
+                LocalDateTime end = rs.getTimestamp("end").toLocalDateTime();
+                String title = rs.getString("title");
+                String location = rs.getString("location");
+                String description = rs.getString("description");
+                String contact = rs.getString("conact");
+                String url = rs.getString("url");
+                int apptCustId = rs.getInt("customerId");
+                int apptId = rs.getInt("appointmentId");
+
+                SQLCustomer customerOfAppt = customerList.filtered(a->a.getCustomerID()==apptCustId).get(0);
+
+                //TODO appt = new SQLAppointment();
+                //TODO show customer name and appointment info in a message? move to the login function?
+
+
             }
         }catch (SQLException e){
             System.out.println("Exception encountered in SQLManager.checkForApptAtLogin: "+ e.getMessage());

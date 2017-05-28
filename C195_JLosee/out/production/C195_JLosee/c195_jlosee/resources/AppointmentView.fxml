@@ -16,27 +16,27 @@
          <children>
             <HBox>
                <children>
-                  <TextField prefHeight="25.0" prefWidth="423.0" text="title" />
+                  <TextField fx:id="titleField" prefHeight="25.0" prefWidth="423.0" text="title" />
                </children>
             </HBox>
             <HBox>
                <children>
-                  <TextField prefHeight="25.0" prefWidth="425.0" text="desc" />
+                  <TextField fx:id="descriptionField" prefHeight="25.0" prefWidth="425.0" text="desc" />
                </children>
             </HBox>
             <HBox>
                <children>
-                  <TextField prefHeight="25.0" prefWidth="424.0" text="location" />
+                  <TextField fx:id="locationField" prefHeight="25.0" prefWidth="424.0" text="location" />
                </children>
             </HBox>
             <HBox>
                <children>
-                  <TextField prefHeight="25.0" prefWidth="423.0" text="contact" />
+                  <TextField fx:id="contactField" prefHeight="25.0" prefWidth="423.0" text="contact" />
                </children>
             </HBox>
             <HBox>
                <children>
-                  <TextField prefHeight="25.0" prefWidth="424.0" text="url" />
+                  <TextField fx:id="urlField" prefHeight="25.0" prefWidth="424.0" text="url" />
                </children>
             </HBox>
             <HBox>
@@ -56,7 +56,7 @@
             <HBox>
                <children>
                   <DatePicker fx:id="endDate" editable="false" focusTraversable="false" promptText="End Date" visible="false" />
-                  <TextField fx:id="endTime" promptText="HH:MM" />
+                  <TextField fx:id="endTimeField" promptText="HH:MM" />
                   <MenuButton fx:id="endTimeSpecifier" mnemonicParsing="false" text="AM/PM/24H">
                      <items>
                         <MenuItem mnemonicParsing="false" text="AM" />
