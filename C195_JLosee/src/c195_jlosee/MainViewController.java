@@ -1,5 +1,6 @@
 package c195_jlosee;
 
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,6 +26,7 @@ public class MainViewController implements Initializable{
     TableView customerTable;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        //For customerList as observable list: customerTable.setItems(SQLManager.getInstance().getCustomerList());
         customerTable.setItems(SQLManager.getInstance().getCustomerList());
         //TODO: Nothing at the moment.
     }

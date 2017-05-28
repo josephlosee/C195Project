@@ -43,7 +43,7 @@
                <children>
                   <DatePicker fx:id="startDate" promptText="Start Date" />
                   <TextField fx:id="startTimeField" promptText="HH:MM" />
-                  <MenuButton mnemonicParsing="false" text="AM/PM/24H">
+                  <MenuButton fx:id="startTimeSpecifier" mnemonicParsing="false" text="AM/PM/24H">
                     <items>
                       <MenuItem mnemonicParsing="false" text="AM" />
                       <MenuItem mnemonicParsing="false" text="PM" />
@@ -57,7 +57,7 @@
                <children>
                   <DatePicker fx:id="endDate" editable="false" focusTraversable="false" promptText="End Date" visible="false" />
                   <TextField fx:id="endTime" promptText="HH:MM" />
-                  <MenuButton mnemonicParsing="false" text="AM/PM/24H">
+                  <MenuButton fx:id="endTimeSpecifier" mnemonicParsing="false" text="AM/PM/24H">
                      <items>
                         <MenuItem mnemonicParsing="false" text="AM" />
                         <MenuItem mnemonicParsing="false" text="PM" />
@@ -71,8 +71,8 @@
                   <ComboBox fx:id="cbCustomer" prefWidth="150.0" promptText="Customer" />
                </children>
             </HBox>
-            <Button maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="52.0" text="Save" />
-            <Button maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="52.0" text="Cancel" />
+            <Button fx:id="saveButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#saveClicked" prefHeight="25.0" prefWidth="52.0" text="Save" />
+            <Button fx:id="cancelButton" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#cancelClicked" prefHeight="25.0" prefWidth="52.0" text="Cancel" />
          </children>
       </VBox>
    </children>

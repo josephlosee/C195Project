@@ -3,19 +3,19 @@ package c195_jlosee;
 import com.sun.xml.internal.fastinfoset.util.CharArray;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
+import java.sql.Timestamp;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Timer;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -34,7 +34,7 @@ public class SQLManager {
     private static String user = "U04bqK", pass="53688195806";
     private static Connection sqlConnection = null;
     private static final SQLManager instance = new SQLManager();
-    private ObservableList <SQLCustomer> customerList;
+    private ObservableList<SQLCustomer> customerList;
     private ObservableList <SQLAppointment> apptList;
 
     private static SQLUser activeUser = null;
@@ -397,21 +397,8 @@ public class SQLManager {
             e.printStackTrace();
         }
 
-        customerList.stream()
-                .forEach(System.out::println);
-    }
-
-    //Probably don't need this after all, just use a join
-    private void parseCustomerAddressInfo(SQLCustomer in){
-        String addrQuery = "Select * FROM address where addressId = ?";
-        String cityQuery = "Select * FROM city where cityId = ?";
-        String countryQuery = "Select * FROM country where cityId = ?";
-        try{
-            sqlConnection.prepareStatement(addrQuery);
-
-        }catch (SQLException e){
-            System.out.println("Error in parseCustomerAddr");
-        }
+        //customerList.stream()
+        //        .forEach(System.out::println);
     }
 
     //TODO: Populate appointment list
@@ -451,7 +438,7 @@ public class SQLManager {
     }
 
     public LocalDateTime canSchedule(int customerId, LocalDateTime start, LocalDateTime end){
-        String scheduleQuery = "Select * from appointment where customerId = ? AND (? > start or ? < end)";
+        String scheduleQuery = "Select * from appointment where customerId = ? AND ((start between ? and ?) OR end between ? and ?)";
         LocalDateTime dt = null;
         try{
             PreparedStatement st = sqlConnection.prepareStatement(scheduleQuery);
@@ -460,8 +447,10 @@ public class SQLManager {
             st.setInt(1, customerId);
             //Make sure the start time is not before the end time of another appt for the same customer
             //TODO: Make this actually work, I think righ tnow it's going to fail regardless, will need to reconstruct
-            st.setTimestamp(2, Timestamp.valueOf(end.atOffset(ZoneOffset.UTC).toLocalDateTime()));
-            st.setTimestamp(3, Timestamp.valueOf(start.atOffset(ZoneOffset.UTC).toLocalDateTime()));
+            st.setTimestamp(2, Timestamp.valueOf(start.atOffset(ZoneOffset.UTC).toLocalDateTime()));
+            st.setTimestamp(3, Timestamp.valueOf(end.atOffset(ZoneOffset.UTC).toLocalDateTime()));
+            st.setTimestamp(4, Timestamp.valueOf(start.atOffset(ZoneOffset.UTC).toLocalDateTime()));
+            st.setTimestamp(5, Timestamp.valueOf(end.atOffset(ZoneOffset.UTC).toLocalDateTime()));
             ResultSet rs = st.executeQuery();
             if (rs.next()){
                 System.out.println((rs.getTime("start").toLocalTime()));
@@ -488,24 +477,25 @@ public class SQLManager {
      */
     public SQLAppointment checkForApptAtLogin(){
         SQLAppointment appt = null;
-
+        final int REMINDER_TIME_LIMIT = 15;
         //TODO:
-        Instant instnow = Instant.now();
-        Instant instnowPlus15min = instnow.plus(15, ChronoUnit.MINUTES);
-        Timestamp now = new Timestamp(instnow.getEpochSecond());
-        Timestamp within15Mins = new Timestamp(instnowPlus15min.getEpochSecond());
+
+        LocalDateTime ldtNow = LocalDateTime.now(ZoneOffset.UTC);
+        Timestamp now = Timestamp.valueOf(ldtNow);
+        Timestamp nowPlus15 = Timestamp.valueOf(ldtNow.plus(REMINDER_TIME_LIMIT, ChronoUnit.MINUTES));
 
         try{
-            String usersAppts = "Select * from appointment where createdBy=? and startTime between(?,?)";
+            String usersAppts = "Select * from appointment where createdBy= ? and start BETWEEN ? AND ?";
             PreparedStatement userApptSt = sqlConnection.prepareStatement(usersAppts);
             userApptSt.setString(1, activeUser.getUserName());
             userApptSt.setTimestamp(2, now);
-            userApptSt.setTimestamp(3, within15Mins);
+            userApptSt.setTimestamp(3, nowPlus15);
 
             ResultSet rs = userApptSt.executeQuery();
             if (rs.next()){
 
-                appt= new SQLAppointment(LocalDateTime.ofInstant(rs.getTime("start").toInstant(), ZoneId.systemDefault()), rs.getString("title"), rs.getString("description"), rs.getString("location"), rs.getString("contact"), rs.getString("URL"));
+                appt= new SQLAppointment(LocalDateTime.ofInstant(rs.getTime("start").toInstant(), ZoneId.systemDefault()), rs.getString("title"),
+                        rs.getString("description"), rs.getString("location"), rs.getString("contact"), rs.getString("URL"));
             }
         }catch (SQLException e){
             System.out.println("Exception encountered in SQLManager.checkForApptAtLogin: "+ e.getMessage());

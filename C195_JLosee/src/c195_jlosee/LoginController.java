@@ -97,6 +97,13 @@ public class LoginController implements Initializable  {
                 //Write to the log file
                 logAction(true);
 
+                SQLAppointment appointmentReminder = SQLManager.getInstance().checkForApptAtLogin();
+                if (appointmentReminder!=null){
+                    //TODO: Make Remidner message show all relevant information: Time, place, customer, title
+                    String reminderMessage = appointmentReminder.getTitle()+appointmentReminder.getStartTime();
+                    new Alert(Alert.AlertType.WARNING, appointmentReminder.getTitle()+"\nwith"+appointmentReminder.getContact()).showAndWait();
+                }
+
                 welcome.showAndWait();
 
                 //ViewManager.showMainView();
