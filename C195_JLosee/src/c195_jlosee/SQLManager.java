@@ -1,21 +1,17 @@
 package c195_jlosee;
 
-import com.sun.xml.internal.fastinfoset.util.CharArray;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import java.rmi.registry.LocateRegistry;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
 import java.sql.Timestamp;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,13 +32,13 @@ public class SQLManager {
     private static Connection sqlConnection = null;
     private static final SQLManager instance = new SQLManager();
     private ObservableList<SQLCustomer> customerList;
-    private ObservableList <SQLAppointment> apptList;
+    private ObservableList <SQLAppointment> activeUserApptList;
 
     private static SQLUser activeUser = null;
 
     private SQLManager(){
         customerList = FXCollections.observableList(new ArrayList<SQLCustomer>());
-        apptList = FXCollections.observableList(new ArrayList<SQLAppointment>());
+        activeUserApptList = FXCollections.observableList(new ArrayList<SQLAppointment>());
         sqlConnection = getSQLConnection();
     }
 
@@ -134,13 +130,12 @@ public class SQLManager {
             if (populateCustomers != null) populateCustomers.shutdown();
             //shutdown the thread
         }
-
         return success;
-
     }
 
     public void logout(){
         activeUser = null;
+        activeUserApptList = null;
     }
 
     public boolean addCustomer(SQLCustomer inCustomer){
@@ -161,7 +156,8 @@ public class SQLManager {
                 pstAddCustomer.setString(1, inCustomer.getCustomerName());
                 pstAddCustomer.setInt(2, inCustomer.getAddressID());
                 pstAddCustomer.setInt(3, inCustomer.getActive());//not sure what active is for, but I'll probably just let this be set as a checkbox?
-                pstAddCustomer.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now(ZoneOffset.UTC)));
+                ZonedDateTime utcTime = ZonedDateTime.now(ZoneOffset.UTC);
+                pstAddCustomer.setTimestamp(4, Timestamp.from(utcTime.toInstant()));
                 pstAddCustomer.setString(5, activeUser.getUserName());
                 pstAddCustomer.setString(6, activeUser.getUserName());
 
@@ -311,7 +307,6 @@ public class SQLManager {
             pstAddrExists.setString(4, postCode);
             pstAddrExists.setString(5, phone);
 
-
             ResultSet rs = pstAddrExists.executeQuery();
             if (rs.next()){
                 addressID=rs.getInt(1);
@@ -335,7 +330,6 @@ public class SQLManager {
                 }
             }
         }catch (SQLException e){
-            //TODO: Handle
             System.out.println("SQLException in addAddres: "+e.getMessage());
         }
 
@@ -346,48 +340,35 @@ public class SQLManager {
         return this.customerList;
     }
 
-    public ObservableList<SQLAppointment> getAppointmentList(){
-        return this.apptList;
-    }
+    public ObservableList<SQLAppointment> getAppointmentList(){        return activeUserApptList;    }
 
     /**
      * Populates the customer list for the table view and other uses
      */
     private void populateCustomerList(){
-        //TODO: Select * from customer Join address Using(addressId)  Join city Using (cityId) Join country using (countryId);
         String allCustQuery = "SELECT * FROM customer JOIN address USING (addressId) JOIN city USING (cityId) JOIN country USING(countryId)";
         SQLCustomer current;
         try{
             ResultSet rs = this.sqlConnection.createStatement().executeQuery(allCustQuery);
             while(rs.next()){
-
-                //Seeing an off-by-one error here
-                //TODO: May need to update these to note specific tables, this is UNTESTED as of 5/15
+                //Get all the customer information
                 current=new SQLCustomer();
-                int custId = rs.getInt("customerId");
-                current.setCustomerID(custId);
-                String custName = rs.getString("customerName");
-                current.setCustomerName(custName);
-                int addressID = rs.getInt("addressId");
-                current.setAddressID(addressID);
-                int active = rs.getInt("active");
-                current.setActive(active);
-                String address1 = rs.getString("address");
-                current.setAddress1(address1);
-                String address2 = rs.getString("address2");
-                current.setAddress2(address2);
-                int cityId = rs.getInt("cityId");
-                current.setCityID(cityId);
-                String cityName = rs.getString ("city");
-                current.setCity(cityName);
-                int countryId = rs.getInt("countryId");
-                current.setCountryID(countryId);
-                String country = rs.getString("country");
-                current.setCountry(country);
-                String phone = rs.getString("phone");
-                current.setPhone(phone);
-                String postCode = rs.getString("postalCode");
-                current.setPostalCode(postCode);
+                current.setCustomerID(rs.getInt("customerId"));
+                current.setCustomerName(rs.getString("customerName"));
+                current.setAddressID(rs.getInt("addressId"));
+                current.setAddress1(rs.getString("address"));
+                current.setAddress2(rs.getString("address2"));
+                current.setCityID(rs.getInt("cityId"));
+                current.setCity(rs.getString ("city"));
+                current.setCountryID(rs.getInt("countryId"));
+                current.setCountry(rs.getString("country"));
+                current.setPhone(rs.getString("phone"));
+                current.setPostalCode(rs.getString("postalCode"));
+                current.setActive(rs.getInt("active"));
+                //Get the customer's apointments
+                current.setAppointmentList(getCustomersAppointments(current));
+
+                //Add the custmoer to the lists
                 customerList.add(current);
 
             }
@@ -429,8 +410,8 @@ public class SQLManager {
                 appt.setCreatedBy(rs.getString("createdBy"));
                 //createdDate may want to be set to DateTime rather than local date time
                 appt.setCreatedDate(rs.getTimestamp("createdDate").toLocalDateTime());
-                LocalDateTime startLocal = rs.getTimestamp("start").toLocalDateTime();
-                LocalDateTime endLocal = rs.getTimestamp("end").toLocalDateTime();
+                ZonedDateTime startLocal = rs.getTimestamp("start").toLocalDateTime().atZone(ZoneId.systemDefault());
+                ZonedDateTime endLocal = rs.getTimestamp("end").toLocalDateTime().atZone(ZoneId.systemDefault());
                 try{
                     appt.setStartDateTime(startLocal);
                     appt.setEndDateTime(endLocal);
@@ -441,67 +422,23 @@ public class SQLManager {
         }catch (SQLException e){
             //TODO
         }
-
-
-
         //TODO: STUB
         return customerAppointments;
     }
 
     /**
-     * Returns a LocalDateTime of conflicting schedules
-     * //TODO: this must be moved to SQL Customer, each customer will have an appointment list
-     * @param customerId
-     * @param start
-     * @param end
-     * @return
-     */
-    public LocalDateTime canSchedule(int customerId, LocalDateTime start, LocalDateTime end){
-        String scheduleQuery = "Select * from appointment where customerId = ? AND ((start between ? and ?) OR end between ? and ?)";
-        LocalDateTime dt = null;
-        try{
-            PreparedStatement st = sqlConnection.prepareStatement(scheduleQuery);
-            //I have no idea if this will work, and it will probably need to be changed.
-
-            st.setInt(1, customerId);
-            //Make sure the start time is not before the end time of another appt for the same customer
-            //TODO: Make this actually work, I think righ tnow it's going to fail regardless, will need to reconstruct
-            st.setTimestamp(2, Timestamp.valueOf(start.atOffset(ZoneOffset.UTC).toLocalDateTime()));
-            st.setTimestamp(3, Timestamp.valueOf(end.atOffset(ZoneOffset.UTC).toLocalDateTime()));
-            st.setTimestamp(4, Timestamp.valueOf(start.atOffset(ZoneOffset.UTC).toLocalDateTime()));
-            st.setTimestamp(5, Timestamp.valueOf(end.atOffset(ZoneOffset.UTC).toLocalDateTime()));
-            ResultSet rs = st.executeQuery();
-            if (rs.next()){
-                System.out.println((rs.getTime("start").toLocalTime()));
-                System.out.println(rs.getTime("end").toLocalTime());
-
-                //LocalTime start = LocalTime.parse(startTime.toString().toCharArray())
-
-            }
-
-        }catch (SQLException e){
-            System.out.println("SQLException in SQLManager.canSchedule: "+e.getMessage());
-        }
-
-        return dt; //TODO STUB
-    }
-
-    //NOTE: Appointment scheduling should be doable by lambda expressions using ForEach. Populate a list of appointments for the selected customer,
-    //Then use a predicate to ensure that the target start dateTime is not before any currently scheduled end dateTimes, and the target dateTime
-    // //is not scheduled for any scheudled starttimes
-
-    /**
      *
-     * @return null if no appts in the next 15 minutes are found
+     * @return null if no appts in the next 15 minutes are found, string with Appt Details otherwise
      */
-    public SQLAppointment checkForApptAtLogin(){
+    public String checkForApptAtLogin(){
+        String appointmentDetails = null;
         SQLAppointment appt = null;
+        //TODO DOES THIS WORK?
         final int REMINDER_TIME_LIMIT = 15;
-        //TODO:
 
-        LocalDateTime ldtNow = LocalDateTime.now(ZoneOffset.UTC);
-        Timestamp now = Timestamp.valueOf(ldtNow);
-        Timestamp nowPlus15 = Timestamp.valueOf(ldtNow.plus(REMINDER_TIME_LIMIT, ChronoUnit.MINUTES));
+        ZonedDateTime zdtNow = ZonedDateTime.now(ZoneOffset.UTC);
+        Timestamp now = Timestamp.valueOf(LocalDateTime.now(ZoneOffset.UTC));
+        Timestamp nowPlus15 = Timestamp.valueOf(LocalDateTime.now(ZoneOffset.UTC).plus(15, ChronoUnit.MINUTES));
 
         try{
             String usersAppts = "Select * from appointment where createdBy= ? and start BETWEEN ? AND ?";
@@ -511,30 +448,63 @@ public class SQLManager {
             userApptSt.setTimestamp(3, nowPlus15);
 
             ResultSet rs = userApptSt.executeQuery();
-            if (rs.next()){
 
+            if (rs.next()){
                 LocalDateTime start = rs.getTimestamp("start").toLocalDateTime();
                 LocalDateTime end = rs.getTimestamp("end").toLocalDateTime();
                 String title = rs.getString("title");
                 String location = rs.getString("location");
                 String description = rs.getString("description");
-                String contact = rs.getString("conact");
+                String contact = rs.getString("contact");
                 String url = rs.getString("url");
                 int apptCustId = rs.getInt("customerId");
                 int apptId = rs.getInt("appointmentId");
 
                 SQLCustomer customerOfAppt = customerList.filtered(a->a.getCustomerID()==apptCustId).get(0);
 
-                //TODO appt = new SQLAppointment();
-                //TODO show customer name and appointment info in a message? move to the login function?
-
-
+                appointmentDetails="Appointment Alert:\n" +title+"\n" +description+"\nCustomer: "
+                        +customerOfAppt.getCustomerName()+"\n"+start+" - "+end+
+                        " \nLocation: "+location;
             }
         }catch (SQLException e){
             System.out.println("Exception encountered in SQLManager.checkForApptAtLogin: "+ e.getMessage());
         }
-        return appt;
+        return appointmentDetails;
     }
 
+    public boolean addAppointment(SQLAppointment appt){
+        //String addAddress="INSERT INTO address (address, address2, cityID, postalCode, phone, createDate, createdBy, lastUpdateBy)"+
+        //" VALUES (? , ?, ?, ?, ?, ?, ?, ?)";
+        boolean success = false;
+        String appointmentQuery = "INSERT INTO appointment (customerId, title, description, location, contact, URL, start, end, createDate, createdBy, lastUpdateBy)"+
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-}
+        ZonedDateTime start = appt.getStartDateTime();
+        ZonedDateTime end = appt.getEndDateTime();
+
+        Timestamp test = Timestamp.valueOf(start.toLocalDateTime());
+        
+        try{
+            PreparedStatement addAppt = sqlConnection.prepareStatement(appointmentQuery);
+            addAppt.setInt(1, appt.getCustomerID());
+            addAppt.setString(2, appt.getTitle());
+            addAppt.setString(3, appt.getDescription());
+            addAppt.setString(4, appt.getLocation());
+            addAppt.setString(5, appt.getContact());
+            addAppt.setString(6, appt.getUrl());
+            //ZonedDateTime zdtAddApptTest = appt.getStartDateTime().atZone(ZoneOffset.UTC);
+            addAppt.setTimestamp(7, Timestamp.valueOf(start.toLocalDateTime()));
+            addAppt.setTimestamp(8, Timestamp.valueOf(end.toLocalDateTime()));
+            addAppt.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now(ZoneOffset.UTC)));
+            addAppt.setString(10, activeUser.getUserName());
+            addAppt.setString(11, activeUser.getUserName());
+
+            //addAppt.executeUpdate();
+            activeUserApptList.add(appt);
+            success = true;
+        }catch(SQLException sqle){
+            System.out.println("SQL Error adding appointment: "+ sqle.getMessage());
+        }
+        return success;
+    }
+}//END OF CLASS

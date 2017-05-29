@@ -124,14 +124,17 @@ public class MainViewController implements Initializable{
     }
 
     /**
-     * On clicking a customer, the table is populated
+     * On clicking a customer, the table is populated with their appointments
      */
     @FXML public void customerSelected(){
         int i = customerTable.getSelectionModel().getSelectedIndex();
-        SQLCustomer selectedCustomer = (SQLCustomer)customerTable.getItems().get(i);
+        if (i>-1) {
+            SQLCustomer selectedCustomer = (SQLCustomer) customerTable.getItems().get(i);
 
-        appointmentTable.setItems(FXCollections.observableArrayList(selectedCustomer.getCustomerAppointments()));
-        //System.out.println(test.getCustomerID());
+            if (selectedCustomer.getCustomerAppointments().size()>0){
+                appointmentTable.setItems(FXCollections.observableArrayList(selectedCustomer.getCustomerAppointments()));
+            }
+        }
     }
 
     @FXML public void editApptClicked(){
@@ -147,19 +150,17 @@ public class MainViewController implements Initializable{
             ViewManager.closeWindowFromEvent(e);
             SQLManager.getInstance().logout();
 
-            Stage stage = new Stage();
-            Parent root = null;
-            try {
-                root = FXMLLoader.load(getClass().getResource("resources/LoginView.fxml"));
+            try {//Open the login fxml and show it
+                Stage stage = new Stage();
+                Parent root = FXMLLoader.load(getClass().getResource("resources/LoginView.fxml"));
+                Scene scene = new Scene(root);
+
+                stage.setScene(scene);
+                stage.setTitle("Login");
+                stage.show();
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
-
-            Scene scene = new Scene(root);
-
-            stage.setScene(scene);
-            stage.setTitle("Login");
-            stage.show();
         }
     }
 

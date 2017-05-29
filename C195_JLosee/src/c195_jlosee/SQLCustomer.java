@@ -29,12 +29,11 @@ public class SQLCustomer {
     private SimpleIntegerProperty countryID = new SimpleIntegerProperty();
     private SimpleIntegerProperty active = new SimpleIntegerProperty();
 
-    ArrayList<SQLAppointment> customerAppointments;
+    ArrayList<SQLAppointment> customerAppointments = new ArrayList<>();
 
     public static void GetMaxValues(){
         //TODO: update this if time allows.
         SQLManager.getSQLConnection();
-
     }
 
     /**
@@ -59,7 +58,6 @@ public class SQLCustomer {
         this.setCountry(country);
         this.setCity(city);
         this.setFullAddress(address1, address2, postCode, phone);
-        customerAppointments=new ArrayList<>();
     }
 
     public boolean setAppointmentList(ArrayList<SQLAppointment> appointmentList) {
@@ -76,14 +74,18 @@ public class SQLCustomer {
         if (customerAppointments.size() ==0){
             customerAppointments.add(appt);
         }else if(customerAppointments.stream()
-                    .filter(a->a.getStartDateTime().toLocalDate().compareTo(appt.getStartDateTime().toLocalDate())==0)
-                    .filter(a->a.getStartDateTime().compareTo(appt.getStartDateTime())>0&
-                               a.getStartDateTime().compareTo(appt.getEndDateTime())<0)
+                //if startDateTime of existing appointments is >= desiredStartDateTime and <= desiredEndDateTime
+                //OR if endDateTime of existing appointment is >= desiredStartDateTime and <= desiredEndDateTime
+                    .filter(a->a.getStartDateTime().compareTo(appt.getStartDateTime())>=0&
+                               a.getStartDateTime().compareTo(appt.getEndDateTime())<=0 ||
+                                a.getEndDateTime().compareTo(appt.getStartDateTime())>=0 &
+                                a.getEndDateTime().compareTo(appt.getEndDateTime())<=0)
                     .count()>0){
                    throw new ConflictingAppointmentException("An existing appointment for this customer conflicts with the requested appointment");
 
         }else {
             customerAppointments.add(appt);
+            SQLManager.getInstance().addAppointment(appt);
         }
     }
 

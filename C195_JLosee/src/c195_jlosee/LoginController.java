@@ -39,16 +39,14 @@ public class LoginController implements Initializable  {
     @FXML private PasswordField loginPW;
     @FXML private Label  userNameLabel, passwordLabel;
     @FXML private ComboBox langSelect;
-    Locale userLocale = Locale.getDefault();
-    ResourceBundle rb;
+    private Locale userLocale = Locale.getDefault();
+    private ResourceBundle rb;
     Path path = Paths.get("./log/login.txt");
     BufferedWriter logFile;
 
     ObservableList<String> supportedLangList = FXCollections.observableList(new ArrayList<String>());
-    
-    @Override public void initialize(URL url, ResourceBundle rb){
-        //TODO: Add any init here
 
+    @Override public void initialize(URL url, ResourceBundle rb){
         supportedLangList.add("English");
         supportedLangList.add("Francois");
         supportedLangList.add("Deutch");
@@ -60,14 +58,16 @@ public class LoginController implements Initializable  {
         }else if (userLocale.getLanguage() == "de"){
             langSelect.getSelectionModel().select(2);
         }else{
-            //default selection to 0, English
+            //Default to English
             langSelect.getSelectionModel().select(0);
         }
-
         changeLanguage(userLocale);
-
     }
 
+    /**
+     * Changes the locale of the login view
+     * @param changeToLocale
+     */
     private void changeLanguage(Locale changeToLocale){
         this.rb = ResourceBundle.getBundle("c195_jlosee/resources/Login", changeToLocale);
         userNameLabel.setText(this.rb.getString("userName"));
@@ -77,9 +77,6 @@ public class LoginController implements Initializable  {
     }
     
     @FXML public void loginClicked(ActionEvent e){
-        //Attempt login, check against SQL database
-        //TODO: log failed/successful attempts
-
         //Quick check for blank fields:
         String userName = loginUN.getText();
         String pw = loginPW.getText();
@@ -92,22 +89,18 @@ public class LoginController implements Initializable  {
             emptyString.showAndWait();
         } else{
             if (SQLManager.getInstance().login(userName, pw)) {
-                Alert welcome = new Alert(Alert.AlertType.INFORMATION, rb.getString("loginSuccess"));
 
                 //Write to the log file
                 logAction(true);
 
-                SQLAppointment appointmentReminder = SQLManager.getInstance().checkForApptAtLogin();
-                if (appointmentReminder!=null){
-                    //TODO: Make Remidner message show all relevant information: Time, place, customer, title
-                    String reminderMessage = appointmentReminder.getTitle()+appointmentReminder.getStartDateTime();
-                    new Alert(Alert.AlertType.WARNING, appointmentReminder.getTitle()+"\nwith"+appointmentReminder.getContact()).showAndWait();
-                }
-
+                Alert welcome = new Alert(Alert.AlertType.INFORMATION, rb.getString("loginSuccess"));
                 welcome.showAndWait();
 
-                //ViewManager.showMainView();
-                //DEBUG: Show customer view
+                String appointmentReminder = SQLManager.getInstance().checkForApptAtLogin();
+                if (appointmentReminder!=null){
+                    new Alert(Alert.AlertType.WARNING, appointmentReminder).showAndWait();
+                }
+
                 Stage custStage = new Stage();
                 try {
                     custStage.setScene(new Scene(FXMLLoader.load(getClass().getResource("resources/MainView.fxml"))));
@@ -119,17 +112,18 @@ public class LoginController implements Initializable  {
 
             } else {
                 logAction(false);
-                Alert loginFailed = new Alert(Alert.AlertType.ERROR, rb.getString("loginFailed"));
-                loginFailed.showAndWait();//System.out.println(rb.getString("loginFailed"));
+                new Alert(Alert.AlertType.ERROR, rb.getString("loginFailed"))
+                        .showAndWait();
             }
         }
     }
     
     @FXML public void exitClicked(ActionEvent e){
-        if (ViewManager.showConfirmationView(rb.getString("exitConfirmation"))){
-            System.exit(0);
-        }
-
+        //Lambda
+        new Alert(Alert.AlertType.CONFIRMATION, rb.getString("exitConfirmation"))
+                .showAndWait()
+                .filter(response->response==ButtonType.OK)
+                .ifPresent(response->System.exit(0));
     }
 
     @FXML public void langChanged(ActionEvent e){
@@ -146,6 +140,7 @@ public class LoginController implements Initializable  {
     private void logAction(boolean loginSucceeded){
         //Paths.
         try{
+            //Create the file if not present
             Files.createDirectories(Paths.get("./log/"));
             File test = path.toFile();
             test.createNewFile();
@@ -156,14 +151,14 @@ public class LoginController implements Initializable  {
         String loginString;
         if (loginSucceeded) {
             loginString = "" + LocalDateTime.now() + " Login successful for " + loginUN.getText();
-
         }else{
             loginString = "" + LocalDateTime.now() + " Login failed for " + loginUN.getText();
         }
 
-        try (BufferedWriter testBuff = Files.newBufferedWriter(path, Charset.forName("UTF-16"), StandardOpenOption.APPEND)) {
-            testBuff.write(loginString);
-            testBuff.newLine();
+        //Try with resources
+        try (BufferedWriter loginBuff = Files.newBufferedWriter(path, Charset.forName("UTF-16"), StandardOpenOption.APPEND)) {
+            loginBuff.write(loginString);
+            loginBuff.newLine();
         } catch (IOException e) {
             e.printStackTrace();
         }

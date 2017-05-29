@@ -2,10 +2,9 @@ package c195_jlosee;
 
 import javafx.beans.property.SimpleStringProperty;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Map;
+import java.time.ZonedDateTime;
 
 /**
  * ${FILENAME}
@@ -13,15 +12,16 @@ import java.util.Map;
  */
 public class SQLAppointment {
 
-    private SimpleStringProperty apptTime;
-    private SimpleStringProperty title;
-    private SimpleStringProperty description;
-    private SimpleStringProperty location;
-    private SimpleStringProperty contact;
-    private SimpleStringProperty url;
-    private SimpleStringProperty createdBy;
+    private SimpleStringProperty apptTime = new SimpleStringProperty();
+    private SimpleStringProperty title = new SimpleStringProperty();
+    private SimpleStringProperty description = new SimpleStringProperty();
+    private SimpleStringProperty location = new SimpleStringProperty();
+    private SimpleStringProperty contact = new SimpleStringProperty();
+    private SimpleStringProperty url = new SimpleStringProperty();
+    private SimpleStringProperty createdBy = new SimpleStringProperty();
     private LocalDateTime createdDate;
-    private LocalDateTime startDate, endDate;
+    private ZonedDateTime startDate;
+    private ZonedDateTime endDate;
     private int apptID, customerID;
 
     //ASSUMPTION: business hours are 8am-6pm
@@ -30,7 +30,8 @@ public class SQLAppointment {
     public SQLAppointment(){
 
     }
-    public SQLAppointment(LocalDateTime startTime, LocalDateTime endTime, String title, String descrip,
+
+    public SQLAppointment(ZonedDateTime startTime, ZonedDateTime endTime, String title, String descrip,
                           String location, String contact, String URL, int customerID, LocalDateTime createdDate, String createdBy) throws OutsideBusinessHoursException {
 
         try {
@@ -50,7 +51,25 @@ public class SQLAppointment {
         }
     }
 
-    public void setStartDateTime(LocalDateTime start) throws OutsideBusinessHoursException{
+    public SQLAppointment(ZonedDateTime startTime, ZonedDateTime endTime, String title, String descrip,
+                          String location, String contact, String URL, int customerID) throws OutsideBusinessHoursException {
+
+        try {
+            this.setStartDateTime(startTime);
+            this.setEndDateTime(endTime);
+            this.setTitle(title);
+            this.setDescription(descrip);
+            this.setLocation(location);
+            this.setContact(contact);
+            this.setUrl(URL);
+            this.setCustomerID(customerID);
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+
+    public void setStartDateTime(ZonedDateTime start) throws OutsideBusinessHoursException{
         if (isOutsideHours(start)){
             throw new OutsideBusinessHoursException("Appointment start time is not within business hours of "+businessStart+"-"+businessEnd);
         }else{
@@ -59,7 +78,7 @@ public class SQLAppointment {
         }
     }
 
-    public void setEndDateTime(LocalDateTime end) throws OutsideBusinessHoursException{
+    public void setEndDateTime(ZonedDateTime end) throws OutsideBusinessHoursException{
         if (isOutsideHours(end)){
             throw new OutsideBusinessHoursException("Appointment end time is not within business hours of "+businessStart+"-"+businessEnd);
         }else{
@@ -69,7 +88,11 @@ public class SQLAppointment {
     }
 
     private void setApptTime(){
-        this.apptTime.set(this.startDate.toLocalTime()+"-"+this.endDate.toLocalTime());
+        try {
+            this.apptTime.set(this.startDate.toLocalTime()+"-"+this.endDate.toLocalTime());
+        }catch (NullPointerException npe){
+
+        }
     }
 
     /**
@@ -77,7 +100,7 @@ public class SQLAppointment {
      * @param time
      * @return true if the input time falls outside the listed business hours.
      */
-    private boolean isOutsideHours(LocalDateTime time){
+    private boolean isOutsideHours(ZonedDateTime time){
         boolean outsideHours = false;
         if (time.toLocalTime().compareTo(businessEnd)>0 || time.toLocalTime().compareTo(businessStart)<0){
             outsideHours = true;
@@ -181,11 +204,11 @@ public class SQLAppointment {
         this.customerID = customerID;
     }
 
-    public LocalDateTime getStartDateTime() {
+    public ZonedDateTime getStartDateTime() {
         return startDate;
     }
 
-    public LocalDateTime getEndDateTime(){
+    public ZonedDateTime getEndDateTime(){
         return endDate;
     }
 

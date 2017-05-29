@@ -12,13 +12,10 @@ import javafx.scene.control.*;
 
 import java.net.URL;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.sql.Timestamp;
+import java.time.*;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-
 import java.util.ResourceBundle;
 
 
@@ -61,7 +58,6 @@ public class AppointmentViewController implements Initializable, InvalidationLis
         }
     }
 
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
@@ -80,23 +76,43 @@ public class AppointmentViewController implements Initializable, InvalidationLis
         //TODO: WHY ARE TWO ERROR MESSAGES THROWN? DOES IT NEED 0?
         //TODO: SQLAppointment.setAll
         try{
-            LocalDateTime start = constructStartDateTime();
-            LocalDateTime end = constructEndDateTime();
+            ZonedDateTime start = constructStartDateTime();
+            ZonedDateTime end = constructEndDateTime();
+            if (start.compareTo(end)>-1){
+                ViewManager.showErrorMessage("Appointment start time cannot be after the end. ");
+            }
+            int customerIndex = cbCustomer.getSelectionModel().getSelectedIndex();
+            if (customerIndex <0){
+                throw new Exception("No customer selected to schedule the appointment with.");
+            }
+
             String title = titleField.getText();
             String description = descriptionField.getText();
             String url = urlField.getText();
             String contact = contactField.getText();
             String location = locationField.getText();
-            SQLCustomer test = (SQLCustomer)cbCustomer.getSelectionModel().getSelectedItem();
-            //SQLAppointment current = new SQLAppointment(start, end, title, description, location, contact, url);
+            SQLCustomer apptCustomer = SQLManager.getInstance().getCustomerList().get(customerIndex);
+            //public SQLAppointment(LocalDateTime startTime, LocalDateTime endTime, String title, String descrip,
+            //String location, String contact, String URL, int customerID, LocalDateTime createdDate, String createdBy)
+            //TODO: REFACTOR:SQLAppointment current = new SQLAppointment(start, end, title, description, location, contact, url, apptCustomer.getCustomerID());
 
-            LocalDateTime conflict = SQLManager.getInstance().canSchedule(test.getCustomerID(), start, end);
+            Timestamp test = Timestamp.from(start.toInstant());
+            System.out.println("ZonedDateTime.toInstant"+test);
+            test=Timestamp.valueOf(start.toLocalDateTime());
+            System.out.println("ZonedDateTime.toLocal"+test);
+            LocalDateTime test2= start.withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+            test=Timestamp.valueOf(test2);
+            System.out.println("ZonedDateTime.withZoneSameInstant(UTC).toLocalDT: "+test);
+            //apptCustomer.addAppointment(current);
 
-            if (start.compareTo(end)>-1){
-                ViewManager.showErrorMessage("Appointment start time cannot be after the end. ");
-            }
-        }catch (Exception exc){
-            System.out.println("something happened in AppointmentViewController: "+exc.getMessage());
+        }catch (SQLCustomer.ConflictingAppointmentException cae){
+            //Call this if there is an appointement already scheduled for this customer
+            new Alert(Alert.AlertType.ERROR, cae.getMessage())
+                    .showAndWait();
+        } catch(Exception exc){
+            //System.out.println("something happened in AppointmentViewController.saveClicked: "+exc.getMessage());
+            new Alert(Alert.AlertType.ERROR, exc.getMessage())
+                    .showAndWait();
         }
     }
 
@@ -115,13 +131,13 @@ public class AppointmentViewController implements Initializable, InvalidationLis
      * Constructs the start date time from the date picker and
      * @return
      */
-    public LocalDateTime constructStartDateTime(){
-        //TODO: Implement, stub
-        LocalDateTime startDT = null;
+    public ZonedDateTime constructStartDateTime(){
+
+        ZonedDateTime startDT = null;
         try {
             LocalDate date = getDate();
             LocalTime time = LocalTime.parse(startTimeField.getCharacters());
-            startDT = LocalDateTime.of(date, time);
+            startDT = ZonedDateTime.of(date, time, ZoneId.systemDefault());
         } catch (DateTimeParseException dtpe){
             ViewManager.showErrorMessage("Please enter a valid date and start time for the appointment.");
         } catch (Exception e){
@@ -130,13 +146,13 @@ public class AppointmentViewController implements Initializable, InvalidationLis
         return startDT;
     }
 
-    public LocalDateTime constructEndDateTime(){
-        LocalDateTime endDT = null;
+    public ZonedDateTime constructEndDateTime(){
+        ZonedDateTime endDT = null;
 
         try{
             LocalDate date = getDate();
             LocalTime time = LocalTime.parse(endTimeField.getCharacters());
-            endDT=LocalDateTime.of(date, time);
+            endDT=ZonedDateTime.of(date, time, ZoneId.systemDefault());
         } catch (DateTimeParseException dtpe){
             ViewManager.showErrorMessage("Please enter a valid date and end time for the appointment.");
         } catch (Exception e){
