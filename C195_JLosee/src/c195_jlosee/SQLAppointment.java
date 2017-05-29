@@ -13,7 +13,14 @@ import java.util.Map;
  */
 public class SQLAppointment {
 
-    private SimpleStringProperty date, startTime, title, description, location, contact, url, createdBy, createdDate;
+    private SimpleStringProperty apptTime;
+    private SimpleStringProperty title;
+    private SimpleStringProperty description;
+    private SimpleStringProperty location;
+    private SimpleStringProperty contact;
+    private SimpleStringProperty url;
+    private SimpleStringProperty createdBy;
+    private LocalDateTime createdDate;
     private LocalDateTime startDate, endDate;
     private int apptID, customerID;
 
@@ -24,51 +31,72 @@ public class SQLAppointment {
 
     }
     public SQLAppointment(LocalDateTime startTime, LocalDateTime endTime, String title, String descrip,
-                          String location, String contact, String URL){
+                          String location, String contact, String URL, int customerID, LocalDateTime createdDate, String createdBy) throws OutsideBusinessHoursException {
 
-        //TODO stub
-        System.out.println("SQLApptConstructor Stub 1");
+        try {
+            setStartDateTime(startTime);
+            setEndDateTime(endTime);
+            setTitle(title);
+            setDescription(descrip);
+            setLocation(location);
+            setContact(contact);
+            setUrl(URL);
+            setCustomerID(customerID);
+            setCreatedDate(createdDate);
+            setCreatedBy(createdBy);
+
+        }catch (Exception e){
+            throw e;
+        }
     }
 
-    public SQLAppointment(LocalDateTime dateTime, String title, String descrip, String location,
-                          String contact, String URL, String createdBy, String createdDate){
-
+    public void setStartDateTime(LocalDateTime start) throws OutsideBusinessHoursException{
+        if (isOutsideHours(start)){
+            throw new OutsideBusinessHoursException("Appointment start time is not within business hours of "+businessStart+"-"+businessEnd);
+        }else{
+            this.startDate=start;
+            setApptTime();
+        }
     }
 
-    public SQLAppointment(Map<String, String> values){
-
+    public void setEndDateTime(LocalDateTime end) throws OutsideBusinessHoursException{
+        if (isOutsideHours(end)){
+            throw new OutsideBusinessHoursException("Appointment end time is not within business hours of "+businessStart+"-"+businessEnd);
+        }else{
+            this.endDate=end;
+            setApptTime();
+        }
     }
 
-    public String getDate() {
-        return date.get();
-    }
-    public SimpleStringProperty dateProperty() {
-        return date;
-    }
-    public void setDate(String date) {
-        this.date.set(date);
+    private void setApptTime(){
+        this.apptTime.set(this.startDate.toLocalTime()+"-"+this.endDate.toLocalTime());
     }
 
-    public String getStartTime() {
-        return startTime.get();
+    /**
+     *
+     * @param time
+     * @return true if the input time falls outside the listed business hours.
+     */
+    private boolean isOutsideHours(LocalDateTime time){
+        boolean outsideHours = false;
+        if (time.toLocalTime().compareTo(businessEnd)>0 || time.toLocalTime().compareTo(businessStart)<0){
+            outsideHours = true;
+        }
+
+        return outsideHours;
     }
 
-    public SimpleStringProperty startTimeProperty() {
-        return startTime;
+    public String getApptTime() {
+        return apptTime.get();
     }
-
-    public void setStartTime(String startTime) {
-        this.startTime.set(startTime);
-    }
+    public SimpleStringProperty apptTimeProperty() {return apptTime;    }
 
     public String getTitle() {
         return title.get();
     }
-
     public SimpleStringProperty titleProperty() {
         return title;
     }
-
     public void setTitle(String title) {
         this.title.set(title);
     }
@@ -126,14 +154,11 @@ public class SQLAppointment {
         this.createdBy.set(createdBy);
     }
 
-    public String getCreatedDate() {
-        return createdDate.get();
-    }
-    public SimpleStringProperty createdDateProperty() {
+    public LocalDateTime getCreatedDate() {
         return createdDate;
     }
-    public void setCreatedDate(String createdDate) {
-        this.createdDate.set(createdDate);
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate=createdDate;
     }
 
     ////////////////////////////////////////////////////////////
@@ -156,5 +181,17 @@ public class SQLAppointment {
         this.customerID = customerID;
     }
 
+    public LocalDateTime getStartDateTime() {
+        return startDate;
+    }
 
+    public LocalDateTime getEndDateTime(){
+        return endDate;
+    }
+
+    class OutsideBusinessHoursException extends Exception{
+        OutsideBusinessHoursException(String message){
+            super(message);
+        }
+    }
 }

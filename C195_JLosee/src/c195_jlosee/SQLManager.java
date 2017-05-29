@@ -8,6 +8,7 @@ import javafx.collections.ObservableMap;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import java.rmi.registry.LocateRegistry;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
@@ -407,7 +408,9 @@ public class SQLManager {
     }
 
     public ArrayList<SQLAppointment> getCustomersAppointments(SQLCustomer in){
+        ArrayList<SQLAppointment> customerAppointments= new ArrayList<>();
         String apptQuery = "Select * from appointment";
+
         int custID = in.getCustomerID();
         try{
             PreparedStatement st = getSQLConnection().prepareStatement(apptQuery);
@@ -416,16 +419,24 @@ public class SQLManager {
             ResultSet rs = st.executeQuery();
             while (rs.next()){
                 SQLAppointment appt = new SQLAppointment();
-                appt.setApptID(rs.getInt(1));
+                appt.setApptID(rs.getInt("appointmentId"));
                 appt.setCustomerID(custID);
                 appt.setTitle(rs.getString("title"));
                 appt.setDescription(rs.getString("description"));
                 appt.setLocation(rs.getString("location"));
                 appt.setContact(rs.getString("contact"));
                 appt.setUrl(rs.getString("url"));
-                //TODO: Add another method for localTime, fix this
-                appt.setStartTime(rs.getTime("start").toString());
-                //TODO: END TIME?
+                appt.setCreatedBy(rs.getString("createdBy"));
+                //createdDate may want to be set to DateTime rather than local date time
+                appt.setCreatedDate(rs.getTimestamp("createdDate").toLocalDateTime());
+                LocalDateTime startLocal = rs.getTimestamp("start").toLocalDateTime();
+                LocalDateTime endLocal = rs.getTimestamp("end").toLocalDateTime();
+                try{
+                    appt.setStartDateTime(startLocal);
+                    appt.setEndDateTime(endLocal);
+                }catch (Exception e){
+                    //Discard this because we're pulling the information from the database so we don't really care
+                }
             }
         }catch (SQLException e){
             //TODO
@@ -434,9 +445,17 @@ public class SQLManager {
 
 
         //TODO: STUB
-        return null;
+        return customerAppointments;
     }
 
+    /**
+     * Returns a LocalDateTime of conflicting schedules
+     * //TODO: this must be moved to SQL Customer, each customer will have an appointment list
+     * @param customerId
+     * @param start
+     * @param end
+     * @return
+     */
     public LocalDateTime canSchedule(int customerId, LocalDateTime start, LocalDateTime end){
         String scheduleQuery = "Select * from appointment where customerId = ? AND ((start between ? and ?) OR end between ? and ?)";
         LocalDateTime dt = null;

@@ -23,7 +23,7 @@ import java.util.ResourceBundle;
 public class MainViewController implements Initializable{
 
     @FXML
-    TableView customerTable;
+    TableView customerTable, appointmentTable;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //For customerList as observable list: customerTable.setItems(SQLManager.getInstance().getCustomerList());
@@ -121,6 +121,17 @@ public class MainViewController implements Initializable{
         stage.setScene(scene);
         stage.setTitle("Add Appointment");
         stage.show();
+    }
+
+    /**
+     * On clicking a customer, the table is populated
+     */
+    @FXML public void customerSelected(){
+        int i = customerTable.getSelectionModel().getSelectedIndex();
+        SQLCustomer selectedCustomer = (SQLCustomer)customerTable.getItems().get(i);
+
+        appointmentTable.setItems(FXCollections.observableArrayList(selectedCustomer.getCustomerAppointments()));
+        //System.out.println(test.getCustomerID());
     }
 
     @FXML public void editApptClicked(){

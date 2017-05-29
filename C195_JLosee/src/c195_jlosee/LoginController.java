@@ -100,7 +100,7 @@ public class LoginController implements Initializable  {
                 SQLAppointment appointmentReminder = SQLManager.getInstance().checkForApptAtLogin();
                 if (appointmentReminder!=null){
                     //TODO: Make Remidner message show all relevant information: Time, place, customer, title
-                    String reminderMessage = appointmentReminder.getTitle()+appointmentReminder.getStartTime();
+                    String reminderMessage = appointmentReminder.getTitle()+appointmentReminder.getStartDateTime();
                     new Alert(Alert.AlertType.WARNING, appointmentReminder.getTitle()+"\nwith"+appointmentReminder.getContact()).showAndWait();
                 }
 

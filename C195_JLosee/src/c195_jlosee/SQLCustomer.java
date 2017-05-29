@@ -3,6 +3,8 @@ package c195_jlosee;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
+import java.util.ArrayList;
+
 /**
  * ${FILENAME}
  * Created by Joseph Losee on 5/11/2017.
@@ -27,7 +29,10 @@ public class SQLCustomer {
     private SimpleIntegerProperty countryID = new SimpleIntegerProperty();
     private SimpleIntegerProperty active = new SimpleIntegerProperty();
 
+    ArrayList<SQLAppointment> customerAppointments;
+
     public static void GetMaxValues(){
+        //TODO: update this if time allows.
         SQLManager.getSQLConnection();
 
     }
@@ -46,18 +51,42 @@ public class SQLCustomer {
         } catch (Exception e) {
             e.printStackTrace();
         }*/
-
         //SQLManager.getInstance().addCustomer(this);
-
     }
 
     public SQLCustomer(String customerName, String address1, String address2, String city, String postCode, String phone, String country) throws Exception {
-
         this.setCustomerName(customerName);
         this.setCountry(country);
         this.setCity(city);
         this.setFullAddress(address1, address2, postCode, phone);
+        customerAppointments=new ArrayList<>();
     }
+
+    public boolean setAppointmentList(ArrayList<SQLAppointment> appointmentList) {
+        boolean success = false;
+        customerAppointments=appointmentList;
+        return success;
+    }
+
+    public ArrayList<SQLAppointment> getCustomerAppointments(){
+        return this.customerAppointments;
+    }
+
+    public void addAppointment(SQLAppointment appt) throws ConflictingAppointmentException{
+        if (customerAppointments.size() ==0){
+            customerAppointments.add(appt);
+        }else if(customerAppointments.stream()
+                    .filter(a->a.getStartDateTime().toLocalDate().compareTo(appt.getStartDateTime().toLocalDate())==0)
+                    .filter(a->a.getStartDateTime().compareTo(appt.getStartDateTime())>0&
+                               a.getStartDateTime().compareTo(appt.getEndDateTime())<0)
+                    .count()>0){
+                   throw new ConflictingAppointmentException("An existing appointment for this customer conflicts with the requested appointment");
+
+        }else {
+            customerAppointments.add(appt);
+        }
+    }
+
 
     public boolean setFullAddress(String address1, String address2, String postCode, String phone) throws Exception {
         boolean ret = false;
@@ -272,6 +301,15 @@ public class SQLCustomer {
     @Override
     public String toString(){
         return this.getCustomerName()+" "+this.getCity()+" "+this.getCountry();
+    }
+
+    /**
+     * Exception for attempting schedule an appointment
+     */
+    class ConflictingAppointmentException extends Exception{
+        ConflictingAppointmentException(String message){
+            super(message);
+        }
     }
 
 }
