@@ -15,13 +15,14 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 
 
 /**
- * ${FILENAME}
+ * $AppointmentViewController, handles the logic and basic validation
  * Created by Joseph Losee on 5/22/2017.
  */
 public class AppointmentViewController implements Initializable, InvalidationListener {
@@ -36,6 +37,7 @@ public class AppointmentViewController implements Initializable, InvalidationLis
     MenuButton startTimeSpecifier, endTimeSpecifier;
 
     private final String REGEX_24H ="([01]?[0-9]|2[0-3]):[0-5][0-9]";
+    private final String REGEX_24HTEST = "^([01]\\d|2[0-3]):?([0-5]\\d)$";
     private final String REGEX_12H ="([01]?[0-9]|2[0-3]):[0-5][0-9]";
     private final String EXCLUDE_ALL_NOT_TIME=".*[^0-9:]";
 
@@ -49,7 +51,7 @@ public class AppointmentViewController implements Initializable, InvalidationLis
                 timeString.set(input.substring(0,input.length()-1));
             }
             if ( input.length()==5) {
-                if (!input.matches(REGEX_24H)) {
+                if (!input.matches(REGEX_24HTEST)) {
                     new Alert(Alert.AlertType.ERROR, "Enter a valid time").showAndWait();
                 }
             }else if(input.length()>5){
@@ -64,7 +66,10 @@ public class AppointmentViewController implements Initializable, InvalidationLis
         zones = FXCollections.observableList(new ArrayList<>(ZoneId.getAvailableZoneIds()));
         cbCustomer.setItems(SQLManager.getInstance().getCustomerList());
         startTimeField.textProperty().addListener(this::invalidated);
+        startTimeField.setText(LocalTime.now().plus(15, ChronoUnit.MINUTES).toString());
         endTimeField.textProperty().addListener(this::invalidated);
+        endTimeField.setText(LocalTime.now().plus(30, ChronoUnit.MINUTES).toString());
+        startDate.setValue(LocalDate.now());
         //artDate.
         /// startTimeField.
     }
@@ -78,6 +83,7 @@ public class AppointmentViewController implements Initializable, InvalidationLis
         try{
             ZonedDateTime start = constructStartDateTime();
             ZonedDateTime end = constructEndDateTime();
+
             if (start.compareTo(end)>-1){
                 ViewManager.showErrorMessage("Appointment start time cannot be after the end. ");
             }
@@ -94,24 +100,17 @@ public class AppointmentViewController implements Initializable, InvalidationLis
             SQLCustomer apptCustomer = SQLManager.getInstance().getCustomerList().get(customerIndex);
             //public SQLAppointment(LocalDateTime startTime, LocalDateTime endTime, String title, String descrip,
             //String location, String contact, String URL, int customerID, LocalDateTime createdDate, String createdBy)
-            //TODO: REFACTOR:SQLAppointment current = new SQLAppointment(start, end, title, description, location, contact, url, apptCustomer.getCustomerID());
+            SQLAppointment current = new SQLAppointment(start, end, title, description, location, contact, url, apptCustomer.getCustomerID());
 
-            Timestamp test = Timestamp.from(start.toInstant());
-            System.out.println("ZonedDateTime.toInstant"+test);
-            test=Timestamp.valueOf(start.toLocalDateTime());
-            System.out.println("ZonedDateTime.toLocal"+test);
-            LocalDateTime test2= start.withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
-            test=Timestamp.valueOf(test2);
-            System.out.println("ZonedDateTime.withZoneSameInstant(UTC).toLocalDT: "+test);
-            //apptCustomer.addAppointment(current);
+            apptCustomer.addAppointment(current);
+            ViewManager.closeWindowFromEvent(e);
 
         }catch (SQLCustomer.ConflictingAppointmentException cae){
-            //Call this if there is an appointement already scheduled for this customer
+            //Call this if there is an appointment already scheduled for this customer
             new Alert(Alert.AlertType.ERROR, cae.getMessage())
                     .showAndWait();
         } catch(Exception exc){
-            //System.out.println("something happened in AppointmentViewController.saveClicked: "+exc.getMessage());
-            new Alert(Alert.AlertType.ERROR, exc.getMessage())
+            new Alert(Alert.AlertType.ERROR, exc.getMessage()+exc.getStackTrace().toString())
                     .showAndWait();
         }
     }

@@ -73,6 +73,7 @@ public class SQLCustomer {
     public void addAppointment(SQLAppointment appt) throws ConflictingAppointmentException{
         if (customerAppointments.size() ==0){
             customerAppointments.add(appt);
+            SQLManager.getInstance().addAppointment(appt);
         }else if(customerAppointments.stream()
                 //if startDateTime of existing appointments is >= desiredStartDateTime and <= desiredEndDateTime
                 //OR if endDateTime of existing appointment is >= desiredStartDateTime and <= desiredEndDateTime
@@ -108,7 +109,6 @@ public class SQLCustomer {
     public int getActive() {        return active.get();    }
     public SimpleIntegerProperty activeProperty() {        return active;    }
     public void setActive(int active) {        this.active.set(active);    }
-//555-888-5431
     //
     //Customer Name getter/setter
     public String getCustomerName() {        return customerName.get();    }

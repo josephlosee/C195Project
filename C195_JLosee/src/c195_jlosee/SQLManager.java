@@ -11,6 +11,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
 import java.sql.Timestamp;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -63,7 +64,7 @@ public class SQLManager {
             try {
                 //Ensure all columns are set to auto_increment, takes about 500ms on launch, but worth it as this program won't have to find and calculate every addressID;
                 sqlConnection = DriverManager.getConnection(url, user, pass);
-                Instant timer = Instant.now();
+                //Instant timer = Instant.now();
                 sqlConnection.createStatement().executeUpdate("Alter Table appointment Modify Column appointmentId int(10) not null auto_increment");
                 sqlConnection.createStatement().executeUpdate("Alter Table country Modify Column countryId int(10) not null auto_increment");
                 sqlConnection.createStatement().executeUpdate("Alter Table city Modify Column cityId int(10) not null auto_increment");
@@ -71,8 +72,8 @@ public class SQLManager {
                 sqlConnection.createStatement().executeUpdate("Alter Table address Modify Column addressId int(10) not null auto_increment");
                 sqlConnection.createStatement().executeUpdate("Alter Table customer Modify Column customerId int(10) not null auto_increment");
                 Instant timer2 = Instant.now();
-                long nanoTime = timer.toEpochMilli()-timer2.toEpochMilli();
-                System.out.println(nanoTime);
+                //long nanoTime = timer.toEpochMilli()-timer2.toEpochMilli();
+                //Debug code to check time of this operation System.out.println(nanoTime);
             } catch (SQLException sqlE){
                 System.out.println("SQL Exception Encountered: "+sqlE.getMessage());
             }
@@ -106,10 +107,6 @@ public class SQLManager {
             if (res.next()){
                 int userID = res.getInt(1);
                 String userName = res.getString(2);
-                /*Debugging code
-                System.out.println("User login successful!");
-                System.out.println("UserID: " + userID);
-                System.out.println("UserName: " + userName);*/
                 activeUser = new SQLUser(userID, userName);
 
                 success = true;
@@ -148,20 +145,20 @@ public class SQLManager {
             pstCustomerExists.setString(1, inCustomer.getCustomerName());
             pstCustomerExists.setInt(2, inCustomer.getAddressID());
             ResultSet rs = pstCustomerExists.executeQuery();
+
             if (rs.next()){
                 inCustomer.setCustomerID(rs.getInt("customerId"));
             }else{
                 PreparedStatement pstAddCustomer = getSQLConnection().prepareStatement(addCustString);
-                //pstAddCustomer.setInt(1, inCustomer.getCustomerID());
                 pstAddCustomer.setString(1, inCustomer.getCustomerName());
                 pstAddCustomer.setInt(2, inCustomer.getAddressID());
                 pstAddCustomer.setInt(3, inCustomer.getActive());//not sure what active is for, but I'll probably just let this be set as a checkbox?
+
                 ZonedDateTime utcTime = ZonedDateTime.now(ZoneOffset.UTC);
                 pstAddCustomer.setTimestamp(4, Timestamp.from(utcTime.toInstant()));
                 pstAddCustomer.setString(5, activeUser.getUserName());
                 pstAddCustomer.setString(6, activeUser.getUserName());
 
-                //TODO: Add "active" checkbox to customer form
                 pstAddCustomer.executeUpdate();
                 //After all is said and done, if no exceptions are encountered, add the customer to the list.
                 rs=pstCustomerExists.executeQuery();
@@ -176,7 +173,6 @@ public class SQLManager {
             System.out.println("Error creating statement in addCustomer: "+ sqlE.getMessage());
             System.out.println(sqlE.getStackTrace());
         }
-
         return addSucceed;
     }
 
@@ -237,19 +233,20 @@ public class SQLManager {
             }
             else{
                 PreparedStatement pstAddCity = sqlConnection.prepareStatement(addCity);
-                //pstAddCity.setInt(1, ++cityID);
+
                 pstAddCity.setString(1, cityName);
                 pstAddCity.setInt(2, countryID);
                 pstAddCity.setTimestamp(3,Timestamp.valueOf(LocalDateTime.now(ZoneOffset.UTC)));
                 pstAddCity.setString(4, activeUser.getUserName());
                 pstAddCity.setString(5, activeUser.getUserName());
+
                 pstAddCity.executeUpdate();
 
                 cityPresent=pstCityExists.executeQuery();
+                //Assign the newly generated ID
                 if (cityPresent.next()){
                     cityID = cityPresent.getInt(1);
                 }
-
             }
         }catch (SQLException e){
             System.out.println("SQLException in addCity: "+e.getMessage());
@@ -340,7 +337,7 @@ public class SQLManager {
         return this.customerList;
     }
 
-    public ObservableList<SQLAppointment> getAppointmentList(){        return activeUserApptList;    }
+    public ObservableList<SQLAppointment> getUserAppointmentList(){        return activeUserApptList;    }
 
     /**
      * Populates the customer list for the table view and other uses
@@ -383,6 +380,24 @@ public class SQLManager {
         //        .forEach(System.out::println);
     }
 
+    public void updateCustomer(SQLCustomer toUpdate){
+        String strUdateQuery = "UPDATE customer SET customerName=?, addressId=?, active=?, lastUpdateBy=? WHERE customerId=?";
+
+        try {
+            PreparedStatement psUpdate=sqlConnection.prepareStatement(strUdateQuery);
+            psUpdate.setString(1, toUpdate.getCustomerName());
+            psUpdate.setInt(2, toUpdate.getAddressID());
+            psUpdate.setInt(3, toUpdate.getActive());
+            psUpdate.setString(4, activeUser.getUserName());
+            psUpdate.setInt(5, toUpdate.getCustomerID());
+
+            int i = psUpdate.executeUpdate();
+
+        }catch (SQLException sqle){
+            System.out.println("SQLException in sqlmanager.updateCustomer: " +sqle.getMessage());
+        }
+    }
+
     //TODO: Populate appointment list
     private void populateAppointmentList(){
         String apptQuery = "Select * from appointment";
@@ -410,8 +425,9 @@ public class SQLManager {
                 appt.setCreatedBy(rs.getString("createdBy"));
                 //createdDate may want to be set to DateTime rather than local date time
                 appt.setCreatedDate(rs.getTimestamp("createdDate").toLocalDateTime());
-                ZonedDateTime startLocal = rs.getTimestamp("start").toLocalDateTime().atZone(ZoneId.systemDefault());
-                ZonedDateTime endLocal = rs.getTimestamp("end").toLocalDateTime().atZone(ZoneId.systemDefault());
+                ZonedDateTime startLocal = rs.getTimestamp("start").toInstant().atZone(ZoneId.systemDefault());
+                ZonedDateTime endLocal = rs.getTimestamp("end").toInstant().atZone(ZoneId.systemDefault());
+
                 try{
                     appt.setStartDateTime(startLocal);
                     appt.setEndDateTime(endLocal);
@@ -436,9 +452,9 @@ public class SQLManager {
         //TODO DOES THIS WORK?
         final int REMINDER_TIME_LIMIT = 15;
 
-        ZonedDateTime zdtNow = ZonedDateTime.now(ZoneOffset.UTC);
-        Timestamp now = Timestamp.valueOf(LocalDateTime.now(ZoneOffset.UTC));
-        Timestamp nowPlus15 = Timestamp.valueOf(LocalDateTime.now(ZoneOffset.UTC).plus(15, ChronoUnit.MINUTES));
+
+        Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+        Timestamp nowPlus15 = Timestamp.valueOf(LocalDateTime.now().plus(15, ChronoUnit.MINUTES));
 
         try{
             String usersAppts = "Select * from appointment where createdBy= ? and start BETWEEN ? AND ?";
@@ -450,8 +466,14 @@ public class SQLManager {
             ResultSet rs = userApptSt.executeQuery();
 
             if (rs.next()){
-                LocalDateTime start = rs.getTimestamp("start").toLocalDateTime();
-                LocalDateTime end = rs.getTimestamp("end").toLocalDateTime();
+                Timestamp tsApptStart = rs.getTimestamp("start");
+                Timestamp tsApptEnd = rs.getTimestamp("end");
+
+                ZoneId test = ZoneId.systemDefault();
+                //////IMPORTANT THING
+                ZonedDateTime zdtStart = ZonedDateTime.ofInstant(tsApptStart.toInstant(), ZoneId.systemDefault());
+                ZonedDateTime zdtEnd = ZonedDateTime.ofInstant(tsApptEnd.toInstant(), ZoneId.systemDefault());
+
                 String title = rs.getString("title");
                 String location = rs.getString("location");
                 String description = rs.getString("description");
@@ -463,7 +485,7 @@ public class SQLManager {
                 SQLCustomer customerOfAppt = customerList.filtered(a->a.getCustomerID()==apptCustId).get(0);
 
                 appointmentDetails="Appointment Alert:\n" +title+"\n" +description+"\nCustomer: "
-                        +customerOfAppt.getCustomerName()+"\n"+start+" - "+end+
+                        +customerOfAppt.getCustomerName()+"\n"+zdtStart.toLocalTime()+" - "+ zdtEnd.toLocalTime()+
                         " \nLocation: "+location;
             }
         }catch (SQLException e){
@@ -472,6 +494,11 @@ public class SQLManager {
         return appointmentDetails;
     }
 
+    /**
+     * Adds an appointment to the database. Probably should move to SQLCustomer
+     * @param appt
+     * @return
+     */
     public boolean addAppointment(SQLAppointment appt){
         //String addAddress="INSERT INTO address (address, address2, cityID, postalCode, phone, createDate, createdBy, lastUpdateBy)"+
         //" VALUES (? , ?, ?, ?, ?, ?, ?, ?)";
@@ -479,11 +506,9 @@ public class SQLManager {
         String appointmentQuery = "INSERT INTO appointment (customerId, title, description, location, contact, URL, start, end, createDate, createdBy, lastUpdateBy)"+
                 " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        ZonedDateTime start = appt.getStartDateTime();
-        ZonedDateTime end = appt.getEndDateTime();
+        Timestamp tsStart = Timestamp.from(appt.getStartDateTime().toInstant());
+        Timestamp tsEnd = Timestamp.from(appt.getEndDateTime().toInstant());
 
-        Timestamp test = Timestamp.valueOf(start.toLocalDateTime());
-        
         try{
             PreparedStatement addAppt = sqlConnection.prepareStatement(appointmentQuery);
             addAppt.setInt(1, appt.getCustomerID());
@@ -492,16 +517,16 @@ public class SQLManager {
             addAppt.setString(4, appt.getLocation());
             addAppt.setString(5, appt.getContact());
             addAppt.setString(6, appt.getUrl());
-            //ZonedDateTime zdtAddApptTest = appt.getStartDateTime().atZone(ZoneOffset.UTC);
-            addAppt.setTimestamp(7, Timestamp.valueOf(start.toLocalDateTime()));
-            addAppt.setTimestamp(8, Timestamp.valueOf(end.toLocalDateTime()));
+            addAppt.setTimestamp(7, tsStart);
+            addAppt.setTimestamp(8, tsEnd);
             addAppt.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now(ZoneOffset.UTC)));
             addAppt.setString(10, activeUser.getUserName());
             addAppt.setString(11, activeUser.getUserName());
 
-            //addAppt.executeUpdate();
+            addAppt.executeUpdate();
             activeUserApptList.add(appt);
             success = true;
+
         }catch(SQLException sqle){
             System.out.println("SQL Error adding appointment: "+ sqle.getMessage());
         }
