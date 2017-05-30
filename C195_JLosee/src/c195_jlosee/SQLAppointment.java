@@ -15,14 +15,43 @@ public class SQLAppointment {
     private SimpleStringProperty apptTime = new SimpleStringProperty();
     private SimpleStringProperty title = new SimpleStringProperty();
     private SimpleStringProperty description = new SimpleStringProperty();
-    private SimpleStringProperty location = new SimpleStringProperty();
+    private SimpleStringProperty locationProperty = new SimpleStringProperty();
     private SimpleStringProperty contact = new SimpleStringProperty();
     private SimpleStringProperty url = new SimpleStringProperty();
+
+    public String getDateProperty() {
+        return dateProperty.get();
+    }
+    public SimpleStringProperty datePropertyProperty() {
+        return dateProperty;
+    }
+
+    public void setDateProperty(ZonedDateTime time) {
+        this.dateProperty.set(time.toLocalDate().toString());
+    }
+
+    private SimpleStringProperty dateProperty = new SimpleStringProperty();
     private SimpleStringProperty createdBy = new SimpleStringProperty();
     private LocalDateTime createdDate;
     private ZonedDateTime startDate;
     private ZonedDateTime endDate;
     private int apptID, customerID;
+
+    public LocalTime getBusinessStart() {
+        return businessStart;
+    }
+
+    public void setBusinessStart(LocalTime businessStart) {
+        this.businessStart = businessStart;
+    }
+
+    public LocalTime getBusinessEnd() {
+        return businessEnd;
+    }
+
+    public void setBusinessEnd(LocalTime businessEnd) {
+        this.businessEnd = businessEnd;
+    }
 
     //ASSUMPTION: business hours are 8am-6pm
     private LocalTime businessStart = LocalTime.of(8,0), businessEnd = LocalTime.of(18,0);
@@ -32,14 +61,14 @@ public class SQLAppointment {
     }
 
     public SQLAppointment(ZonedDateTime startTime, ZonedDateTime endTime, String title, String descrip,
-                          String location, String contact, String URL, int customerID, LocalDateTime createdDate, String createdBy) throws OutsideBusinessHoursException {
+                          String locationProperty, String contact, String URL, int customerID, LocalDateTime createdDate, String createdBy) throws OutsideBusinessHoursException {
 
         try {
             setStartDateTime(startTime);
             setEndDateTime(endTime);
             setTitle(title);
             setDescription(descrip);
-            setLocation(location);
+            setLocationProperty(locationProperty);
             setContact(contact);
             setUrl(URL);
             setCustomerID(customerID);
@@ -59,7 +88,7 @@ public class SQLAppointment {
             this.setEndDateTime(endTime);
             this.setTitle(title);
             this.setDescription(descrip);
-            this.setLocation(location);
+            this.setLocationProperty(location);
             this.setContact(contact);
             this.setUrl(URL);
             this.setCustomerID(customerID);
@@ -90,6 +119,7 @@ public class SQLAppointment {
     private void setApptTime(){
         try {
             this.apptTime.set(this.startDate.toLocalTime()+"-"+this.endDate.toLocalTime());
+            this.setDateProperty(this.startDate);
         }catch (NullPointerException npe){
 
         }
@@ -134,14 +164,14 @@ public class SQLAppointment {
         this.description.set(description);
     }
 
-    public String getLocation() {
-        return location.get();
+    public String getLocationProperty() {
+        return locationProperty.get();
     }
-    public SimpleStringProperty locationProperty() {
-        return location;
+    public SimpleStringProperty locationPropertyProperty() {
+        return locationProperty;
     }
-    public void setLocation(String location) {
-        this.location.set(location);
+    public void setLocationProperty(String locationProperty) {
+        this.locationProperty.set(locationProperty);
     }
 
     public String getContact() {

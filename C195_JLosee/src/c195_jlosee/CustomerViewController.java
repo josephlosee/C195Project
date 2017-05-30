@@ -53,23 +53,20 @@ public class CustomerViewController implements Initializable{
                 indexOfDefault=i;
                 break;
             }
-
         }
+
         countryField.setItems(countryList);
         countryField.getSelectionModel().select(indexOfDefault);
 
+        /*Debug Customer Informatino
         custNameField.setText("Alan Smithee");
         AddressLine1Field.setText("123 Main St.");
         CityField.setText("Anytown");
-        //countryField.di("Canada");
         PostalCodeField.setText("11111");
-        PhoneField.setText("888-555-5555");
-        //activeCB.setSelected(false);
+        PhoneField.setText("888-555-5555");*/
     }
 
     @FXML void saveClicked(ActionEvent e){
-        /// public SQLCustomer(String customerName, String address1, String address2, String city, String postCode, String phone, String country){
-
         //if customer is not being edited
         if (customerData==null){
             try {
@@ -121,7 +118,6 @@ public class CustomerViewController implements Initializable{
     @FXML void testClick(){
         activeCB.setSelected(!activeCB.isSelected());
         activeCB.fire();
-        System.out.println("Checkbox state: "+activeCB.isSelected());
     }
 
     public void editCustomer(SQLCustomer updateCustomer) {
@@ -144,18 +140,11 @@ public class CustomerViewController implements Initializable{
         AddressLine1Field.setText(customerData.getAddress1());
         AddressLine2Field.setText(customerData.getAddress2());
         CityField.setText(customerData.getCity());
-        //countryField.di("Canada");
         PostalCodeField.setText(customerData.getPostalCode());
         PhoneField.setText(customerData.getPhone());
         custIdLabel.setText(String.valueOf(customerData.getCustomerID()));
         setCountrySelection(customerData.getCountry());
-        /*if (customerData.getActive()>0){
-            activeCB.setSelected(true);
-        }else{
-            activeCB.setSelected(false);
-        }*/
         activeCB.setSelected(customerData.getActive()>0);
-
     }
 
     //Disables everything for viewing the customer data without chance of altering the data

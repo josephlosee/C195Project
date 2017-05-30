@@ -56,12 +56,23 @@
             </TableColumn>
         </columns>
       </TableView>
-      <TableView prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
+      <TableView fx:id="appointmentTable" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
         <columns>
-          <TableColumn prefWidth="75.0" text="Time" />
-          <TableColumn prefWidth="75.0" text="Location" />
-            <TableColumn prefWidth="75.0" text="Date" />
-            <TableColumn prefWidth="75.0" text="Contact" />
+          <TableColumn editable="false" prefWidth="75.0" text="Time">
+              <cellValueFactory><PropertyValueFactory property="apptTime"/></cellValueFactory>
+          </TableColumn>
+          <TableColumn editable="false" prefWidth="75.0" text="Location">
+              <cellValueFactory><PropertyValueFactory property="locationProperty"/></cellValueFactory>
+          </TableColumn>
+            <TableColumn editable="false" prefWidth="75.0" text="Date">
+                <cellValueFactory><PropertyValueFactory property="dateProperty"/></cellValueFactory>
+            </TableColumn>
+            <TableColumn editable="false" prefWidth="75.0" text="Customer Name">
+                <cellValueFactory><PropertyValueFactory property="contact"/></cellValueFactory>
+            </TableColumn>
+            <TableColumn editable="false" prefWidth="75.0" text="Contact">
+                <cellValueFactory><PropertyValueFactory property="contact"/></cellValueFactory>
+            </TableColumn>
         </columns>
       </TableView>
    </children>
