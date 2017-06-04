@@ -304,14 +304,4 @@ public class SQLCustomer {
     public String toString(){
         return this.getCustomerName()+" "+this.getCity()+" "+this.getCountry();
     }
-
-    /**
-     * Exception for attempting schedule an appointment
-     */
-    class ConflictingAppointmentException extends Exception{
-        ConflictingAppointmentException(String message){
-            super(message);
-        }
-    }
-
 }

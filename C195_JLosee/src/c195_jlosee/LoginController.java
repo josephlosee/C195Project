@@ -9,12 +9,10 @@ package c195_jlosee;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -25,6 +23,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -53,14 +52,17 @@ public class LoginController implements Initializable  {
 
         langSelect.setItems(supportedLangList);
 
-        if (userLocale.getLanguage() == "fr"){
-            langSelect.getSelectionModel().select(1);
-        }else if (userLocale.getLanguage() == "de"){
-            langSelect.getSelectionModel().select(2);
-        }else{
-            //Default to English
-            langSelect.getSelectionModel().select(0);
+        switch (userLocale.getLanguage()){
+            case("fr"):
+                langSelect.getSelectionModel().select(1);
+                break;
+            case("de"):
+                langSelect.getSelectionModel().select(2);
+                break;
+            default:
+                langSelect.getSelectionModel().select(0);
         }
+
         changeLanguage(userLocale);
     }
 
@@ -105,7 +107,7 @@ public class LoginController implements Initializable  {
                 try {
                     custStage.setScene(new Scene(FXMLLoader.load(getClass().getResource("resources/MainView.fxml"))));
                     custStage.show();
-                    ViewManager.closeWindowFromEvent(e);
+                    (((Node)e.getSource()).getScene().getWindow()).hide();
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
@@ -142,8 +144,8 @@ public class LoginController implements Initializable  {
         try{
             //Create the file if not present
             Files.createDirectories(Paths.get("./log/"));
-            File test = path.toFile();
-            test.createNewFile();
+            File filePresent = path.toFile();
+            filePresent.createNewFile();
         }catch (IOException createExc){
             System.out.println("Error in creating file: "+createExc.getMessage());
         }

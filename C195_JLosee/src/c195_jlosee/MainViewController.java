@@ -5,10 +5,13 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
@@ -23,11 +26,15 @@ import java.util.ResourceBundle;
 public class MainViewController implements Initializable{
 
     @FXML
-    TableView customerTable, appointmentTable;
+    private TableView customerTable, appointmentTable;
+    @FXML private GridPane gpMain;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //For customerList as observable list: customerTable.setItems(SQLManager.getInstance().getCustomerList());
+
         customerTable.setItems(SQLManager.getInstance().getCustomerList());
+        gpMain.add(JLCalendar.getInstance().getCalendar(),0,0);
+        gpMain.add(new JLWeeklyAppointments().getWeekVBox(), 1, 0);
         //TODO: Nothing at the moment.
     }
 
@@ -147,8 +154,13 @@ public class MainViewController implements Initializable{
     }
 
     @FXML public void logoutClicked(ActionEvent e){
-        if (ViewManager.showConfirmationView("Logout?")){
-            ViewManager.closeWindowFromEvent(e);
+        String logoutConfMsg = "Logout?";
+        boolean bLogout = new Alert(Alert.AlertType.CONFIRMATION, logoutConfMsg)
+                .showAndWait()
+                .filter(response->response== ButtonType.OK)
+                .isPresent();
+        if (bLogout){
+            (((Node)e.getSource()).getScene().getWindow()).hide();
             SQLManager.getInstance().logout();
 
             try {//Open the login fxml and show it

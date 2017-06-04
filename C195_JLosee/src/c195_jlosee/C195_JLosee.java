@@ -26,7 +26,7 @@ public class C195_JLosee extends Application {
         ExecutorService startSQLConnection = null;
         try{
             startSQLConnection = Executors.newSingleThreadExecutor();
-            startSQLConnection.submit(()->SQLManager.getSQLConnection());
+            startSQLConnection.submit(SQLManager::getSQLConnection);
         }finally{
             if (startSQLConnection != null) startSQLConnection.shutdown();
             //shutdown the thread
@@ -50,6 +50,8 @@ public class C195_JLosee extends Application {
             SQLManager.getSQLConnection().close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } catch (Exception e){
+            //Do nothing
         }
     }
 

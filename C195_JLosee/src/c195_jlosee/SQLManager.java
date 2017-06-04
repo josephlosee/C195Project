@@ -25,7 +25,7 @@ public class SQLManager {
 
     //TODO: Add Prepared Statements for SQL Queries up here along with strings for grouped references
     //SQL Connection information in one convenient package!
-    private static String driver   = "com.mysql.jdbc.Driver"; ;
+    private static String driver   = "com.mysql.jdbc.Driver";
     private static String schema = "U04bqK";
     private static String url = "jdbc:mysql://52.206.157.109/"+schema;
     private static String user = "U04bqK", pass="53688195806";
@@ -33,6 +33,8 @@ public class SQLManager {
     private static final SQLManager instance = new SQLManager();
     private ObservableList<SQLCustomer> customerList;
     private ObservableList <SQLAppointment> activeUserApptList;
+
+    private Map <String, PreparedStatement> mapOfStatements = new HashMap<>();
 
     private static SQLUser activeUser = null;
 
@@ -63,18 +65,35 @@ public class SQLManager {
             try {
                 //Ensure all columns are set to auto_increment, takes about 500ms on launch, but worth it as this program won't have to find and calculate every addressID;
                 sqlConnection = DriverManager.getConnection(url, user, pass);
-                //Instant timer = Instant.now();
+                Instant timer = Instant.now();
+
                 sqlConnection.createStatement().executeUpdate("Alter Table appointment Modify Column appointmentId int(10) not null auto_increment");
                 sqlConnection.createStatement().executeUpdate("Alter Table country Modify Column countryId int(10) not null auto_increment");
                 sqlConnection.createStatement().executeUpdate("Alter Table city Modify Column cityId int(10) not null auto_increment");
                 sqlConnection.createStatement().executeUpdate("Alter Table city Modify Column cityId int(10) not null auto_increment");
                 sqlConnection.createStatement().executeUpdate("Alter Table address Modify Column addressId int(10) not null auto_increment");
                 sqlConnection.createStatement().executeUpdate("Alter Table customer Modify Column customerId int(10) not null auto_increment");
+                /*
+                List<Callable<Integer>> updateTableKeysToAutoInc = Arrays.asList(
+                    ()->sqlConnection.createStatement().executeUpdate("Alter Table appointment Modify Column appointmentId int(10) not null auto_increment"),
+                    ()->sqlConnection.createStatement().executeUpdate("Alter Table country Modify Column countryId int(10) not null auto_increment"),
+                    ()->sqlConnection.createStatement().executeUpdate("Alter Table city Modify Column cityId int(10) not null auto_increment"),
+                    ()->sqlConnection.createStatement().executeUpdate("Alter Table city Modify Column cityId int(10) not null auto_increment"),
+                    ()->sqlConnection.createStatement().executeUpdate("Alter Table address Modify Column addressId int(10) not null auto_increment"),
+                    ()->sqlConnection.createStatement().executeUpdate("Alter Table customer Modify Column customerId int(10) not null auto_increment"));
+                ExecutorService updateAllTableKeysToAutoInc = Executors.newFixedThreadPool(3);
+                updateAllTableKeysToAutoInc.invokeAll(updateTableKeysToAutoInc);*/
+
                 Instant timer2 = Instant.now();
-                //long nanoTime = timer.toEpochMilli()-timer2.toEpochMilli();
-                //Debug code to check time of this operation System.out.println(nanoTime);
-            } catch (SQLException sqlE){
-                System.out.println("SQL Exception Encountered: "+sqlE.getMessage());
+                long nanoTime = timer.toEpochMilli()-timer2.toEpochMilli();
+                //Debug code to check time of this operation
+                System.out.println(nanoTime);
+            } /*catch (InterruptedException ie){
+                System.out.println("InterruptedException Encountered in SQLManager.getSQLConnection"+ie.getMessage());
+            } /*catch (ExecutionException ee){
+                System.out.println("ExecutionException Encountered in SQLManager.getSQLConnection"+ee.getMessage());
+            }*/catch(SQLException sqlE){
+                System.out.println("SQL Exception Encountered in SQLManager.getSQLConnection: "+sqlE.getMessage());
             }
         }
         return sqlConnection;
@@ -83,7 +102,7 @@ public class SQLManager {
     public boolean login(String user, String pass){
         //Sanitize
         PreparedStatement prepStatement;
-        ResultSet res = null;
+        ResultSet res;
         boolean success = false;
 
         //LOGIN QUERY
@@ -148,7 +167,7 @@ public class SQLManager {
                 PreparedStatement pstAddCustomer = getSQLConnection().prepareStatement(addCustString);
                 pstAddCustomer.setString(1, inCustomer.getCustomerName());
                 pstAddCustomer.setInt(2, inCustomer.getAddressID());
-                pstAddCustomer.setInt(3, inCustomer.getActive());//not sure what active is for, but I'll probably just let this be set as a checkbox?
+                pstAddCustomer.setInt(3, inCustomer.getActive());
 
                 ZonedDateTime utcTime = ZonedDateTime.now(ZoneOffset.UTC);
                 pstAddCustomer.setTimestamp(4, Timestamp.from(utcTime.toInstant()));
@@ -163,6 +182,7 @@ public class SQLManager {
                     customerList.add(inCustomer);
                     addSucceed=true;
                 }
+                rs.close();
             }
         } catch(SQLException sqlE){
             System.out.println("Error creating statement in addCustomer: "+ sqlE.getMessage());
@@ -264,8 +284,8 @@ public class SQLManager {
             SecretKeyFactory skf = SecretKeyFactory.getInstance( "PBKDF2WithHmacSHA512" );
             PBEKeySpec spec = new PBEKeySpec( password, salt, iterations, keyLength );
             SecretKey key = skf.generateSecret( spec );
-            byte[] res = key.getEncoded( );
-            return res;
+            return key.getEncoded( );
+
 
         } catch( NoSuchAlgorithmException | InvalidKeySpecException e ) {
             throw new RuntimeException( e );
@@ -338,7 +358,7 @@ public class SQLManager {
         String allCustQuery = "SELECT * FROM customer JOIN address USING (addressId) JOIN city USING (cityId) JOIN country USING(countryId)";
         SQLCustomer current;
         try{
-            ResultSet rs = this.sqlConnection.createStatement().executeQuery(allCustQuery);
+            ResultSet rs = sqlConnection.createStatement().executeQuery(allCustQuery);
             while(rs.next()){
                 //Get all the customer information
                 current=new SQLCustomer();
@@ -493,7 +513,7 @@ public class SQLManager {
     }
 
     /**
-     * Adds an appointment to the database. Probably should move to SQLCustomer
+     * Adds an appointment to the database.
      * @param appt
      * @return
      */
@@ -537,12 +557,17 @@ public class SQLManager {
                 System.out.println("SQLException in SQLManager.addAppointment while attempting to retrieve the appointmentID");
             }
 
-            activeUserApptList.add(appt);
+            //TODO: Replace activeUserApptList.add(appt);
+            //activeUser.addAppointment(appt);
             success = true;
 
         }catch(SQLException sqle){
             System.out.println("SQL Error adding appointment: "+ sqle.getMessage());
         }
         return success;
+    }
+
+    public SQLUser getActiveUser(){
+        return activeUser;
     }
 }//END OF CLASS

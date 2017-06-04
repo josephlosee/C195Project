@@ -8,6 +8,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 
 import java.net.URL;
@@ -27,14 +28,14 @@ import java.util.ResourceBundle;
  */
 public class AppointmentViewController implements Initializable, InvalidationListener {
     @FXML
-    TextField titleField, descriptionField, locationField, contactField, urlField, startTimeField, endTimeField;
+    private TextField titleField, descriptionField, locationField, contactField, urlField, startTimeField, endTimeField;
     @FXML
-    ComboBox startZone, cbCustomer;
-    ObservableList<String> zones;
+    private ComboBox startZone, cbCustomer;
+    private ObservableList<String> zones;
     @FXML
-    DatePicker startDate, endDate;
+    private DatePicker startDate, endDate;
     @FXML
-    MenuButton startTimeSpecifier, endTimeSpecifier;
+    private MenuButton startTimeSpecifier, endTimeSpecifier;
 
     private final String REGEX_24H ="([01]?[0-9]|2[0-3]):[0-5][0-9]";
     private final String REGEX_24HTEST = "^([01]\\d|2[0-3]):?([0-5]\\d)$";
@@ -85,7 +86,8 @@ public class AppointmentViewController implements Initializable, InvalidationLis
             ZonedDateTime end = constructEndDateTime();
 
             if (start.compareTo(end)>-1){
-                ViewManager.showErrorMessage("Appointment start time cannot be after the end. ");
+                new Alert(Alert.AlertType.ERROR,"Appointment start time cannot be after the end. ")
+                        .showAndWait();
             }
             int customerIndex = cbCustomer.getSelectionModel().getSelectedIndex();
             if (customerIndex <0){
@@ -102,10 +104,12 @@ public class AppointmentViewController implements Initializable, InvalidationLis
             //String location, String contact, String URL, int customerID, LocalDateTime createdDate, String createdBy)
             SQLAppointment current = new SQLAppointment(start, end, title, description, location, contact, url, apptCustomer.getCustomerID());
 
+            SQLManager.getInstance().getActiveUser().addAppointment(current);
             apptCustomer.addAppointment(current);
-            ViewManager.closeWindowFromEvent(e);
 
-        }catch (SQLCustomer.ConflictingAppointmentException cae){
+            (((Node)e.getSource()).getScene().getWindow()).hide();
+
+        }catch (ConflictingAppointmentException cae){
             //Call this if there is an appointment already scheduled for this customer
             new Alert(Alert.AlertType.ERROR, cae.getMessage())
                     .showAndWait();
@@ -121,8 +125,14 @@ public class AppointmentViewController implements Initializable, InvalidationLis
      */
     @FXML public void cancelClicked(ActionEvent e){
         String confirmation = "Discard changes?";
-        if (ViewManager.showConfirmationView(confirmation)){
-            ViewManager.closeWindowFromEvent(e);
+        boolean bCancel = new Alert(Alert.AlertType.CONFIRMATION, confirmation)
+                .showAndWait()
+                .filter(response->response==ButtonType.OK)
+                .isPresent();
+        if (bCancel){
+            //Close the window:
+            // ViewManager.closeWindowFromEvent(e);
+            (((Node)e.getSource()).getScene().getWindow()).hide();
         }
     }
 
@@ -138,7 +148,8 @@ public class AppointmentViewController implements Initializable, InvalidationLis
             LocalTime time = LocalTime.parse(startTimeField.getCharacters());
             startDT = ZonedDateTime.of(date, time, ZoneId.systemDefault());
         } catch (DateTimeParseException dtpe){
-            ViewManager.showErrorMessage("Please enter a valid date and start time for the appointment.");
+            new Alert(Alert.AlertType.ERROR,"Please enter a valid date and start time for the appointment.")
+                    .showAndWait();
         } catch (Exception e){
             System.out.println("Something went wrong in constructing the appointment start date time.");
         }
@@ -153,7 +164,8 @@ public class AppointmentViewController implements Initializable, InvalidationLis
             LocalTime time = LocalTime.parse(endTimeField.getCharacters());
             endDT=ZonedDateTime.of(date, time, ZoneId.systemDefault());
         } catch (DateTimeParseException dtpe){
-            ViewManager.showErrorMessage("Please enter a valid date and end time for the appointment.");
+            new Alert(Alert.AlertType.ERROR,"Please enter a valid date and end time for the appointment.")
+                    .showAndWait();
         } catch (Exception e){
             System.out.println("Something went wrong in constructing the appointment end date time.");
         }

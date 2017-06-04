@@ -5,11 +5,11 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 
-import javax.swing.text.View;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,9 +79,12 @@ public class CustomerViewController implements Initializable{
                 customerData.setActive(active);
                 SQLManager.getInstance().addCustomer(customerData);
                 custIdLabel.setText(String.valueOf(customerData.getCustomerID()));
-                ViewManager.closeWindowFromEvent(e);
+
+                //Close the window
+                (((Node)e.getSource()).getScene().getWindow()).hide();
             }catch (Exception exc){
-                ViewManager.showErrorMessage(exc.getMessage());
+                new Alert(Alert.AlertType.ERROR, exc.getMessage())
+                        .showAndWait();
             }
         }else{
             //Update customer information
@@ -98,17 +101,24 @@ public class CustomerViewController implements Initializable{
                 customerData.setActive(active);
                 SQLManager.getInstance().updateCustomer(customerData);
 
-                ViewManager.closeWindowFromEvent(e);
+                //Close the window
+                ((Node)e.getSource()).getScene().getWindow().hide();
             } catch (Exception e1) {
-                ViewManager.showErrorMessage(e1.getMessage());
+                new Alert(Alert.AlertType.ERROR,e1.getMessage())
+                        .showAndWait();
             }
         }
     }
 
     @FXML void cancelClicked(ActionEvent e){
-        String confirmation = "Discard changes?";
-        if (ViewManager.showConfirmationView(confirmation)){
-            ViewManager.closeWindowFromEvent(e);
+        String confMessage = "Discard changes?";
+        boolean bCancel = new Alert(Alert.AlertType.CONFIRMATION, confMessage)
+                .showAndWait()
+                .filter(response->response==ButtonType.OK)
+                .isPresent();
+        if (bCancel){
+            //Close the window, discarding changes
+            (((Node)e.getSource()).getScene().getWindow()).hide();
         }
     }
 
@@ -131,7 +141,7 @@ public class CustomerViewController implements Initializable{
         saveCust.setText("Close");
         cancelCust.setVisible(false);
         saveCust.setOnAction(event->
-            ViewManager.closeWindowFromEvent(event));
+                (((Node)event.getSource()).getScene().getWindow()).hide());
         disableControls(true);
     }
 

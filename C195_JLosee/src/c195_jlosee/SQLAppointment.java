@@ -2,9 +2,7 @@ package c195_jlosee;
 
 import javafx.beans.property.SimpleStringProperty;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 
 /**
  * ${FILENAME}
@@ -121,7 +119,7 @@ public class SQLAppointment {
             this.apptTime.set(this.startDate.toLocalTime()+"-"+this.endDate.toLocalTime());
             this.setDateProperty(this.startDate);
         }catch (NullPointerException npe){
-
+            //Discard the NPE as this method is called when one or the other of these times is null;
         }
     }
 
@@ -132,7 +130,9 @@ public class SQLAppointment {
      */
     private boolean isOutsideHours(ZonedDateTime time){
         boolean outsideHours = false;
-        if (time.toLocalTime().compareTo(businessEnd)>0 || time.toLocalTime().compareTo(businessStart)<0){
+        //check if the appointment falls outside business hours: 8am-6pm, Monday-Friday
+        if (time.toLocalTime().compareTo(businessEnd)>0 || time.toLocalTime().compareTo(businessStart)<0 ||
+                time.getDayOfWeek()== DayOfWeek.SATURDAY || time.getDayOfWeek() == DayOfWeek.SUNDAY){
             outsideHours = true;
         }
 
