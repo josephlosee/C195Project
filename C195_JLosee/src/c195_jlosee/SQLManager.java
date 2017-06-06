@@ -99,6 +99,12 @@ public class SQLManager {
         return sqlConnection;
     }
 
+    /**
+     * Checks the sql database for the user information entered
+     * @param user - user name
+     * @param pass - user password
+     * @return - if the login was successful
+     */
     public boolean login(String user, String pass){
         //Sanitize
         PreparedStatement prepStatement;
@@ -124,7 +130,18 @@ public class SQLManager {
                 String userName = res.getString(2);
                 activeUser = new SQLUser(userID, userName);
 
+                populateCustomerList();
                 success = true;
+
+                /*
+                ExecutorService populateCustomers = null;
+                try{
+                    populateCustomers = Executors.newSingleThreadExecutor();
+                    populateCustomers.submit(()->SQLManager.getInstance().populateCustomerList());
+                }finally{
+                    if (populateCustomers != null) populateCustomers.shutdown();
+                    //shutdown the thread
+                }*/
             }
 
         }catch (SQLException sqlE){
@@ -134,14 +151,6 @@ public class SQLManager {
             System.out.println("An generic exception occurred during the prepared statement of login. "+e.getMessage());
         }
 
-        ExecutorService populateCustomers = null;
-        try{
-            populateCustomers = Executors.newSingleThreadExecutor();
-            populateCustomers.submit(()->SQLManager.getInstance().populateCustomerList());
-        }finally{
-            if (populateCustomers != null) populateCustomers.shutdown();
-            //shutdown the thread
-        }
         return success;
     }
 
@@ -410,11 +419,6 @@ public class SQLManager {
         }
     }
 
-    //TODO: Populate appointment list
-    private void populateAppointmentList(){
-        String apptQuery = "Select * from appointment";
-    }
-
     public ArrayList<SQLAppointment> getCustomersAppointments(SQLCustomer in){
         ArrayList<SQLAppointment> customerAppointments= new ArrayList<>();
         String apptQuery = "Select * from appointment where customerId=?";
@@ -428,7 +432,7 @@ public class SQLManager {
             while (rs.next()){
                 SQLAppointment appt = new SQLAppointment();
                 appt.setApptID(rs.getInt("appointmentId"));
-                appt.setCustomerID(custID);
+                appt.setCustomerRef(in);
                 appt.setTitle(rs.getString("title"));
                 appt.setDescription(rs.getString("description"));
                 appt.setLocationProperty(rs.getString("location"));
@@ -449,10 +453,19 @@ public class SQLManager {
                     appt.setEndDateTime(endLocal);
                     appt.setBusinessStart(startHolder);
                     appt.setBusinessEnd(endHolder);
+                    //appt.setCustomerRef(in);
                 }catch (Exception e){
                     //Discard this because we're pulling the information from the database so we don't really care
                 }
                 customerAppointments.add(appt);
+                if (appt.getCreatedBy().equalsIgnoreCase(activeUser.getUserName())){
+                    try {
+                        activeUser.addAppointment(appt);
+                    } catch (ConflictingAppointmentException cae){
+                        assert true;
+                        //System.out.println("A conflicting user appointment was generated on loading from the database. "+cae.getMessage());
+                    }
+                }
             }
         }catch (SQLException e){
             System.out.println("SQLException occurred in SQLManager.getCustomersAppointments: "+e.getMessage());

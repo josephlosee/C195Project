@@ -31,6 +31,10 @@ public class SQLCustomer {
 
     ArrayList<SQLAppointment> customerAppointments = new ArrayList<>();
 
+    public SQLCustomer(int customerID){
+        setCustomerID(customerID);
+    }
+
     public static void GetMaxValues(){
         //TODO: update this if time allows.
         SQLManager.getSQLConnection();
@@ -154,6 +158,15 @@ public class SQLCustomer {
             isEmpty = toCheck.trim().isEmpty();
         }
         return isEmpty;
+    }
+
+    @Override public boolean equals(Object obj){
+        boolean isEqual = false;
+        if (obj instanceof SQLCustomer){
+            isEqual = ((SQLCustomer) obj).getCustomerID()==this.getCustomerID();
+        }
+
+        return isEqual;
     }
 
     private String notNullFieldEmptyMessageFactory(String fieldName){

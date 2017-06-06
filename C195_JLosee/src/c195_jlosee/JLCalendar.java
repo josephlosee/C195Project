@@ -1,6 +1,8 @@
 package c195_jlosee;
 
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
@@ -8,6 +10,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 
+import java.awt.event.ActionEvent;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.stream.Collectors;
@@ -25,9 +29,11 @@ public class JLCalendar {
     private static JLCalendar instance = new JLCalendar();
 
     private JLCalendar(){
-        calendar.setMinHeight(550);
+        calendar.setMinHeight(385);
+
         baseDate = LocalDate.now();
         banner = new HBox(10);
+        banner.setMinHeight(35);
         banner.setPadding(new Insets(5.0));
         nextMonth = new Button(" > ");
         nextMonth.setMinWidth(25);
@@ -50,8 +56,8 @@ public class JLCalendar {
 
         banner.getChildren().add(prevMonth);
         banner.getChildren().add(currentMonth);
-        banner.getChildren().add(nextMonth);
         banner.getChildren().add(currentYear);
+        banner.getChildren().add(nextMonth);
 
         calendar.add(banner, 0 ,0 );
         constructCalendar(baseDate);
@@ -66,11 +72,15 @@ public class JLCalendar {
         return this.calendar;
     }
 
+    public ObservableList<Node> getVBoxList(){
+        return gpMonth.getChildren();
+    }
+
     public void constructCalendar(LocalDate initialFocus){
         final int DAYS_IN_WEEK = 7;
 
         GridPane constructedMonth = new GridPane();
-        constructedMonth.setMinHeight(450);
+        constructedMonth.setMinHeight(360);
         constructedMonth.setPadding(new Insets(5.0));
         constructedMonth.gridLinesVisibleProperty().setValue(true);
         baseDate=initialFocus;
@@ -82,6 +92,7 @@ public class JLCalendar {
         int initialYear = initialFocus.getYear();
 
         int rowIndex = 0;
+        Instant test = Instant.now();
         for (int dayOfMonth = 1; dayOfMonth <= initialFocus.getMonth().length(initialFocus.isLeapYear()); dayOfMonth++){
 
             LocalDate date = LocalDate.of(initialYear, initialMonth, dayOfMonth);
@@ -89,28 +100,35 @@ public class JLCalendar {
 
             VBox dateBox = new VBox();
             dateBox.setPadding(new Insets(5.0));
-            dateBox.setMinWidth(75);
-            dateBox.setMinHeight(75);
+            dateBox.setMinWidth(65);
+            dateBox.setMinHeight(60);
 
-            //TODO: PLACEHOLDER, get
+            //get the count of appts for this day
             long numAppts = SQLManager.getInstance().getActiveUser().getUserAppts()
                     .stream()
                     .filter(a->a.getStartDateTime().toLocalDate().isEqual(date))
                     .count();
-            //int numAppts = (int)(dayOfMonth*Math.random()*.3);
+
             dateBox.getChildren().addAll(new Label(String.valueOf(dayOfMonth)), new Label("# Appts: "+numAppts));
 
-            if (dayOfMonth==initialFocus.getDayOfMonth()){
+            //TODO: Make the click set the
+            //dateBox.setOnMouseClicked(()->);
+            if (date.isEqual(LocalDate.now())){
                 dateBox.setStyle("-fx-background-color:AZURE");
             }
+            dateBox.setId("dbox_"+date);
             constructedMonth.add(dateBox, date.getDayOfWeek().getValue()%DAYS_IN_WEEK, rowIndex);
-
         }
+        System.out.println(Instant.now().minusMillis(test.toEpochMilli()).toEpochMilli());
 
         this.calendar.getChildren().remove(gpMonth);
         this.gpMonth=constructedMonth;
         this.calendar.add(gpMonth, 0, 1);
 
+    }
+
+    public void refresh(){
+        constructCalendar(this.baseDate);
     }
 }//END OF CLASS
 

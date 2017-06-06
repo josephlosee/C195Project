@@ -1,5 +1,6 @@
 package c195_jlosee;
 
+import com.sun.istack.internal.NotNull;
 import javafx.beans.property.SimpleStringProperty;
 
 import java.time.*;
@@ -34,6 +35,7 @@ public class SQLAppointment {
     private ZonedDateTime startDate;
     private ZonedDateTime endDate;
     private int apptID, customerID;
+    private SQLCustomer customerRef;
 
     public LocalTime getBusinessStart() {
         return businessStart;
@@ -79,7 +81,7 @@ public class SQLAppointment {
     }
 
     public SQLAppointment(ZonedDateTime startTime, ZonedDateTime endTime, String title, String descrip,
-                          String location, String contact, String URL, int customerID) throws OutsideBusinessHoursException {
+                               String location, String contact, String URL, int customerID) throws OutsideBusinessHoursException {
 
         try {
             this.setStartDateTime(startTime);
@@ -90,9 +92,39 @@ public class SQLAppointment {
             this.setContact(contact);
             this.setUrl(URL);
             this.setCustomerID(customerID);
+            this.retrieveCustomerInfo();
         }catch (Exception e){
             throw e;
         }
+    }
+
+    public SQLAppointment(ZonedDateTime startTime, ZonedDateTime endTime, String title, String descrip,
+                          String location, String contact, String URL, SQLCustomer customer) throws OutsideBusinessHoursException {
+
+        try {
+            this.setStartDateTime(startTime);
+            this.setEndDateTime(endTime);
+            this.setTitle(title);
+            this.setDescription(descrip);
+            this.setLocationProperty(location);
+            this.setContact(contact);
+            this.setUrl(URL);
+            this.setCustomerRef(customer);
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+
+    public void retrieveCustomerInfo(){
+        int index =  SQLManager.getInstance().getCustomerList().indexOf(new SQLCustomer(this.customerID));
+        this.customerRef = SQLManager.getInstance().getCustomerList().get(index);
+
+    }
+
+    public void setCustomerRef(@NotNull SQLCustomer cust){
+        this.customerRef=cust;
+        setCustomerID(customerRef.getCustomerID());
     }
 
 
@@ -123,7 +155,18 @@ public class SQLAppointment {
         }
     }
 
-    /**
+    @Override public String toString(){
+        String apptTime = getApptTime();
+        String customerName = customerRef.getCustomerName();
+        String apptTitle = getTitle();
+        return apptTime+" " +customerName+" "+apptTitle;
+    }
+
+    public SQLCustomer getCustomerRef(){
+        return customerRef;
+    }
+
+     /**
      *
      * @param time
      * @return true if the input time falls outside the listed business hours.
@@ -232,6 +275,10 @@ public class SQLAppointment {
     }
     public void setCustomerID(int customerID) {
         this.customerID = customerID;
+        if (customerRef==null | customerID!=customerRef.getCustomerID()){
+            this.retrieveCustomerInfo();
+        }
+
     }
 
     public ZonedDateTime getStartDateTime() {
