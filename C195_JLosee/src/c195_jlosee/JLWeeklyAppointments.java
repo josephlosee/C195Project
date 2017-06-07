@@ -21,6 +21,7 @@ public class JLWeeklyAppointments {
     private LocalDate startOfWeek = LocalDate.now();
     String formatterPattern = "ccc MM-dd";
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formatterPattern);
+    List<SQLAppointment> usersApptsThisWeek = new ArrayList<>();
     //private static JLWeeklyAppointments wkAppts = new JLWeeklyAppointments();
 
     public JLWeeklyAppointments(){
@@ -68,16 +69,12 @@ public class JLWeeklyAppointments {
             VBox dayVBox = new VBox();
             Label dayName = new Label(dayOfWeek.format(formatter));
             dayVBox.getChildren().add(dayName);
-            //ArrayList<SQLAppointment> appts = null;
-            //ObservableList<SQLAppointment> appts = FXCollections.observableArrayList(new ArrayList<>());
-            List<SQLAppointment> collect = SQLManager.getInstance().getActiveUser().getUserAppts()
+
+            usersApptsThisWeek = SQLManager.getInstance().getActiveUser().getUserAppts()
                     .stream()
                     .filter(a -> a.getStartDateTime().toLocalDate().isEqual(dayOfWeek))
                     .collect(Collectors.toList());
-            collect.forEach(a-> dayVBox.getChildren().add(new Label(a.toString())));
-            //dayVBox.getChildren().add();
-            //TODO dayVBox.getChildren().add(ObservableList);
-
+            usersApptsThisWeek.forEach(a-> dayVBox.getChildren().add(new Label(a.toString())));
 
             weekContainer.getChildren().add(dayVBox);
         }

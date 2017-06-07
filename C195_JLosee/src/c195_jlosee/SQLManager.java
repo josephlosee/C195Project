@@ -13,8 +13,10 @@ import java.sql.Timestamp;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * $SQLManager
@@ -33,8 +35,10 @@ public class SQLManager {
     private static final SQLManager instance = new SQLManager();
     private ObservableList<SQLCustomer> customerList;
     private ObservableList <SQLAppointment> activeUserApptList;
+    private PreparedStatement customerAppointment;
 
     private Map <String, PreparedStatement> mapOfStatements = new HashMap<>();
+    private Map <Integer, SQLCustomer> customerMap = new HashMap<>();
 
     private static SQLUser activeUser = null;
 
@@ -52,7 +56,7 @@ public class SQLManager {
      * Returns the sql connection object if available, or establishes a new connection
      * @return reference to the sqlConnection
      */
-    public static Connection getSQLConnection(){
+    public Connection getSQLConnection(){
 
         //Would use a data source instead, but the SQL server seems to be set up for this.
         if (sqlConnection==null){
@@ -63,31 +67,35 @@ public class SQLManager {
             }
 
             try {
+                //
                 //Ensure all columns are set to auto_increment, takes about 500ms on launch, but worth it as this program won't have to find and calculate every addressID;
                 sqlConnection = DriverManager.getConnection(url, user, pass);
                 Instant timer = Instant.now();
 
-                sqlConnection.createStatement().executeUpdate("Alter Table appointment Modify Column appointmentId int(10) not null auto_increment");
-                sqlConnection.createStatement().executeUpdate("Alter Table country Modify Column countryId int(10) not null auto_increment");
-                sqlConnection.createStatement().executeUpdate("Alter Table city Modify Column cityId int(10) not null auto_increment");
-                sqlConnection.createStatement().executeUpdate("Alter Table city Modify Column cityId int(10) not null auto_increment");
-                sqlConnection.createStatement().executeUpdate("Alter Table address Modify Column addressId int(10) not null auto_increment");
-                sqlConnection.createStatement().executeUpdate("Alter Table customer Modify Column customerId int(10) not null auto_increment");
-                /*
-                List<Callable<Integer>> updateTableKeysToAutoInc = Arrays.asList(
-                    ()->sqlConnection.createStatement().executeUpdate("Alter Table appointment Modify Column appointmentId int(10) not null auto_increment"),
-                    ()->sqlConnection.createStatement().executeUpdate("Alter Table country Modify Column countryId int(10) not null auto_increment"),
-                    ()->sqlConnection.createStatement().executeUpdate("Alter Table city Modify Column cityId int(10) not null auto_increment"),
-                    ()->sqlConnection.createStatement().executeUpdate("Alter Table city Modify Column cityId int(10) not null auto_increment"),
-                    ()->sqlConnection.createStatement().executeUpdate("Alter Table address Modify Column addressId int(10) not null auto_increment"),
-                    ()->sqlConnection.createStatement().executeUpdate("Alter Table customer Modify Column customerId int(10) not null auto_increment"));
-                ExecutorService updateAllTableKeysToAutoInc = Executors.newFixedThreadPool(3);
-                updateAllTableKeysToAutoInc.invokeAll(updateTableKeysToAutoInc);*/
+                ResultSet rs = sqlConnection.createStatement().executeQuery("Select userId from user");
 
-                Instant timer2 = Instant.now();
-                long nanoTime = timer.toEpochMilli()-timer2.toEpochMilli();
+                //Programmatically determine if the database has already set the primary key columns to autoIncrement, saves about 500ms
+                boolean isAutoIncrementEnabled = false;
+                if (rs.next()){
+                    if (rs.getMetaData().isAutoIncrement(1)){
+                        isAutoIncrementEnabled=true;
+                    }
+                }
+
+                //If the DB got reset:
+                if (!isAutoIncrementEnabled){
+                    sqlConnection.createStatement().executeUpdate("Alter Table appointment Modify Column appointmentId int(10) not null auto_increment");
+                    sqlConnection.createStatement().executeUpdate("Alter Table country Modify Column countryId int(10) not null auto_increment");
+                    sqlConnection.createStatement().executeUpdate("Alter Table city Modify Column cityId int(10) not null auto_increment");
+                    sqlConnection.createStatement().executeUpdate("Alter Table city Modify Column cityId int(10) not null auto_increment");
+                    sqlConnection.createStatement().executeUpdate("Alter Table address Modify Column addressId int(10) not null auto_increment");
+                    sqlConnection.createStatement().executeUpdate("Alter Table customer Modify Column customerId int(10) not null auto_increment");
+                }
+
+                String custAppt = "Select * from appointment where customerId = ?";
+                customerAppointment = sqlConnection.prepareStatement(custAppt);
+
                 //Debug code to check time of this operation
-                System.out.println(nanoTime);
             } /*catch (InterruptedException ie){
                 System.out.println("InterruptedException Encountered in SQLManager.getSQLConnection"+ie.getMessage());
             } /*catch (ExecutionException ee){
@@ -130,18 +138,11 @@ public class SQLManager {
                 String userName = res.getString(2);
                 activeUser = new SQLUser(userID, userName);
 
-                populateCustomerList();
+                long start = System.currentTimeMillis();
+                populateCustomerMap();
+                System.out.println("Populating Customer List took: "+(System.currentTimeMillis()-start));
+                //This takes 3 seconds, can I speed it up?
                 success = true;
-
-                /*
-                ExecutorService populateCustomers = null;
-                try{
-                    populateCustomers = Executors.newSingleThreadExecutor();
-                    populateCustomers.submit(()->SQLManager.getInstance().populateCustomerList());
-                }finally{
-                    if (populateCustomers != null) populateCustomers.shutdown();
-                    //shutdown the thread
-                }*/
             }
 
         }catch (SQLException sqlE){
@@ -294,8 +295,6 @@ public class SQLManager {
             PBEKeySpec spec = new PBEKeySpec( password, salt, iterations, keyLength );
             SecretKey key = skf.generateSecret( spec );
             return key.getEncoded( );
-
-
         } catch( NoSuchAlgorithmException | InvalidKeySpecException e ) {
             throw new RuntimeException( e );
         }
@@ -355,10 +354,48 @@ public class SQLManager {
     }
 
     public ObservableList<SQLCustomer> getCustomerList(){
-        return this.customerList;
+        return FXCollections.observableArrayList(this.customerMap.values());
     }
 
     public ObservableList<SQLAppointment> getUserAppointmentList(){        return activeUserApptList;    }
+
+    private void populateCustomerMap(){
+        String allCustQuery = "SELECT * FROM customer JOIN address USING (addressId) JOIN city USING (cityId) JOIN country USING(countryId)";
+        SQLCustomer current;
+        try{
+            ResultSet rs = sqlConnection.createStatement().executeQuery(allCustQuery);
+            while(rs.next()){
+                //Get all the customer information
+                current=new SQLCustomer();
+                int customerID = rs.getInt("customerId");
+                current.setCustomerID(customerID);
+                current.setCustomerName(rs.getString("customerName"));
+                current.setAddressID(rs.getInt("addressId"));
+                current.setAddress1(rs.getString("address"));
+                current.setAddress2(rs.getString("address2"));
+                current.setCityID(rs.getInt("cityId"));
+                current.setCity(rs.getString ("city"));
+                current.setCountryID(rs.getInt("countryId"));
+                current.setCountry(rs.getString("country"));
+                current.setPhone(rs.getString("phone"));
+                current.setPostalCode(rs.getString("postalCode"));
+                current.setActive(rs.getInt("active"));
+                //Get the customer's apointments
+                long test = System.currentTimeMillis();
+                System.out.println("Appt list for "+current.getCustomerName()+" took: "+(System.currentTimeMillis()-test));
+                //Add the customer to the lists
+                customerMap.put(customerID, current);
+
+            }
+        }catch (SQLException e){
+            System.out.println("Error in SQLManager.populateCustomerList() resultSet : "+e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Change in the database parameters parsing customer records: "+e.getMessage());
+            e.printStackTrace();
+        }
+
+        retrieveAllCustomerAppointments();
+    }
 
     /**
      * Populates the customer list for the table view and other uses
@@ -384,8 +421,10 @@ public class SQLManager {
                 current.setPostalCode(rs.getString("postalCode"));
                 current.setActive(rs.getInt("active"));
                 //Get the customer's apointments
-                current.setAppointmentList(getCustomersAppointments(current));
+                long test = System.currentTimeMillis();
 
+                current.setAppointmentList((getCustomersAppointments(current)));
+                System.out.println("Appt list for "+current.getCustomerName()+" took: "+(System.currentTimeMillis()-test));
                 //Add the customer to the lists
                 customerList.add(current);
 
@@ -419,17 +458,83 @@ public class SQLManager {
         }
     }
 
+    public void retrieveAllCustomerAppointments(){
+        String apptQueryString = "Select * from appointment";
+
+        long queryTimer = System.currentTimeMillis();
+        try{
+            PreparedStatement apptQuery = sqlConnection.prepareStatement(apptQueryString);
+
+            ResultSet rs = apptQuery.executeQuery();
+            System.out.println("Execute Query for  retrieveAllcustomerAppointments took " + (System.currentTimeMillis()-queryTimer)+"ms");
+            int apptCount = 0;
+            queryTimer = System.currentTimeMillis();
+            while (rs.next()){
+                apptCount++;
+                long timer = System.currentTimeMillis();
+                SQLAppointment appt = new SQLAppointment();
+                appt.setApptID(rs.getInt("appointmentId"));
+                int customerId = rs.getInt("customerId");
+                appt.setCustomerRef(customerMap.get(customerId));
+                appt.setTitle(rs.getString("title"));
+                appt.setDescription(rs.getString("description"));
+                appt.setLocationProperty(rs.getString("location"));
+                appt.setContact(rs.getString("contact"));
+                appt.setUrl(rs.getString("url"));
+                appt.setCreatedBy(rs.getString("createdBy"));
+                appt.setCreatedDate(rs.getTimestamp("createdate").toLocalDateTime());
+                ZonedDateTime startLocal = rs.getTimestamp("start").toInstant().atZone(ZoneId.systemDefault());
+                ZonedDateTime endLocal = rs.getTimestamp("end").toInstant().atZone(ZoneId.systemDefault());
+
+                try{
+                    LocalTime endHolder = appt.getBusinessEnd();
+                    LocalTime startHolder = appt.getBusinessStart();
+                    appt.setBusinessStart(LocalTime.of(0,0));
+                    appt.setBusinessEnd(LocalTime.of(23,59));
+                    appt.setStartDateTime(startLocal);
+                    appt.setEndDateTime(endLocal);
+                    appt.setBusinessStart(startHolder);
+                    appt.setBusinessEnd(endHolder);
+                    //appt.setCustomerRef(in);
+                }catch (Exception e){
+                    //Discard this because we're pulling the information from the database so we don't really care
+                }
+
+                //long timer2 = System.currentTimeMillis();
+                //System.out.print(in.getCustomerName() + "Appt #"+apptCount+" took "+(timer2-timer));
+                if (appt.getCreatedBy().equalsIgnoreCase(activeUser.getUserName())){
+                    try {
+                        activeUser.addAppointment(appt);
+                    } catch (ConflictingAppointmentException cae){
+                        assert true;
+                        //System.out.println("A conflicting user appointment was generated on loading from the database. "+cae.getMessage());
+                    }
+                }
+                //System.out.print(" adding to user took " + (System.currentTimeMillis()-timer2)+"\n");
+
+            }
+        }catch (SQLException e){
+            System.out.println("SQLException occurred in SQLManager.getCustomersAppointments: "+e.getMessage());
+        }
+        System.out.println("Parsing the appointment result set took: " +(System.currentTimeMillis()-queryTimer));
+
+    }
+
     public ArrayList<SQLAppointment> getCustomersAppointments(SQLCustomer in){
         ArrayList<SQLAppointment> customerAppointments= new ArrayList<>();
         String apptQuery = "Select * from appointment where customerId=?";
 
         int custID = in.getCustomerID();
         try{
-            PreparedStatement st = getSQLConnection().prepareStatement(apptQuery);
-            st.setInt(1, custID);
 
-            ResultSet rs = st.executeQuery();
+            this.customerAppointment.setInt(1, custID);
+            long queryTimer = System.currentTimeMillis();
+            ResultSet rs = this.customerAppointment.executeQuery();
+            System.out.println("Execute Query for "+in.getCustomerName()+" took " + (System.currentTimeMillis()-queryTimer)+"ms");
+            int apptCount = 0;
             while (rs.next()){
+                apptCount++;
+                long timer = System.currentTimeMillis();
                 SQLAppointment appt = new SQLAppointment();
                 appt.setApptID(rs.getInt("appointmentId"));
                 appt.setCustomerRef(in);
@@ -439,7 +544,6 @@ public class SQLManager {
                 appt.setContact(rs.getString("contact"));
                 appt.setUrl(rs.getString("url"));
                 appt.setCreatedBy(rs.getString("createdBy"));
-                //createdDate may want to be set to DateTime rather than local date time
                 appt.setCreatedDate(rs.getTimestamp("createdate").toLocalDateTime());
                 ZonedDateTime startLocal = rs.getTimestamp("start").toInstant().atZone(ZoneId.systemDefault());
                 ZonedDateTime endLocal = rs.getTimestamp("end").toInstant().atZone(ZoneId.systemDefault());
@@ -458,6 +562,8 @@ public class SQLManager {
                     //Discard this because we're pulling the information from the database so we don't really care
                 }
                 customerAppointments.add(appt);
+                long timer2 = System.currentTimeMillis();
+                System.out.print(in.getCustomerName() + "Appt #"+apptCount+" took "+(timer2-timer));
                 if (appt.getCreatedBy().equalsIgnoreCase(activeUser.getUserName())){
                     try {
                         activeUser.addAppointment(appt);
@@ -466,6 +572,8 @@ public class SQLManager {
                         //System.out.println("A conflicting user appointment was generated on loading from the database. "+cae.getMessage());
                     }
                 }
+                System.out.print(" adding to user took " + (System.currentTimeMillis()-timer2)+"\n");
+
             }
         }catch (SQLException e){
             System.out.println("SQLException occurred in SQLManager.getCustomersAppointments: "+e.getMessage());

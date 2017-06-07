@@ -37,7 +37,7 @@ public class SQLCustomer {
 
     public static void GetMaxValues(){
         //TODO: update this if time allows.
-        SQLManager.getSQLConnection();
+        //SQLManager.getSQLConnection();
     }
 
     /**
@@ -45,16 +45,6 @@ public class SQLCustomer {
      * Result of test: Doable, but may be time inefficient
      */
     public SQLCustomer(){
-        /*try {
-            int testNameLength = SQLManager.getSQLConnection()
-                    .createStatement()
-                    .executeQuery("Select * from customer")
-                    .getMetaData().
-            System.out.println("testing column display size for customerName. Max length: "+testNameLength);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-        //SQLManager.getInstance().addCustomer(this);
     }
 
     public SQLCustomer(String customerName, String address1, String address2, String city, String postCode, String phone, String country) throws Exception {

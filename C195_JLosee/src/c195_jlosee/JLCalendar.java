@@ -59,9 +59,13 @@ public class JLCalendar {
         banner.getChildren().add(currentYear);
         banner.getChildren().add(nextMonth);
 
+        gpMonth.setMinHeight(360);
+        gpMonth.setPadding(new Insets(5.0));
+        gpMonth.gridLinesVisibleProperty().setValue(true);
+
         calendar.add(banner, 0 ,0 );
         constructCalendar(baseDate);
-//        calendar.add(gpMonth, 0, 1);
+        calendar.add(gpMonth, 0, 1);
     }
 
     public static JLCalendar getInstance(){
@@ -78,11 +82,13 @@ public class JLCalendar {
 
     public void constructCalendar(LocalDate initialFocus){
         final int DAYS_IN_WEEK = 7;
+        gpMonth.getChildren().clear();
 
-        GridPane constructedMonth = new GridPane();
-        constructedMonth.setMinHeight(360);
-        constructedMonth.setPadding(new Insets(5.0));
-        constructedMonth.gridLinesVisibleProperty().setValue(true);
+        //GridPane constructedMonth = new GridPane();
+        //constructedMonth.setMinHeight(360);
+        //constructedMonth.setPadding(new Insets(5.0));
+        //constructedMonth.gridLinesVisibleProperty().setValue(true);
+
         baseDate=initialFocus;
 
         currentMonth.setText(initialFocus.getMonth().toString());
@@ -117,14 +123,11 @@ public class JLCalendar {
                 dateBox.setStyle("-fx-background-color:AZURE");
             }
             dateBox.setId("dbox_"+date);
-            constructedMonth.add(dateBox, date.getDayOfWeek().getValue()%DAYS_IN_WEEK, rowIndex);
+            gpMonth.add(dateBox, date.getDayOfWeek().getValue()%DAYS_IN_WEEK, rowIndex);
         }
         System.out.println(Instant.now().minusMillis(test.toEpochMilli()).toEpochMilli());
 
-        this.calendar.getChildren().remove(gpMonth);
-        this.gpMonth=constructedMonth;
-        this.calendar.add(gpMonth, 0, 1);
-
+        //this.calendar.getChildren().remove(gpMonth);
     }
 
     public void refresh(){

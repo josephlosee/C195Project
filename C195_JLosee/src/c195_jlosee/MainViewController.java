@@ -1,6 +1,9 @@
 package c195_jlosee;
 
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -54,6 +57,23 @@ public class MainViewController implements Initializable{
                 }
             }
         }*/
+        calendar.getVBoxList().addListener(new ListChangeListener<Node>() {
+            @Override
+            public void onChanged(Change<? extends Node> c) {
+                System.out.println("Listener working?");
+                setCalendarActions();
+            }
+        });
+        this.setCalendarActions();
+        this.weeklyAppts.getWeekScrollPane().setOnMouseClicked(event->{
+            LocalDate yesterday = LocalDate.now().minusDays(1);
+            LocalDate endOfWeek = LocalDate.now().plusDays(1);
+            SQLManager.getInstance().getActiveUser().getUserAppts()
+                    .parallelStream()
+                    .filter(a->a.getStartDateTime().toLocalDate().isAfter(yesterday) &&
+                            a.getStartDateTime().toLocalDate().isBefore(endOfWeek))
+                    .collect(Collectors.toList());
+        });
         gpMain.add(calendar.getCalendar(), 0,0);
         gpMain.add(weeklyAppts.getWeekScrollPane(), 1, 0);
         gpMain.setAlignment(Pos.TOP_CENTER);
@@ -272,6 +292,11 @@ public class MainViewController implements Initializable{
         this.weeklyAppts.refresh();
 
         Instant time1 = Instant.now();
+        setCalendarActions();
+        System.out.println(Instant.now().minusMillis(time1.toEpochMilli()).toEpochMilli());
+    }
+
+    public void setCalendarActions(){
         calendar.getVBoxList().stream()
                 .filter((Node n)->(n.getId()!=null && n.getId().contains("dbox_")))
                 .forEach((Node n)->n.setOnMouseClicked(e->{
@@ -283,7 +308,7 @@ public class MainViewController implements Initializable{
                     appointmentTable.getItems().clear();
                     appointmentTable.setItems(FXCollections.observableList(dateToFilter));
                 }));
-        System.out.println(Instant.now().minusMillis(time1.toEpochMilli()).toEpochMilli());
+        System.out.println("Testing");
     }
 
 
