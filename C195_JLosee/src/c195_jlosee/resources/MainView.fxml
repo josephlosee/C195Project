@@ -61,7 +61,7 @@
                 <cellValueFactory><PropertyValueFactory property="dateProperty" /></cellValueFactory>
             </TableColumn>
             <TableColumn editable="false" prefWidth="111.0" text="Customer Name">
-                <cellValueFactory><PropertyValueFactory property="contact" /></cellValueFactory>
+                <cellValueFactory><PropertyValueFactory property="customerName" /></cellValueFactory>
             </TableColumn>
             <TableColumn editable="false" prefWidth="105.0" text="Contact">
                 <cellValueFactory><PropertyValueFactory property="contact" /></cellValueFactory>

@@ -117,7 +117,6 @@ public class SQLCustomer {
         this.customerName.set(customerName);
     }
 
-    //
     // Address Line 1 getter/Setter
     public String getAddress1() {
         return address1.get();
@@ -167,7 +166,6 @@ public class SQLCustomer {
         return varName+" exceeds the maximum length supported by the database and would result in truncation. Please shorten and try again.";
     }
 
-    //
     // Address Line 2 getter/setter
     public String getAddress2() {
         return address2.get();
@@ -184,7 +182,6 @@ public class SQLCustomer {
         this.address2.set(address2);
     }
 
-    //
     // City getter/setter
     public String getCity() {
         return city.get();

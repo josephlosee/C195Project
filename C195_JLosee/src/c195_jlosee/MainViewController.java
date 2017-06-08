@@ -1,10 +1,7 @@
 package c195_jlosee;
 
-import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
-import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,9 +14,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -47,20 +42,9 @@ public class MainViewController implements Initializable{
     public void initialize(URL location, ResourceBundle resources) {
         customerTable.setItems(SQLManager.getInstance().getCustomerList());
 
-        /*ObservableList<Node> test = calendar.getVBoxList();
-        for (Node b:test
-             ) {
-            if (b.getId()!=null){
-
-                if (b.getId().contains("dbox_")) {
-                    b.setOnMouseClicked(event -> System.out.println(b.getId()));
-                }
-            }
-        }*/
         calendar.getVBoxList().addListener(new ListChangeListener<Node>() {
             @Override
             public void onChanged(Change<? extends Node> c) {
-                System.out.println("Listener working?");
                 setCalendarActions();
             }
         });
@@ -88,22 +72,17 @@ public class MainViewController implements Initializable{
         } catch (IOException e1) {
             e1.printStackTrace();
         }
-
         Scene scene = new Scene(root);
 
         stage.setScene(scene);
         stage.setTitle("Add Customer");
         stage.showAndWait();
-
-
     }
 
     @FXML public void editCustClicked() {
-        int selectionIndex =customerTable.getSelectionModel().getSelectedIndex();
+        SQLCustomer updateCustomer =(SQLCustomer)customerTable.getSelectionModel().getSelectedItem();
 
-        if (selectionIndex>-1){
-            SQLCustomer updateCustomer = SQLManager.getInstance().getCustomerList().get(selectionIndex);
-
+        if (updateCustomer!=null){
             Parent modProdPane = new Region();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("resources/CustomerView.fxml"));
             try {
@@ -124,9 +103,7 @@ public class MainViewController implements Initializable{
             //Show and Wait to take away input from the main window
             secondaryStage.showAndWait();
         }
-
     }
-
 
     @FXML public void viewCustClicked(){
         int selectionIndex = customerTable.getSelectionModel().getSelectedIndex();
@@ -149,7 +126,6 @@ public class MainViewController implements Initializable{
             //Resume setting up
             Stage secondaryStage = new Stage();
             secondaryStage.setScene(new Scene(modProdPane));
-
             //Show and Wait to take away input from the main window
             secondaryStage.showAndWait();
         }
@@ -297,7 +273,7 @@ public class MainViewController implements Initializable{
     }
 
     public void setCalendarActions(){
-        calendar.getVBoxList().stream()
+        calendar.getVBoxList().parallelStream()
                 .filter((Node n)->(n.getId()!=null && n.getId().contains("dbox_")))
                 .forEach((Node n)->n.setOnMouseClicked(e->{
                     LocalDate date = LocalDate.parse(n.getId().substring(5));
@@ -307,9 +283,7 @@ public class MainViewController implements Initializable{
                             .collect(Collectors.toList());
                     appointmentTable.getItems().clear();
                     appointmentTable.setItems(FXCollections.observableList(dateToFilter));
+                    n.setStyle("-fx-background-color:");
                 }));
-        System.out.println("Testing");
     }
-
-
-}
+}//END OF CLASS

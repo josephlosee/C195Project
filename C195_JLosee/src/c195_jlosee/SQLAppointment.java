@@ -17,7 +17,7 @@ public class SQLAppointment {
     private SimpleStringProperty locationProperty = new SimpleStringProperty();
     private SimpleStringProperty contact = new SimpleStringProperty();
     private SimpleStringProperty url = new SimpleStringProperty();
-
+    private SimpleStringProperty customerName = new SimpleStringProperty();
     public String getDateProperty() {
         return dateProperty.get();
     }
@@ -117,14 +117,15 @@ public class SQLAppointment {
 
 
     public void retrieveCustomerInfo(){
-        int index =  SQLManager.getInstance().getCustomerList().indexOf(new SQLCustomer(this.customerID));
-        this.customerRef = SQLManager.getInstance().getCustomerList().get(index);
-
+        setCustomerRef(SQLManager.getInstance().getCustomerMap().get(this.customerID));
     }
 
     public void setCustomerRef(@NotNull SQLCustomer cust){
         this.customerRef=cust;
-        setCustomerID(customerRef.getCustomerID());
+        if (cust!=null) {
+            customerName.set(customerRef.getCustomerName());
+            customerID=(customerRef.getCustomerID());
+        }
     }
 
 
@@ -284,9 +285,19 @@ public class SQLAppointment {
     public ZonedDateTime getStartDateTime() {
         return startDate;
     }
-
     public ZonedDateTime getEndDateTime(){
         return endDate;
+    }
+
+    public String getCustomerName() {
+        return customerNameProperty().get();
+    }
+
+    public SimpleStringProperty customerNameProperty() {
+        return customerName;
+    }
+    public void setCustomerName(String customerName) {
+        this.customerName.set(customerName);
     }
 
     class OutsideBusinessHoursException extends Exception{

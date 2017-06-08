@@ -2,6 +2,7 @@ package c195_jlosee;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -148,9 +149,9 @@ public class SQLManager {
         }catch (SQLException sqlE){
             System.out.println("Error creating statement in : "+ sqlE.getMessage());
             System.out.println(sqlE.getStackTrace());
-        }catch (Exception e){
+        }/*catch (Exception e){
             System.out.println("An generic exception occurred during the prepared statement of login. "+e.getMessage());
-        }
+        }*/
 
         return success;
     }
@@ -354,7 +355,12 @@ public class SQLManager {
     }
 
     public ObservableList<SQLCustomer> getCustomerList(){
-        return FXCollections.observableArrayList(this.customerMap.values());
+        List<SQLCustomer> customerList = new ArrayList<SQLCustomer>(customerMap.values());//new ArrayList<>(customerMap.values().toArray());
+        return FXCollections.observableList(customerList);
+    }
+
+    public Map<Integer, SQLCustomer> getCustomerMap(){
+        return customerMap;
     }
 
     public ObservableList<SQLAppointment> getUserAppointmentList(){        return activeUserApptList;    }
@@ -382,7 +388,7 @@ public class SQLManager {
                 current.setActive(rs.getInt("active"));
                 //Get the customer's apointments
                 long test = System.currentTimeMillis();
-                System.out.println("Appt list for "+current.getCustomerName()+" took: "+(System.currentTimeMillis()-test));
+                //System.out.println("Appt list for "+current.getCustomerName()+" took: "+(System.currentTimeMillis()-test));
                 //Add the customer to the lists
                 customerMap.put(customerID, current);
 
@@ -469,55 +475,63 @@ public class SQLManager {
             System.out.println("Execute Query for  retrieveAllcustomerAppointments took " + (System.currentTimeMillis()-queryTimer)+"ms");
             int apptCount = 0;
             queryTimer = System.currentTimeMillis();
+
             while (rs.next()){
-                apptCount++;
-                long timer = System.currentTimeMillis();
-                SQLAppointment appt = new SQLAppointment();
-                appt.setApptID(rs.getInt("appointmentId"));
+                //In case the appointment somehow has a null customer:
                 int customerId = rs.getInt("customerId");
-                appt.setCustomerRef(customerMap.get(customerId));
-                appt.setTitle(rs.getString("title"));
-                appt.setDescription(rs.getString("description"));
-                appt.setLocationProperty(rs.getString("location"));
-                appt.setContact(rs.getString("contact"));
-                appt.setUrl(rs.getString("url"));
-                appt.setCreatedBy(rs.getString("createdBy"));
-                appt.setCreatedDate(rs.getTimestamp("createdate").toLocalDateTime());
-                ZonedDateTime startLocal = rs.getTimestamp("start").toInstant().atZone(ZoneId.systemDefault());
-                ZonedDateTime endLocal = rs.getTimestamp("end").toInstant().atZone(ZoneId.systemDefault());
+                SQLCustomer apptCustomer = customerMap.get(customerId);
 
-                try{
-                    LocalTime endHolder = appt.getBusinessEnd();
-                    LocalTime startHolder = appt.getBusinessStart();
-                    appt.setBusinessStart(LocalTime.of(0,0));
-                    appt.setBusinessEnd(LocalTime.of(23,59));
-                    appt.setStartDateTime(startLocal);
-                    appt.setEndDateTime(endLocal);
-                    appt.setBusinessStart(startHolder);
-                    appt.setBusinessEnd(endHolder);
-                    //appt.setCustomerRef(in);
-                }catch (Exception e){
-                    //Discard this because we're pulling the information from the database so we don't really care
-                }
-
-                //long timer2 = System.currentTimeMillis();
-                //System.out.print(in.getCustomerName() + "Appt #"+apptCount+" took "+(timer2-timer));
-                if (appt.getCreatedBy().equalsIgnoreCase(activeUser.getUserName())){
-                    try {
-                        activeUser.addAppointment(appt);
-                    } catch (ConflictingAppointmentException cae){
-                        assert true;
-                        //System.out.println("A conflicting user appointment was generated on loading from the database. "+cae.getMessage());
+                if (apptCustomer==null) {
+                    apptCustomer = new SQLCustomer(customerId);
+                    try{
+                        apptCustomer.setCustomerName("PlaceholderCustomer" + customerId);
+                        customerMap.put(customerId, apptCustomer);
+                    }catch(Exception e){
+                        assert true: "PlaceholderCustomer Name "+apptCustomer.getCustomerName() +"caused an exception. This should never be reached.";
                     }
                 }
-                //System.out.print(" adding to user took " + (System.currentTimeMillis()-timer2)+"\n");
+                long timer = System.currentTimeMillis();
+                    SQLAppointment appt = new SQLAppointment();
+                    appt.setApptID(rs.getInt("appointmentId"));
+                    appt.setCustomerRef(apptCustomer);
+                    appt.setTitle(rs.getString("title"));
+                    appt.setDescription(rs.getString("description"));
+                    appt.setLocationProperty(rs.getString("location"));
+                    appt.setContact(rs.getString("contact"));
+                    appt.setUrl(rs.getString("url"));
+                    appt.setCreatedBy(rs.getString("createdBy"));
+                    appt.setCreatedDate(rs.getTimestamp("createdate").toLocalDateTime());
+                    ZonedDateTime startLocal = rs.getTimestamp("start").toInstant().atZone(ZoneId.systemDefault());
+                    ZonedDateTime endLocal = rs.getTimestamp("end").toInstant().atZone(ZoneId.systemDefault());
 
-            }
-        }catch (SQLException e){
+                    try{
+                        LocalTime endHolder = appt.getBusinessEnd();
+                        LocalTime startHolder = appt.getBusinessStart();
+                        appt.setBusinessStart(LocalTime.of(0,0));
+                        appt.setBusinessEnd(LocalTime.of(23,59));
+                        appt.setStartDateTime(startLocal);
+                        appt.setEndDateTime(endLocal);
+                        appt.setBusinessStart(startHolder);
+                        appt.setBusinessEnd(endHolder);
+                        //appt.setCustomerRef(in);
+                    }catch (Exception e){
+                        System.out.println("This is a test of the retrieveAllAppointments method, this should not be reached");//Discard this because we're pulling the information from the database so we don't really care
+                    }
+
+                    if (appt.getCreatedBy().equalsIgnoreCase(activeUser.getUserName())){
+                        try {
+                            activeUser.addAppointment(appt);
+                        } catch (ConflictingAppointmentException cae){
+                            assert true;
+                        }
+                    }
+                }
+
+
+            }catch (SQLException e){
             System.out.println("SQLException occurred in SQLManager.getCustomersAppointments: "+e.getMessage());
         }
         System.out.println("Parsing the appointment result set took: " +(System.currentTimeMillis()-queryTimer));
-
     }
 
     public ArrayList<SQLAppointment> getCustomersAppointments(SQLCustomer in){
