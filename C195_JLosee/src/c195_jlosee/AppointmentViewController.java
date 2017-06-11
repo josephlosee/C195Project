@@ -200,6 +200,7 @@ public class AppointmentViewController implements Initializable, InvalidationLis
 
     public void editAppointment(SQLAppointment appt){
         this.current = appt;
+        setFields();
     }
 
     private void setFields(){

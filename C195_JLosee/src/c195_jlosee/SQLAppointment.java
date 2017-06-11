@@ -3,6 +3,9 @@ package c195_jlosee;
 import com.sun.istack.internal.NotNull;
 import javafx.beans.property.SimpleStringProperty;
 
+import javax.xml.transform.Result;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.*;
 
 /**
@@ -58,6 +61,38 @@ public class SQLAppointment {
 
     public SQLAppointment(){
 
+    }
+
+    public SQLAppointment(ResultSet rs) throws SQLException {
+        try {
+            this.setApptID(rs.getInt("appointmentId"));
+            this.setCustomerID(rs.getInt("customerId"));
+            this.setTitle(rs.getString("title"));
+            this.setDescription(rs.getString("description"));
+            this.setLocationProperty(rs.getString("location"));
+            this.setContact(rs.getString("contact"));
+            this.setUrl(rs.getString("url"));
+            this.setCreatedBy(rs.getString("createdBy"));
+            this.setCreatedDate(rs.getTimestamp("createdate").toLocalDateTime());
+            ZonedDateTime startLocal = rs.getTimestamp("start").toInstant().atZone(ZoneId.systemDefault());
+            ZonedDateTime endLocal = rs.getTimestamp("end").toInstant().atZone(ZoneId.systemDefault());
+
+            try{
+                LocalTime endHolder = this.getBusinessEnd();
+                LocalTime startHolder = this.getBusinessStart();
+                this.setBusinessStart(LocalTime.of(0,0));
+                this.setBusinessEnd(LocalTime.of(23,59));
+                this.setStartDateTime(startLocal);
+                this.setEndDateTime(endLocal);
+                this.setBusinessStart(startHolder);
+                this.setBusinessEnd(endHolder);
+                //appt.setCustomerRef(in);
+            }catch (Exception e){
+                //Discard this because we're pulling the information from the database so we don't really care
+            }
+        } catch (SQLException sql){
+            throw sql;
+        }
     }
 
     public SQLAppointment(ZonedDateTime startTime, ZonedDateTime endTime, String title, String descrip,

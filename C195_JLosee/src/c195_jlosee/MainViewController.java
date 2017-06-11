@@ -15,6 +15,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -38,6 +39,7 @@ public class MainViewController implements Initializable{
     @FXML private GridPane gpMain;
     private JLCalendar calendar = JLCalendar.getInstance();
     private JLWeeklyAppointments weeklyAppts = new JLWeeklyAppointments();
+    private VBox selectedDate = null;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         customerTable.setItems(SQLManager.getInstance().getCustomerList());
@@ -261,17 +263,42 @@ public class MainViewController implements Initializable{
 
     @FXML public void reportsClicked(){
         System.out.println("Reports button clicked");
+        SQLReports reports = new SQLReports();
+        List<String> apptTypes = reports.getAppointmentTypesByMonth(6, 2017);
+        List<SQLAppointment> apptList = reports.getConsultantSchedule(SQLManager.getInstance().getActiveUser().getUserID(), LocalDate.now());
+
+        Parent modProdPane = new Region();
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("resources/ReportView.fxml"));
+        try {
+            //Setup the parent
+            modProdPane = (Parent)loader.load();
+            //Get the reference to the controller class so
+            //AppointmentViewController controller =loader.<AppointmentViewController>getController();
+            //We can populate the view with the part to be modified.
+            //controller.viewAppointment(viewAppt);
+
+        }catch (IOException ioExc){
+            ioExc.printStackTrace();
+        }
+        //Resume setting up
+        Stage secondaryStage = new Stage();
+        secondaryStage.setScene(new Scene(modProdPane));
+
+        //Show and Wait to take away input from the main window
+        secondaryStage.showAndWait();
     }
 
     public void refreshCalendars(){
         this.calendar.refresh();
         this.weeklyAppts.refresh();
 
-        Instant time1 = Instant.now();
         setCalendarActions();
-        System.out.println(Instant.now().minusMillis(time1.toEpochMilli()).toEpochMilli());
     }
 
+    /**
+     * adds action handling to all the date boxes of the calendar
+     */
     public void setCalendarActions(){
         calendar.getVBoxList().parallelStream()
                 .filter((Node n)->(n.getId()!=null && n.getId().contains("dbox_")))
@@ -283,7 +310,27 @@ public class MainViewController implements Initializable{
                             .collect(Collectors.toList());
                     appointmentTable.getItems().clear();
                     appointmentTable.setItems(FXCollections.observableList(dateToFilter));
-                    n.setStyle("-fx-background-color:");
+                    n.setStyle("-fx-background-color: THISTLE");
+                    dateSelected((VBox)n);
                 }));
+    }
+
+    /**
+     * Sets the currently selected date in the calendar, and changes the color previously
+     * @param vb
+     */
+    private void dateSelected(VBox vb){
+        if (this.selectedDate!=null){
+            LocalDate test = LocalDate.parse(this.selectedDate.getId().substring(5));
+            System.out.println(test);
+            if (test.equals(LocalDate.now())){
+
+                this.selectedDate.setStyle("-fx-background-color: lawngreen");
+            }else{
+                this.selectedDate.setStyle("-fx-background-color: TRANSPARENT");
+            }
+        }
+        this.selectedDate=vb;
+
     }
 }//END OF CLASS

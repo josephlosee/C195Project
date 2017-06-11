@@ -535,7 +535,7 @@ public class SQLManager {
     }
 
     public ArrayList<SQLAppointment> getCustomersAppointments(SQLCustomer in){
-        ArrayList<SQLAppointment> customerAppointments= new ArrayList<>();
+        ArrayList<SQLAppointment> customerAppointmentsList= new ArrayList<>();
         String apptQuery = "Select * from appointment where customerId=?";
 
         int custID = in.getCustomerID();
@@ -547,8 +547,10 @@ public class SQLManager {
             System.out.println("Execute Query for "+in.getCustomerName()+" took " + (System.currentTimeMillis()-queryTimer)+"ms");
             int apptCount = 0;
             while (rs.next()){
+                //DEBUG testing:
                 apptCount++;
                 long timer = System.currentTimeMillis();
+
                 SQLAppointment appt = new SQLAppointment();
                 appt.setApptID(rs.getInt("appointmentId"));
                 appt.setCustomerRef(in);
@@ -575,7 +577,7 @@ public class SQLManager {
                 }catch (Exception e){
                     //Discard this because we're pulling the information from the database so we don't really care
                 }
-                customerAppointments.add(appt);
+                customerAppointmentsList.add(appt);
                 long timer2 = System.currentTimeMillis();
                 System.out.print(in.getCustomerName() + "Appt #"+apptCount+" took "+(timer2-timer));
                 if (appt.getCreatedBy().equalsIgnoreCase(activeUser.getUserName())){
@@ -593,7 +595,7 @@ public class SQLManager {
             System.out.println("SQLException occurred in SQLManager.getCustomersAppointments: "+e.getMessage());
         }
 
-        return customerAppointments;
+        return customerAppointmentsList;
     }
 
     /**
@@ -653,8 +655,7 @@ public class SQLManager {
      * @return
      */
     public boolean addAppointment(SQLAppointment appt){
-        //String addAddress="INSERT INTO address (address, address2, cityID, postalCode, phone, createDate, createdBy, lastUpdateBy)"+
-        //" VALUES (? , ?, ?, ?, ?, ?, ?, ?)";
+
         boolean success = false;
         String appointmentQuery = "INSERT INTO appointment (customerId, title, description, location, contact, URL, start, end, createDate, createdBy, lastUpdateBy)"+
                 " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";

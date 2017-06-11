@@ -120,7 +120,7 @@ public class JLCalendar {
             //TODO: Make the click set the
             //dateBox.setOnMouseClicked(()->);
             if (date.isEqual(LocalDate.now())){
-                dateBox.setStyle("-fx-background-color:AZURE");
+                dateBox.setStyle("-fx-background-color:lawngreen");
             }
             dateBox.setId("dbox_"+date);
             gpMonth.add(dateBox, date.getDayOfWeek().getValue()%DAYS_IN_WEEK, rowIndex);

@@ -1,11 +1,7 @@
 package c195_jlosee;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.Month;
-import java.time.Year;
+import java.sql.*;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,9 +10,11 @@ import java.util.List;
  */
 public class SQLReports {
     private String queryConsultantSchedule = "Select start, end from appointment where createdBy=? and start between ? and ?";
-    private String queryApptTypeByMont = "Select description, count(description) from appointment where ?"; //start is within the passed month/year
+    //, count(description)
+    private String queryApptTypeByMont = "Select DISTINCT description, count(*) AS ApptCount from appointment where start between ? and ? GROUP BY description"; //start is within the passed month/year
     private String queryCustomerLastActive = "Select max(start) where customerId = ? ";
-    PreparedStatement pstCustomerLastActive, pstApptTypeByMonth, pstConsultantSchedule;
+    private String queryMostActiveCustomers = "Select customerId, count(customerId) AS ApptCount from appointment where start between ? and ? GROUP BY ApptCount";
+    private PreparedStatement pstCustomerLastActive, pstApptTypeByMonth, pstConsultantSchedule, pstMostActiveCustomer;
     //List<?> monthlyApptTypes
 
     public SQLReports(){
@@ -25,11 +23,10 @@ public class SQLReports {
             pstApptTypeByMonth = sqlConn.prepareStatement(queryApptTypeByMont);
             pstCustomerLastActive = sqlConn.prepareStatement(queryCustomerLastActive);
             pstConsultantSchedule = sqlConn.prepareStatement(queryConsultantSchedule);
+            pstCustomerLastActive = sqlConn.prepareStatement(queryMostActiveCustomers);
         }catch (SQLException sqle){
 
         }
-
-
     }
 
     //TODO: Generate reports from SQL
@@ -40,18 +37,28 @@ public class SQLReports {
      * @param year
      * @return an empty list if there is no appointment.
      */
-    public List<String> getAppointmentTypesByMonth(Month month, Year year){
+    public List<String> getAppointmentTypesByMonth(int month, int year){
         //TODO: STUB
         List<String> apptsByMonth = new ArrayList<>();
-        pstApptTypeByMonth.asdf;
+
+        LocalDateTime start = LocalDateTime.of(year, month, 1, 0,0);
+        LocalDateTime end = LocalDateTime.of(year, month, Month.of(month).length(Year.isLeap(year)), 23, 59);
 
         try{
-            pstApptTypeByMonth.setTime();
-            pstApptTypeByMonth.setTime();
+            pstApptTypeByMonth.setTimestamp(1, Timestamp.valueOf(start));
+            pstApptTypeByMonth.setTimestamp(2, Timestamp.valueOf(end));
+
+            ResultSet rs = pstApptTypeByMonth.executeQuery();
+
+            while (rs.next()){
+                String appt = rs.getString("description")+", "+rs.getInt("ApptCount");
+                System.out.println(appt);
+                apptsByMonth.add(appt);
+            }
+
         }catch (SQLException sqle){
-
+            System.out.println("SQLException in SQLReports.getAppointTypesByMonth: "+sqle.getMessage());
         }
-
         return apptsByMonth;
     }
 
@@ -64,25 +71,38 @@ public class SQLReports {
     public List<SQLAppointment> getConsultantSchedule(int userId, LocalDate scheduleForDay){
         List<SQLAppointment> consultantSchedule = new ArrayList<>();
 
-        pstConsultantSchedule.asdf;
+        LocalDateTime startOfDay = LocalDateTime.of(scheduleForDay, LocalTime.of(0,0));
+        LocalDateTime endOfDay = LocalDateTime.of(scheduleForDay, LocalTime.of(23, 59));
 
         try{
-            pstConsultantSchedule.setInt();
-            pstConsultantSchedule.setTime();
-        }catch (SQLException sqle){
+            pstConsultantSchedule.setInt(1, userId);
+            pstConsultantSchedule.setTimestamp(2,Timestamp.valueOf(startOfDay));
+            pstConsultantSchedule.setTimestamp(3, Timestamp.valueOf(endOfDay));
 
+            ResultSet rs = pstConsultantSchedule.executeQuery();
+
+            while (rs.next()){
+                SQLAppointment currAppt = new SQLAppointment(rs);
+                consultantSchedule.add(currAppt);
+            }
+        }catch (SQLException sqle){
+            System.out.println("SQLException in SQLReports.getConsultantSchedule: " + sqle.getMessage());
         }
 
         return consultantSchedule;
     }
 
     public LocalDate customerLastActive(int customerID){
-        LocalDate lastActive;
-
-        pstCustomerLastActive.asdf;
+        LocalDate lastActive = null;
 
         try{
             pstCustomerLastActive.setInt(1, customerID);
+            ResultSet rs = pstCustomerLastActive.executeQuery();
+
+            if (rs.next()){
+                Timestamp ts = rs.getTimestamp(1);
+                lastActive = ts.toLocalDateTime().toLocalDate();
+            }
         }catch (SQLException sql){
 
         }
@@ -90,8 +110,31 @@ public class SQLReports {
         return lastActive;
     }
 
-    public List<String> mostActiveCustomers(){
-        return null;
+    public List<String> mostActiveCustomers(int numCustomers, LocalDate start, LocalDate end){
+        List<String> activeCustomers = new ArrayList<>();
         //TODO
+
+        LocalDateTime startDT = start.atStartOfDay();
+        LocalDateTime endDT = end.atTime(23,59, 59);
+
+        try {
+            pstMostActiveCustomer.setTimestamp(1, Timestamp.valueOf(startDT));
+            pstMostActiveCustomer.setTimestamp(2, Timestamp.valueOf(endDT));
+
+            ResultSet rs = pstMostActiveCustomer.executeQuery();
+
+            int i=0;
+            while (rs.next() && i < numCustomers){
+               int custID = rs.getInt("customerId");
+               int apptCount = rs.getInt("ApptCount");
+               String strCustCount = SQLManager.getInstance().getCustomerMap().get(custID).getCustomerName()+", "+apptCount;
+               activeCustomers.add(strCustCount);
+               System.out.println("Most Active Customer #" +i + " " + strCustCount);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return activeCustomers;
     }
 }//END OF CLASS
