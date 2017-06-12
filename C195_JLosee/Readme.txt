@@ -1,42 +1,47 @@
 C195 Software II
 Decision Making Notes
 -Default User Name/Password: test/test
--Made a check on launch to ensure all id columns are set to auto_increment, as this was noted as an option in the course chatter.
+-Additional User Name/Passwords: jlosee/password, review/review
+-Made a check on launch to ensure all id columns are set to auto_increment, as
+	this was noted as an option in the course chatter.
 
 Rubric 
 
 Requirement A:
--Done, this is the initial loaded form. This defaults to the user's system setting, but the user can select the language from the combobox for supported languages.
+This is the initial loaded form. This defaults to the user's system setting, 
+but the user can select the language from the combobox for supported languages.
 
 Requirement B:
--Form Created, todo: Validate all input, add customer to DB
--Made a combobox for the country selection to avoid duplicates in the database.
--TODO: make sure to set active in the customer table, currently do not have this working
--Todo: edit customer code, view customer code (reuse same view, edit loads in existing, view sets all fields to not editable)
+Customer information can be viewed in the bottom left table view of the main 
+application view.
 
 Requirement C:
--TODO: ALL
+Lamda expressions are used in AppointmentViewController to filter appointment 
+time input, SQLCustomer and SQLUser(in canUpdateAppointmentTime and addAppointment)
 
 Requirement D:
--TODO: All, 
+Interactive calendar is present in the main view after login, as is the
+consultant's calendar for the week.
 
 Requirement E:
--TODO: All, but this is a simple conversion from the SQL dateTime to a zoned datetime based on user system defaults
+Implemented.
 
 Requirement F (Exception Controls):
--In progress: overlapping appointments, nonexistent or invalid customer data (See Requirement B, completed validation)
--Done: UN/Password
+Done, try with resources is used in LoginController to log successful and 
+failed login attempts.
 
 Requirement G:
--TODO: Lambda expressions for alerts and popups, this will be done at the end probably
+All alerts and popups use lambdas
 
 Requirement H:
--Reminders at login, todo: get appointments at login, parse for appointsmnets and display a popup
+On login, the user will receive an alert if they have an appointment in the 
+next 15 minutes.
 
 Rubric I:
-TODO: All
-Appt types by month: Select description as 'Appt Type', count(description) where datetime in ?(given month)
-Schedule for each consultant: Select * from appts where createdBy = current user
-Additional report: 
+Reports can be accessed by clicking the "Reports" button at the bottom of the 
+main view.
+The additional report created is a list of the most active customers in the
+selected period.
+
 Rubric J:
--Completed, this is output to /log/log.txt
+The log is output to /log/log.txt

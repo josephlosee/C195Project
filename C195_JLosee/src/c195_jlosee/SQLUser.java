@@ -53,7 +53,7 @@ public class SQLUser {
             userAppts.add(appt);
 
             //Check there are no conflicts
-        }else if(userAppts.stream()
+        }else if(userAppts.parallelStream()
                 .filter(a->a.getStartDateTime().compareTo(appt.getStartDateTime())>=0&
                         a.getStartDateTime().compareTo(appt.getEndDateTime())<=0 ||
                         a.getEndDateTime().compareTo(appt.getStartDateTime())>=0 &
@@ -79,7 +79,9 @@ public class SQLUser {
         List<SQLAppointment> countOfConflictingAppts = userAppts.parallelStream()
                 .filter(a->!(a.getApptID() == updateAppt.getApptID()))
                 .filter(a->a.getStartDateTime().compareTo(start)>=0&
-                        a.getStartDateTime().compareTo(end)<=0)
+                        a.getStartDateTime().compareTo(end)<=0||
+                        a.getEndDateTime().compareTo(start)>=0 &
+                                a.getEndDateTime().compareTo(end)<=0)
                 .collect(Collectors.toList());
 
         canUpdate = countOfConflictingAppts.size()==0;
