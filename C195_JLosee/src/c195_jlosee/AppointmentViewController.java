@@ -43,7 +43,7 @@ public class AppointmentViewController implements Initializable, InvalidationLis
 
     private final String REGEX_24H ="([01]?[0-9]|2[0-3]):[0-5][0-9]";
     private final String REGEX_24HTEST = "^([01]\\d|2[0-3]):?([0-5]\\d)$";
-    private final String REGEX_12H ="([01]?[0-9]|2[0-3]):[0-5][0-9]";
+    private final String REGEX_12H ="((([0-1]?[0-9])|([2])[0-3]):([0-5][0-9](\\s?(A|P|a|p)?(M|m)?)))";
     private final String EXCLUDE_ALL_NOT_TIME=".*[^0-9:]";
 
     /**
@@ -58,11 +58,12 @@ public class AppointmentViewController implements Initializable, InvalidationLis
             if (input.matches(EXCLUDE_ALL_NOT_TIME)){
                 timeString.set(input.substring(0,input.length()-1));
             }
-            if ( input.length()==5) {
-                if (!input.matches(REGEX_24HTEST) & !input.matches(REGEX_12H)) {
-                    new Alert(Alert.AlertType.ERROR, "Enter a valid time").showAndWait();
+            if ( input.length()>=5 && input.length()<=8) {
+                if (!input.matches(REGEX_24HTEST) | !input.matches(REGEX_12H)) {
+                    new Alert(Alert.AlertType.ERROR, "Enter a valid 24H format time").showAndWait();
                 }
-            }else if(input.length()>5){
+            }
+            else if(input.length()>5){
                 timeString.set(input.substring(0,5));
             }
         }
@@ -73,9 +74,9 @@ public class AppointmentViewController implements Initializable, InvalidationLis
         //zones = FXCollections.observableList(new ArrayList<>(ZoneId.getAvailableZoneIds()));
         cbCustomer.setItems(SQLManager.getInstance().getCustomerList());
         startTimeField.textProperty().addListener(this::invalidated);
-        startTimeField.setText(LocalTime.now().plus(15, ChronoUnit.MINUTES).toString());
+        startTimeField.setText(LocalTime.now().plus(15, ChronoUnit.MINUTES).toString().substring(0,5));
         endTimeField.textProperty().addListener(this::invalidated);
-        endTimeField.setText(LocalTime.now().plus(30, ChronoUnit.MINUTES).toString());
+        endTimeField.setText(LocalTime.now().plus(30, ChronoUnit.MINUTES).toString().substring(0,5));
         startDate.setValue(LocalDate.now());
     }
 
@@ -105,7 +106,6 @@ public class AppointmentViewController implements Initializable, InvalidationLis
             String url = urlField.getText();
             if (url==null||url.isEmpty()) throw new Exception("Enter a URL");
 
-
             SQLCustomer apptCustomer = SQLManager.getInstance().getCustomerList().get(customerIndex);
 
             //If this is a new appointment:
@@ -116,7 +116,6 @@ public class AppointmentViewController implements Initializable, InvalidationLis
                 apptCustomer.addAppointment(current);
                 /*Else: Edit the existing customer that's been set*/
             } else {
-                //TODO:
                 //Check there's no conflict with existing customer appointments then update
                 if (!apptCustomer.canUpdateAppointmentTime(current, start, end)) {
                     throw new ConflictingAppointmentException("An existing customer appointment conflicts with the requested times.");
@@ -133,8 +132,6 @@ public class AppointmentViewController implements Initializable, InvalidationLis
                          throw new ConflictingAppointmentException("An existing user appointment conflicts with the requested times");
                      }
                      else {
-                         //System.out.println("No conflicts for the appointment found. ");
-
                          current.setTitle(title);
                          current.setDescription(description);
                          current.setLocationProperty(location);
@@ -142,7 +139,6 @@ public class AppointmentViewController implements Initializable, InvalidationLis
                          current.setUrl(url);
                          current.setStartDateTime(start);
                          current.setEndDateTime(end);
-
                          current.getCustomerRef().getCustomerAppointments().remove(current);
                          current.setCustomerRef(apptCustomer);
                          apptCustomer.getCustomerAppointments().add(current);
@@ -151,9 +147,6 @@ public class AppointmentViewController implements Initializable, InvalidationLis
                  } else{
                      new Alert(Alert.AlertType.ERROR, "createdBy user was not found in the user list.");
                  }
-
-                //Select appointmentId where createdBy = current.getCreatedBy() and start between start and end
-                //Then update the database
             }
             //Close the window after everything is done
             (((Node)e.getSource()).getScene().getWindow()).hide();
@@ -192,10 +185,14 @@ public class AppointmentViewController implements Initializable, InvalidationLis
         ZonedDateTime startDT = null;
         try {
             LocalDate date = getDate();
-            LocalTime time = LocalTime.parse(startTimeField.getCharacters());
+            StringBuilder sbTime = new StringBuilder(startTimeField.getCharacters());
+            if (sbTime.length()==4){
+                sbTime.insert(0, 0);
+            }
+            LocalTime time = LocalTime.parse(sbTime);
             startDT = ZonedDateTime.of(date, time, ZoneId.systemDefault());
         } catch (DateTimeParseException dtpe){
-            new Alert(Alert.AlertType.ERROR,"Please enter a valid date and start time for the appointment.")
+            new Alert(Alert.AlertType.ERROR,"Please enter a valid date and start time in 24-hour format (00:00-23:59) for the appointment.")
                     .showAndWait();
         } catch (Exception e){
             System.out.println("Something went wrong in constructing the appointment start date time.");
@@ -208,10 +205,14 @@ public class AppointmentViewController implements Initializable, InvalidationLis
 
         try{
             LocalDate date = getDate();
-            LocalTime time = LocalTime.parse(endTimeField.getCharacters());
+            StringBuilder sbTime = new StringBuilder(endTimeField.getCharacters());
+            if (sbTime.length()==4){
+                sbTime.insert(0,0);
+            }
+            LocalTime time = LocalTime.parse(sbTime);
             endDT=ZonedDateTime.of(date, time, ZoneId.systemDefault());
         } catch (DateTimeParseException dtpe){
-            new Alert(Alert.AlertType.ERROR,"Please enter a valid date and end time for the appointment.")
+            new Alert(Alert.AlertType.ERROR,"Please enter a valid date and end time in 24-hour format (00:00-23:59) for the appointment.")
                     .showAndWait();
         } catch (Exception e){
             System.out.println("Something went wrong in constructing the appointment end date time.");

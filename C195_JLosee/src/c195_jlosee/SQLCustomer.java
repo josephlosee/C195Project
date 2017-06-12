@@ -88,7 +88,9 @@ public class SQLCustomer {
         long countOfConflicting = customerAppointments.parallelStream()
                         .filter(a->!(a.getApptID()==existing.getApptID())) //make sure it's not conflicting with itself
                         .filter(a->a.getStartDateTime().compareTo(start)>=0&
-                                a.getStartDateTime().compareTo(end)<=0) //then check everything else
+                                a.getStartDateTime().compareTo(end)<=0 ||
+                                a.getEndDateTime().compareTo(start)>=0 &
+                                        a.getEndDateTime().compareTo(end)<=0) //then check everything else
                         .count();
         System.out.println("# of conflicting appts for customer: " +countOfConflicting);
         canUpdate= (countOfConflicting==0);

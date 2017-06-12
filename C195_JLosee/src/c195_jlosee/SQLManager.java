@@ -682,7 +682,7 @@ public class SQLManager {
                 int apptCustId = rs.getInt("customerId");
                 int apptId = rs.getInt("appointmentId");
 
-                SQLCustomer customerOfAppt = customerList.filtered(a->a.getCustomerID()==apptCustId).get(0);
+                SQLCustomer customerOfAppt = customerMap.get(apptCustId);
 
                 appointmentDetails="Appointment Alert:\n" +title+"\n" +description+"\nCustomer: "
                         +customerOfAppt.getCustomerName()+"\n"+zdtStart.toLocalTime()+" - "+ zdtEnd.toLocalTime()+
