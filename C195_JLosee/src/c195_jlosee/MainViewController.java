@@ -20,9 +20,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -68,7 +66,6 @@ public class MainViewController implements Initializable{
     }
 
     @FXML public void addCustClicked(){
-        System.out.println("Add Customer Button Clicked");
         Stage stage = new Stage();
         Parent root = null;
         try {
@@ -265,7 +262,6 @@ public class MainViewController implements Initializable{
     }
 
     @FXML public void reportsClicked(){
-        System.out.println("Reports button clicked");
         SQLReports reports = new SQLReports();
         List<String> apptTypes = reports.getAppointmentTypesByMonth(6, 2017);
 
@@ -319,7 +315,7 @@ public class MainViewController implements Initializable{
     private void dateSelected(VBox vb){
         if (this.selectedDate!=null){
             LocalDate test = LocalDate.parse(this.selectedDate.getId().substring(5));
-            System.out.println(test);
+
             if (test.equals(LocalDate.now())){
 
                 this.selectedDate.setStyle("-fx-background-color: lawngreen");

@@ -4,8 +4,6 @@ import com.sun.istack.internal.NotNull;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -13,16 +11,14 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 
 import java.net.URL;
-
-import java.sql.Timestamp;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
-
-
 
 /**
  * $AppointmentViewController, handles the logic and basic validation
@@ -60,7 +56,8 @@ public class AppointmentViewController implements Initializable, InvalidationLis
             }
             if ( input.length()>=5 && input.length()<=8) {
                 if (!input.matches(REGEX_24HTEST) | !input.matches(REGEX_12H)) {
-                    new Alert(Alert.AlertType.ERROR, "Enter a valid 24H format time").showAndWait();
+                    new Alert(Alert.AlertType.ERROR, "Enter a valid 24H format time")
+                            .showAndWait();
                 }
             }
             else if(input.length()>5){
@@ -142,7 +139,14 @@ public class AppointmentViewController implements Initializable, InvalidationLis
                          current.getCustomerRef().getCustomerAppointments().remove(current);
                          current.setCustomerRef(apptCustomer);
                          apptCustomer.getCustomerAppointments().add(current);
-                         SQLManager.getInstance().updateAppointment(current);
+
+                         boolean success = SQLManager.getInstance().updateAppointment(current);
+
+                         if (success){
+                             new Alert(Alert.AlertType.INFORMATION, "Appointment updated successfully.");
+                         }else{
+                             new Alert(Alert.AlertType.INFORMATION, "Appointment update failed.");
+                         }
                      }
                  } else{
                      new Alert(Alert.AlertType.ERROR, "createdBy user was not found in the user list.");
@@ -195,7 +199,8 @@ public class AppointmentViewController implements Initializable, InvalidationLis
             new Alert(Alert.AlertType.ERROR,"Please enter a valid date and start time in 24-hour format (00:00-23:59) for the appointment.")
                     .showAndWait();
         } catch (Exception e){
-            System.out.println("Something went wrong in constructing the appointment start date time.");
+            new Alert(Alert.AlertType.ERROR,"Something unexpeced went wrong in constructing the appointment start date time.")
+                    .showAndWait();
         }
         return startDT;
     }
@@ -215,9 +220,9 @@ public class AppointmentViewController implements Initializable, InvalidationLis
             new Alert(Alert.AlertType.ERROR,"Please enter a valid date and end time in 24-hour format (00:00-23:59) for the appointment.")
                     .showAndWait();
         } catch (Exception e){
-            System.out.println("Something went wrong in constructing the appointment end date time.");
+            new Alert(Alert.AlertType.ERROR, "Something unexpected went wrong in constructing the appointment end date time."+e.getMessage())
+                    .showAndWait();
         }
-
         return endDT;
     }
 

@@ -1,8 +1,6 @@
 package c195_jlosee;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -13,10 +11,8 @@ import javafx.scene.layout.GridPane;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -37,8 +33,6 @@ public class ReportsController implements Initializable{
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        //System.out.println(Month.values());
-
         List<String> monthsList = new ArrayList<>();
         Month[] monthArray = Month.values();
         for (int i =0; i < monthArray.length; i++){
@@ -95,7 +89,6 @@ public class ReportsController implements Initializable{
                 apptTypeCountList.setItems(FXCollections.observableList(appointmentTypesByMonth));
                 apptTypeCountList.refresh();
             }catch (Exception e){
-                System.out.println("An exception occurred in ReportsController.generateAppointments: "+e);
                 new Alert(Alert.AlertType.ERROR, "Enter a valid year.").showAndWait();
             }
         }

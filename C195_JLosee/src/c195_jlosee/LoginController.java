@@ -6,17 +6,6 @@
 package c195_jlosee;
 
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.file.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -27,6 +16,20 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  *
@@ -150,7 +153,7 @@ public class LoginController implements Initializable  {
             File filePresent = path.toFile();
             filePresent.createNewFile();
         }catch (IOException createExc){
-            System.out.println("Error in creating file: "+createExc.getMessage());
+            new Alert(Alert.AlertType.ERROR, "An IO error occured while creating log file: "+createExc.getMessage());
         }
 
         String loginString;

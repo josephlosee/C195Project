@@ -1,5 +1,7 @@
 package c195_jlosee;
 
+import javafx.scene.control.Alert;
+
 import java.sql.*;
 import java.time.*;
 import java.util.ArrayList;
@@ -9,21 +11,20 @@ import java.util.List;
  * Created by Joe on 6/7/2017.
  */
 public class SQLReports {
-    private String queryConsultantSchedule = "Select * from appointment where createdBy=? and start between ? and ?";
     private String queryApptTypeByMont = "Select DISTINCT description, count(*) AS ApptCount from appointment where start between ? and ? GROUP BY description"; //start is within the passed month/year
     private String queryCustomerLastActive = "Select max(start) where customerId = ? ";
     private String queryMostActiveCustomers = "Select customerId, count(customerId) AS ApptCount from appointment where start between ? and ? GROUP BY customerId ORDER BY count(customerId) DESC";
-    private PreparedStatement pstCustomerLastActive, pstApptTypeByMonth, pstConsultantSchedule, pstMostActiveCustomer;
+    private PreparedStatement pstCustomerLastActive, pstApptTypeByMonth, pstMostActiveCustomer;
 
     public SQLReports(){
         try{
             Connection sqlConn = SQLManager.getInstance().getSQLConnection();
             pstApptTypeByMonth = sqlConn.prepareStatement(queryApptTypeByMont);
             pstCustomerLastActive = sqlConn.prepareStatement(queryCustomerLastActive);
-            pstConsultantSchedule = sqlConn.prepareStatement(queryConsultantSchedule);
             pstMostActiveCustomer = sqlConn.prepareStatement(queryMostActiveCustomers);
         }catch (SQLException sqle){
-
+            new Alert(Alert.AlertType.ERROR, "SQLException in SQLReports construction: "+ sqle.getMessage())
+                    .showAndWait();
         }
     }
 
@@ -47,12 +48,12 @@ public class SQLReports {
 
             while (rs.next()){
                 String appt = rs.getString("description")+", "+rs.getInt("ApptCount");
-                System.out.println(appt);
                 apptsByMonth.add(appt);
             }
 
         }catch (SQLException sqle){
-            System.out.println("SQLException in SQLReports.getAppointTypesByMonth: "+sqle.getMessage());
+            new Alert(Alert.AlertType.ERROR,"SQLException in SQLReports.getAppointTypesByMonth: "+sqle.getMessage())
+                    .showAndWait();
         }
         return apptsByMonth;
     }
@@ -116,7 +117,8 @@ public class SQLReports {
                int apptCount = rs.getInt("ApptCount");
                String strCustCount = SQLManager.getInstance().getCustomerMap().get(custID).getCustomerName()+", "+apptCount;
                activeCustomers.add(strCustCount);
-               System.out.println("Most Active Customer #" +i + " " + strCustCount);
+               new Alert(Alert.AlertType.ERROR,"Most Active Customer #" +i + " " + strCustCount)
+                       .showAndWait();
             }
         } catch (SQLException e) {
             e.printStackTrace();

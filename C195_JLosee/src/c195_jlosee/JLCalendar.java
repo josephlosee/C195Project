@@ -10,11 +10,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 
-import java.awt.event.ActionEvent;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.stream.Collectors;
 
 /**
  * Created by Joe on 6/3/2017.
