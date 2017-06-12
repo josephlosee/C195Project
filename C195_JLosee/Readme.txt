@@ -35,7 +35,7 @@ Requirement H:
 
 Rubric I:
 TODO: All
-Appt types by month: Select count(description) where datetime in (given month)
+Appt types by month: Select description as 'Appt Type', count(description) where datetime in ?(given month)
 Schedule for each consultant: Select * from appts where createdBy = current user
 Additional report: 
 Rubric J:

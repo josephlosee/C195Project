@@ -285,48 +285,48 @@
     <target name="-check-ant-javafx-in-fxsdk-lib" depends="-check-property-javafx.sdk" if="javafx.sdk.defined">
         <condition property="do.set.ant-javafx.in.fxsdk.lib">
             <and>
-                <not><isset property="ant-javafx.jar.location"/></not>
+                <not><isset property="ant-javafx.jar.locationProperty"/></not>
                 <available file="${javafx.sdk}${file.separator}lib${file.separator}ant-javafx.jar"/>
             </and>
         </condition>
     </target>
     <target name="-set-ant-javafx-in-fxsdk-lib" depends="-check-ant-javafx-in-fxsdk-lib" if="do.set.ant-javafx.in.fxsdk.lib">
-        <property name="ant-javafx.jar.location" value="${javafx.sdk}${file.separator}lib${file.separator}ant-javafx.jar"/>
+        <property name="ant-javafx.jar.locationProperty" value="${javafx.sdk}${file.separator}lib${file.separator}ant-javafx.jar"/>
     </target>
     <target name="-check-ant-javafx-in-fxsdk-tools" depends="-check-property-javafx.sdk" if="javafx.sdk.defined">
         <condition property="do.set.ant-javafx.in.fxsdk.tools">
             <and>
-                <not><isset property="ant-javafx.jar.location"/></not>
+                <not><isset property="ant-javafx.jar.locationProperty"/></not>
                 <available file="${javafx.sdk}${file.separator}tools${file.separator}ant-javafx.jar"/>
             </and>
         </condition>
     </target>
     <target name="-set-ant-javafx-in-fxsdk-tools" depends="-set-ant-javafx-in-fxsdk-lib,-check-ant-javafx-in-fxsdk-tools" if="do.set.ant-javafx.in.fxsdk.tools">
-        <property name="ant-javafx.jar.location" value="${javafx.sdk}${file.separator}tools${file.separator}ant-javafx.jar"/>
+        <property name="ant-javafx.jar.locationProperty" value="${javafx.sdk}${file.separator}tools${file.separator}ant-javafx.jar"/>
     </target>
     <target name="-check-ant-javafx-in-platform-home-lib" if="platform.home">
         <condition property="do.set.ant-javafx.in.platform.home.lib">
             <and>
-                <not><isset property="ant-javafx.jar.location"/></not>
+                <not><isset property="ant-javafx.jar.locationProperty"/></not>
                 <available file="${platform.home}${file.separator}lib${file.separator}ant-javafx.jar"/>
             </and>
         </condition>
     </target>
     <target name="-set-ant-javafx-in-platform-home-lib" depends="-set-ant-javafx-in-fxsdk-tools,-check-ant-javafx-in-platform-home-lib" if="do.set.ant-javafx.in.platform.home.lib">
-        <property name="ant-javafx.jar.location" value="${platform.home}${file.separator}lib${file.separator}ant-javafx.jar"/>
+        <property name="ant-javafx.jar.locationProperty" value="${platform.home}${file.separator}lib${file.separator}ant-javafx.jar"/>
     </target>
     <target name="-check-ant-javafx-in-platform-home-tools" if="platform.home">
         <condition property="do.set.ant-javafx.in.platform.home.tools">
             <and>
-                <not><isset property="ant-javafx.jar.location"/></not>
+                <not><isset property="ant-javafx.jar.locationProperty"/></not>
                 <available file="${platform.home}${file.separator}tools${file.separator}ant-javafx.jar"/>
             </and>
         </condition>
     </target>
     <target name="-set-ant-javafx-in-platform-home-tools" depends="-set-ant-javafx-in-platform-home-lib,-check-ant-javafx-in-platform-home-tools" if="do.set.ant-javafx.in.platform.home.tools">
-        <property name="ant-javafx.jar.location" value="${platform.home}${file.separator}tools${file.separator}ant-javafx.jar"/>
+        <property name="ant-javafx.jar.locationProperty" value="${platform.home}${file.separator}tools${file.separator}ant-javafx.jar"/>
     </target>
-    <target name="-check-ant-javafx-in-probjdk-lib" unless="ant-javafx.jar.location">
+    <target name="-check-ant-javafx-in-probjdk-lib" unless="ant-javafx.jar.locationProperty">
         <condition property="do.set.ant-javafx.in.probjdk.lib.has_jre">
             <available file="${java.home}${file.separator}..${file.separator}lib${file.separator}ant-javafx.jar"/>
         </condition>
@@ -335,7 +335,7 @@
         </condition>
         <condition property="do.set.ant-javafx.in.probjdk.lib">
             <and>
-                <not><isset property="ant-javafx.jar.location"/></not>
+                <not><isset property="ant-javafx.jar.locationProperty"/></not>
                 <or>
                     <isset property="do.set.ant-javafx.in.probjdk.lib.has_jre"/>
                     <isset property="do.set.ant-javafx.in.probjdk.lib.no_jre"/>
@@ -344,11 +344,11 @@
         </condition>
     </target>
     <target name="-set-ant-javafx-in-probjdk-lib" depends="-set-ant-javafx-in-platform-home-tools,-check-ant-javafx-in-probjdk-lib" if="do.set.ant-javafx.in.probjdk.lib">
-        <condition property="ant-javafx.jar.location" value="${java.home}${file.separator}..${file.separator}lib${file.separator}ant-javafx.jar" else="${java.home}${file.separator}lib${file.separator}ant-javafx.jar">
+        <condition property="ant-javafx.jar.locationProperty" value="${java.home}${file.separator}..${file.separator}lib${file.separator}ant-javafx.jar" else="${java.home}${file.separator}lib${file.separator}ant-javafx.jar">
             <isset property="do.set.ant-javafx.in.probjdk.lib.has_jre"/>
         </condition>
     </target>
-    <target name="-check-ant-javafx-in-probjdk-tools" unless="ant-javafx.jar.location">
+    <target name="-check-ant-javafx-in-probjdk-tools" unless="ant-javafx.jar.locationProperty">
         <condition property="do.set.ant-javafx.in.probjdk.tools.has_jre">
             <available file="${java.home}${file.separator}..${file.separator}tools${file.separator}ant-javafx.jar"/>
         </condition>
@@ -357,7 +357,7 @@
         </condition>
         <condition property="do.set.ant-javafx.in.probjdk.tools">
             <and>
-                <not><isset property="ant-javafx.jar.location"/></not>
+                <not><isset property="ant-javafx.jar.locationProperty"/></not>
                 <or>
                     <isset property="do.set.ant-javafx.in.probjdk.tools.has_jre"/>
                     <isset property="do.set.ant-javafx.in.probjdk.tools.no_jre"/>
@@ -366,62 +366,62 @@
         </condition>
     </target>
     <target name="-set-ant-javafx-in-probjdk-tools" depends="-set-ant-javafx-in-probjdk-lib,-check-ant-javafx-in-probjdk-tools" if="do.set.ant-javafx.in.probjdk.tools">
-        <condition property="ant-javafx.jar.location" value="${java.home}${file.separator}..${file.separator}tools${file.separator}ant-javafx.jar" else="${java.home}${file.separator}tools${file.separator}ant-javafx.jar">
+        <condition property="ant-javafx.jar.locationProperty" value="${java.home}${file.separator}..${file.separator}tools${file.separator}ant-javafx.jar" else="${java.home}${file.separator}tools${file.separator}ant-javafx.jar">
             <isset property="do.set.ant-javafx.in.probjdk.tools.has_jre"/>
         </condition>
     </target>
-    <target name="-check-ant-javafx-in-macjdk-lib" unless="ant-javafx.jar.location">
+    <target name="-check-ant-javafx-in-macjdk-lib" unless="ant-javafx.jar.locationProperty">
         <condition property="do.set.ant-javafx.in.macjdk.lib">
             <and>
-                <not><isset property="ant-javafx.jar.location"/></not>
+                <not><isset property="ant-javafx.jar.locationProperty"/></not>
                 <available file="${java.home}${file.separator}lib${file.separator}ant-javafx.jar"/>
             </and>
         </condition>
     </target>
     <target name="-set-ant-javafx-in-macjdk-lib" depends="-set-ant-javafx-in-probjdk-tools,-check-ant-javafx-in-macjdk-lib" if="do.set.ant-javafx.in.macjdk.lib">
-        <property name="ant-javafx.jar.location" value="${java.home}${file.separator}lib${file.separator}ant-javafx.jar"/>
+        <property name="ant-javafx.jar.locationProperty" value="${java.home}${file.separator}lib${file.separator}ant-javafx.jar"/>
     </target>
-    <target name="-check-ant-javafx-in-envjdk-lib" unless="ant-javafx.jar.location">
+    <target name="-check-ant-javafx-in-envjdk-lib" unless="ant-javafx.jar.locationProperty">
         <property environment="env"/>
         <condition property="do.set.ant-javafx.in.envjdk.lib">
             <and>
-                <not><isset property="ant-javafx.jar.location"/></not>
+                <not><isset property="ant-javafx.jar.locationProperty"/></not>
                 <available file="${env.JAVA_HOME}${file.separator}lib${file.separator}ant-javafx.jar"/>
             </and>
         </condition>
     </target>
     <target name="-set-ant-javafx-in-envjdk-lib" depends="-set-ant-javafx-in-macjdk-lib,-check-ant-javafx-in-envjdk-lib" if="do.set.ant-javafx.in.envjdk.lib">
-        <property name="ant-javafx.jar.location" value="${env.JAVA_HOME}${file.separator}lib${file.separator}ant-javafx.jar"/>
+        <property name="ant-javafx.jar.locationProperty" value="${env.JAVA_HOME}${file.separator}lib${file.separator}ant-javafx.jar"/>
     </target>
-    <target name="-check-ant-javafx-in-envjdk-tools" unless="ant-javafx.jar.location">
+    <target name="-check-ant-javafx-in-envjdk-tools" unless="ant-javafx.jar.locationProperty">
         <property environment="env"/>
         <condition property="do.set.ant-javafx.in.envjdk.tools">
             <and>
-                <not><isset property="ant-javafx.jar.location"/></not>
+                <not><isset property="ant-javafx.jar.locationProperty"/></not>
                 <available file="${env.JAVA_HOME}${file.separator}tools${file.separator}ant-javafx.jar"/>
             </and>
         </condition>
     </target>
     <target name="-set-ant-javafx-in-envjdk-tools" depends="-set-ant-javafx-in-envjdk-lib,-check-ant-javafx-in-envjdk-tools" if="do.set.ant-javafx.in.envjdk.tools">
-        <property name="ant-javafx.jar.location" value="${env.JAVA_HOME}${file.separator}tools${file.separator}ant-javafx.jar"/>
+        <property name="ant-javafx.jar.locationProperty" value="${env.JAVA_HOME}${file.separator}tools${file.separator}ant-javafx.jar"/>
     </target>
     <target name="-pre-check-ant-javafx-version" depends="-set-ant-javafx-in-envjdk-tools" unless="ant-javafx-version-already-checked-in-jfximpl">
         <condition property="do.check.ant-javafx.version">
             <and>
-                <isset property="ant-javafx.jar.location"/>
+                <isset property="ant-javafx.jar.locationProperty"/>
                 <not><isset property="ant-javafx-version-already-checked-in-jfximpl"/></not>
             </and>
         </condition>
     </target>
     <target name="-set-endorsed-javafx-ant-classpath" depends="-check-endorsed-javafx-ant-classpath,-pre-check-ant-javafx-version" if="endorsed-javafx-ant-classpath-available">
-        <property name="javafx.ant.classpath" value="${endorsed.javafx.ant.classpath}:${ant-javafx.jar.location}"/>
+        <property name="javafx.ant.classpath" value="${endorsed.javafx.ant.classpath}:${ant-javafx.jar.locationProperty}"/>
     </target>
     <target name="-set-javafx-ant-classpath" depends="-check-endorsed-javafx-ant-classpath,-pre-check-ant-javafx-version" unless="endorsed-javafx-ant-classpath-available">
-        <property name="javafx.ant.classpath" value="${ant-javafx.jar.location}"/>
+        <property name="javafx.ant.classpath" value="${ant-javafx.jar.locationProperty}"/>
     </target>
     <target name="-check-ant-javafx-version" depends="-pre-check-ant-javafx-version,
             -set-endorsed-javafx-ant-classpath,-set-javafx-ant-classpath" if="do.check.ant-javafx.version">
-        <echo message="ant-javafx.jar.location = ${ant-javafx.jar.location}" level="verbose"/>
+        <echo message="ant-javafx.jar.locationProperty = ${ant-javafx.jar.locationProperty}" level="verbose"/>
         <echo message="javafx.ant.classpath = ${javafx.ant.classpath}" level="verbose"/>
         <taskdef resource="com/sun/javafx/tools/ant/antlib.xml"
             uri="javafx:com.sun.javafx.tools.ant"
@@ -467,7 +467,7 @@
                     <isset property="do.set.ant-javafx.in.envjdk.lib"/>
                     <isset property="do.set.ant-javafx.in.envjdk.tools"/>
                 </or>
-                <isset property="ant-javafx.jar.location"/>
+                <isset property="ant-javafx.jar.locationProperty"/>
             </and>
         </condition>
         <condition property="jfx-deployment-missing+jdk7u6">
@@ -528,153 +528,153 @@
     <target name="-check-jfxrt-in-fxrt" depends="-check-property-javafx.runtime" if="javafx.runtime.defined">
         <condition property="do.set.jfxrt.in.fxrt.old">
             <and>
-                <not><isset property="jfxrt.jar.location"/></not>
+                <not><isset property="jfxrt.jar.locationProperty"/></not>
                 <available file="${javafx.runtime}${file.separator}lib${file.separator}jfxrt.jar"/>
             </and>
         </condition>
         <condition property="do.set.jfxrt.in.fxrt.new">
             <and>
                 <not><isset property="do.set.jfxrt.in.fxrt.old"/></not>
-                <not><isset property="jfxrt.jar.location"/></not>
+                <not><isset property="jfxrt.jar.locationProperty"/></not>
                 <available file="${javafx.runtime}${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
             </and>
         </condition>
     </target>
     <target name="-set-jfxrt-in-fxrt-old" depends="-check-jfxrt-in-fxrt" if="do.set.jfxrt.in.fxrt.old">
-        <property name="jfxrt.jar.location" value="${javafx.runtime}${file.separator}lib${file.separator}jfxrt.jar"/>
+        <property name="jfxrt.jar.locationProperty" value="${javafx.runtime}${file.separator}lib${file.separator}jfxrt.jar"/>
     </target>
     <target name="-set-jfxrt-in-fxrt-new" depends="-set-jfxrt-in-fxrt-old,-check-jfxrt-in-fxrt" if="do.set.jfxrt.in.fxrt.new">
-        <property name="jfxrt.jar.location" value="${javafx.runtime}${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
+        <property name="jfxrt.jar.locationProperty" value="${javafx.runtime}${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
     </target>
     <target name="-check-jfxrt-in-fxsdk-jre" depends="-check-property-javafx.sdk" if="javafx.sdk.defined">
         <condition property="do.set.jfxrt.in.fxsdk.jre.old">
             <and>
-                <not><isset property="jfxrt.jar.location"/></not>
+                <not><isset property="jfxrt.jar.locationProperty"/></not>
                 <available file="${javafx.sdk}${file.separator}jre${file.separator}lib${file.separator}jfxrt.jar"/>
             </and>
         </condition>
         <condition property="do.set.jfxrt.in.fxsdk.jre.new">
             <and>
                 <not><isset property="do.set.jfxrt.in.fxsdk.jre.old"/></not>
-                <not><isset property="jfxrt.jar.location"/></not>
+                <not><isset property="jfxrt.jar.locationProperty"/></not>
                 <available file="${javafx.sdk}${file.separator}jre${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
             </and>
         </condition>
     </target>
     <target name="-set-jfxrt-in-fxsdk-jre-old" depends="-set-jfxrt-in-fxrt-new,-check-jfxrt-in-fxsdk-jre" if="do.set.jfxrt.in.fxsdk.jre.old">
-        <property name="jfxrt.jar.location" value="${javafx.sdk}${file.separator}jre${file.separator}lib${file.separator}jfxrt.jar"/>
+        <property name="jfxrt.jar.locationProperty" value="${javafx.sdk}${file.separator}jre${file.separator}lib${file.separator}jfxrt.jar"/>
     </target>
     <target name="-set-jfxrt-in-fxsdk-jre-new" depends="-set-jfxrt-in-fxsdk-jre-old,-check-jfxrt-in-fxsdk-jre" if="do.set.jfxrt.in.fxsdk.jre.new">
-        <property name="jfxrt.jar.location" value="${javafx.sdk}${file.separator}jre${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
+        <property name="jfxrt.jar.locationProperty" value="${javafx.sdk}${file.separator}jre${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
     </target>
     <target name="-check-jfxrt-in-fxsdk-rt" depends="-check-property-javafx.sdk" if="javafx.sdk.defined">
         <condition property="do.set.jfxrt.in.fxsdk.rt.old">
             <and>
-                <not><isset property="jfxrt.jar.location"/></not>
+                <not><isset property="jfxrt.jar.locationProperty"/></not>
                 <available file="${javafx.sdk}${file.separator}rt${file.separator}lib${file.separator}jfxrt.jar"/>
             </and>
         </condition>
         <condition property="do.set.jfxrt.in.fxsdk.rt.new">
             <and>
                 <not><isset property="do.set.jfxrt.in.fxsdk.rt.old"/></not>
-                <not><isset property="jfxrt.jar.location"/></not>
+                <not><isset property="jfxrt.jar.locationProperty"/></not>
                 <available file="${javafx.sdk}${file.separator}rt${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
             </and>
         </condition>
     </target>
     <target name="-set-jfxrt-in-fxsdk-rt-old" depends="-set-jfxrt-in-fxsdk-jre-new,-check-jfxrt-in-fxsdk-rt" if="do.set.jfxrt.in.fxsdk.rt.old">
-        <property name="jfxrt.jar.location" value="${javafx.sdk}${file.separator}rt${file.separator}lib${file.separator}jfxrt.jar"/>
+        <property name="jfxrt.jar.locationProperty" value="${javafx.sdk}${file.separator}rt${file.separator}lib${file.separator}jfxrt.jar"/>
     </target>
     <target name="-set-jfxrt-in-fxsdk-rt-new" depends="-set-jfxrt-in-fxsdk-rt-old,-check-jfxrt-in-fxsdk-rt" if="do.set.jfxrt.in.fxsdk.rt.new">
-        <property name="jfxrt.jar.location" value="${javafx.sdk}${file.separator}rt${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
+        <property name="jfxrt.jar.locationProperty" value="${javafx.sdk}${file.separator}rt${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
     </target>
     <target name="-check-jfxrt-in-platform-home-jre" if="platform.home">
         <condition property="do.set.jfxrt.in.platform.home.jre.old">
             <and>
-                <not><isset property="jfxrt.jar.location"/></not>
+                <not><isset property="jfxrt.jar.locationProperty"/></not>
                 <available file="${platform.home}${file.separator}jre${file.separator}lib${file.separator}jfxrt.jar"/>
             </and>
         </condition>
         <condition property="do.set.jfxrt.in.platform.home.jre.new">
             <and>
                 <not><isset property="do.set.jfxrt.in.platform.home.jre.old"/></not>
-                <not><isset property="jfxrt.jar.location"/></not>
+                <not><isset property="jfxrt.jar.locationProperty"/></not>
                 <available file="${platform.home}${file.separator}jre${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
             </and>
         </condition>
     </target>
     <target name="-set-jfxrt-in-platform-home-jre-old" depends="-set-jfxrt-in-fxsdk-rt-new,-check-jfxrt-in-platform-home-jre" if="do.set.jfxrt.in.platform.home.jre.old">
-        <property name="jfxrt.jar.location" value="${platform.home}${file.separator}jre${file.separator}lib${file.separator}jfxrt.jar"/>
+        <property name="jfxrt.jar.locationProperty" value="${platform.home}${file.separator}jre${file.separator}lib${file.separator}jfxrt.jar"/>
     </target>
     <target name="-set-jfxrt-in-platform-home-jre-new" depends="-set-jfxrt-in-platform-home-jre-old,-check-jfxrt-in-platform-home-jre" if="do.set.jfxrt.in.platform.home.jre.new">
-        <property name="jfxrt.jar.location" value="${platform.home}${file.separator}jre${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
+        <property name="jfxrt.jar.locationProperty" value="${platform.home}${file.separator}jre${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
     </target>
     <target name="-check-jfxrt-in-platform-home-rt" if="platform.home">
         <condition property="do.set.jfxrt.in.platform.home.rt.old">
             <and>
-                <not><isset property="jfxrt.jar.location"/></not>
+                <not><isset property="jfxrt.jar.locationProperty"/></not>
                 <available file="${platform.home}${file.separator}rt${file.separator}lib${file.separator}jfxrt.jar"/>
             </and>
         </condition>
         <condition property="do.set.jfxrt.in.platform.home.rt.new">
             <and>
                 <not><isset property="do.set.jfxrt.in.platform.home.rt.old"/></not>
-                <not><isset property="jfxrt.jar.location"/></not>
+                <not><isset property="jfxrt.jar.locationProperty"/></not>
                 <available file="${platform.home}${file.separator}rt${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
             </and>
         </condition>
     </target>
     <target name="-set-jfxrt-in-platform-home-rt-old" depends="-set-jfxrt-in-platform-home-jre-new,-check-jfxrt-in-platform-home-rt" if="do.set.jfxrt.in.platform.home.rt.old">
-        <property name="jfxrt.jar.location" value="${platform.home}${file.separator}rt${file.separator}lib${file.separator}jfxrt.jar"/>
+        <property name="jfxrt.jar.locationProperty" value="${platform.home}${file.separator}rt${file.separator}lib${file.separator}jfxrt.jar"/>
     </target>
     <target name="-set-jfxrt-in-platform-home-rt-new" depends="-set-jfxrt-in-platform-home-rt-old,-check-jfxrt-in-platform-home-rt" if="do.set.jfxrt.in.platform.home.rt.new">
-        <property name="jfxrt.jar.location" value="${platform.home}${file.separator}rt${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
+        <property name="jfxrt.jar.locationProperty" value="${platform.home}${file.separator}rt${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
     </target>
-    <target name="-check-jfxrt-in-jre" unless="jfxrt.jar.location">
+    <target name="-check-jfxrt-in-jre" unless="jfxrt.jar.locationProperty">
         <condition property="do.set.jfxrt.in.jre.old">
             <and>
-                <not><isset property="jfxrt.jar.location"/></not>
+                <not><isset property="jfxrt.jar.locationProperty"/></not>
                 <available file="${java.home}${file.separator}lib${file.separator}jfxrt.jar"/>
             </and>
         </condition>
         <condition property="do.set.jfxrt.in.jre.new">
             <and>
                 <not><isset property="do.set.jfxrt.in.jre.old"/></not>
-                <not><isset property="jfxrt.jar.location"/></not>
+                <not><isset property="jfxrt.jar.locationProperty"/></not>
                 <available file="${java.home}${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
             </and>
         </condition>
     </target>
     <target name="-set-jfxrt-in-jre-old" depends="-set-jfxrt-in-platform-home-rt-new,-check-jfxrt-in-jre" if="do.set.jfxrt.in.jre.old">
-        <property name="jfxrt.jar.location" value="${java.home}${file.separator}lib${file.separator}jfxrt.jar"/>
+        <property name="jfxrt.jar.locationProperty" value="${java.home}${file.separator}lib${file.separator}jfxrt.jar"/>
     </target>
     <target name="-set-jfxrt-in-jre-new" depends="-set-jfxrt-in-jre-old,-check-jfxrt-in-jre" if="do.set.jfxrt.in.jre.new">
-        <property name="jfxrt.jar.location" value="${java.home}${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
+        <property name="jfxrt.jar.locationProperty" value="${java.home}${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
     </target>
-    <target name="-check-jfxrt-in-envjdk-jre" unless="jfxrt.jar.location">
+    <target name="-check-jfxrt-in-envjdk-jre" unless="jfxrt.jar.locationProperty">
         <property environment="env"/>
         <condition property="do.set.jfxrt.in.envjdk.jre.old">
             <and>
-                <not><isset property="jfxrt.jar.location"/></not>
+                <not><isset property="jfxrt.jar.locationProperty"/></not>
                 <available file="${env.JAVA_HOME}${file.separator}jre${file.separator}lib${file.separator}jfxrt.jar"/>
             </and>
         </condition>
         <condition property="do.set.jfxrt.in.envjdk.jre.new">
             <and>
                 <not><isset property="do.set.jfxrt.in.envjdk.jre.old"/></not>
-                <not><isset property="jfxrt.jar.location"/></not>
+                <not><isset property="jfxrt.jar.locationProperty"/></not>
                 <available file="${env.JAVA_HOME}${file.separator}jre${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
             </and>
         </condition>
     </target>
     <target name="-set-jfxrt-in-envjdk-jre-old" depends="-set-jfxrt-in-jre-new,-check-jfxrt-in-envjdk-jre" if="do.set.jfxrt.in.envjdk.jre.old">
-        <property name="jfxrt.jar.location" value="${env.JAVA_HOME}${file.separator}jre${file.separator}lib${file.separator}jfxrt.jar"/>
+        <property name="jfxrt.jar.locationProperty" value="${env.JAVA_HOME}${file.separator}jre${file.separator}lib${file.separator}jfxrt.jar"/>
     </target>
     <target name="-set-jfxrt-in-envjdk-jre-new" depends="-set-jfxrt-in-envjdk-jre-old,-check-jfxrt-in-envjdk-jre" if="do.set.jfxrt.in.envjdk.jre.new">
-        <property name="jfxrt.jar.location" value="${env.JAVA_HOME}${file.separator}jre${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
+        <property name="jfxrt.jar.locationProperty" value="${env.JAVA_HOME}${file.separator}jre${file.separator}lib${file.separator}ext${file.separator}jfxrt.jar"/>
     </target>
     <target name="-pre-check-jfx-runtime" depends="-set-jfxrt-in-envjdk-jre-new">
-        <echo message="jfxrt.jar.location = ${jfxrt.jar.location}" level="verbose"/>
+        <echo message="jfxrt.jar.locationProperty = ${jfxrt.jar.locationProperty}" level="verbose"/>
     </target>
 
     <target name="-check-jfx-runtime" depends="-check-jdk-version, -pre-check-jfx-runtime">
@@ -696,7 +696,7 @@
                     <isset property="do.set.jfxrt.in.envjdk.jre.old"/>
                     <isset property="do.set.jfxrt.in.envjdk.jre.new"/>
                 </or>
-                <isset property="jfxrt.jar.location"/>
+                <isset property="jfxrt.jar.locationProperty"/>
             </and>
         </condition>
         <fail message="Error:${line.separator}JavaFX runtime JAR not found." unless="jfx-runtime-available"/>
@@ -1621,7 +1621,7 @@
     <macrodef name="deploy-defines">
         <sequential>
             <basename property="jfx.deployment.jar" file="${dist.jar}"/>
-            <property name="jfx.deployment.dir" location="${dist.dir}"/>
+            <property name="jfx.deployment.dir" locationProperty="${dist.dir}"/>
         </sequential>
     </macrodef>
 
@@ -1641,7 +1641,7 @@
             <antcall target="-pre-jfx-jar"/>
             <echo message="javafx.ant.classpath = ${javafx.ant.classpath}" level="verbose"/>
             <typedef name="fx_jar" classname="com.sun.javafx.tools.ant.FXJar" classpath="${javafx.ant.classpath}"/>
-            <echo message="Launching &lt;fx:jar&gt; task from ${ant-javafx.jar.location}" level="info"/>
+            <echo message="Launching &lt;fx:jar&gt; task from ${ant-javafx.jar.locationProperty}" level="info"/>
             <property name="pp_jar_destfile" value="${jfx.deployment.dir}${file.separator}${jfx.deployment.jar}"/>
             <property name="pp_jar_buildclasses" value="${basedir}${file.separator}${build.classes.dir}"/>
             <property name="pp_jar_cssbss" value="**${file.separator}*.${css-exclude-ext}"/>
@@ -1993,7 +1993,7 @@
             <echo message="storepass=${javafx.signjar.storepass}" level="verbose"/>
             <echo message="alias=${javafx.signjar.alias}" level="verbose"/>
             <echo message="keypass=${javafx.signjar.keypass}" level="verbose"/>
-            <echo message="Launching &lt;fx:signjar&gt; task from ${ant-javafx.jar.location}" level="info"/>
+            <echo message="Launching &lt;fx:signjar&gt; task from ${ant-javafx.jar.locationProperty}" level="info"/>
             <fx:signjar keystore="${javafx.signjar.keystore}"
                 storepass="${javafx.signjar.storepass}"
                 alias="${javafx.signjar.alias}"
@@ -2047,7 +2047,7 @@
                     <include name="lib${file.separator}${javafx.preloader.jar.filename}"/>
                 </fileset>
             </signjar>
-            <echo message="Launching &lt;fx:signjar&gt; task from ${ant-javafx.jar.location}" level="info"/>
+            <echo message="Launching &lt;fx:signjar&gt; task from ${ant-javafx.jar.locationProperty}" level="info"/>
             <fx:signjar keystore="${javafx.signjar.keystore}"
                 storepass="${javafx.signjar.storepass}"
                 alias="${javafx.signjar.alias}"
@@ -2084,7 +2084,7 @@
             <antcall target="-call-pre-jfx-native"/>
             <echo message="javafx.ant.classpath = ${javafx.ant.classpath}" level="verbose"/>
             <typedef name="fx_deploy" classname="com.sun.javafx.tools.ant.DeployFXTask" classpath="${javafx.ant.classpath}"/>
-            <echo message="Launching &lt;fx:deploy&gt; task from ${ant-javafx.jar.location}" level="info"/>
+            <echo message="Launching &lt;fx:deploy&gt; task from ${ant-javafx.jar.locationProperty}" level="info"/>
             <property name="pp_deploy_dir" value="${jfx.deployment.dir}"/>
             <property name="pp_deploy_fs1" value="lib${file.separator}${javafx.preloader.jar.filename}"/>
             <property name="pp_deploy_fs2" value="lib${file.separator}*.jar"/>
@@ -3800,11 +3800,11 @@
 
     <target name="-check-jnlp-file-fx" depends="-swing-api-check" unless="fx-in-swing-app-workaround">
         <basename property="jfx.deployment.base" file="${jfx.deployment.jar}" suffix=".jar"/>
-        <property name="jfx.deployment.jnlp" location="${jfx.deployment.dir}${file.separator}${jfx.deployment.base}.jnlp"/>
+        <property name="jfx.deployment.jnlp" locationProperty="${jfx.deployment.dir}${file.separator}${jfx.deployment.base}.jnlp"/>
     </target>
     <target name="-check-jnlp-file-swing" depends="-swing-api-check" if="fx-in-swing-app-workaround">
         <basename property="jfx.deployment.base" file="${jfx.deployment.jar}" suffix=".jar"/>
-        <property name="jfx.deployment.jnlp" location="${jfx.deployment.dir}${file.separator}${jfx.deployment.base}_application.jnlp"/>
+        <property name="jfx.deployment.jnlp" locationProperty="${jfx.deployment.dir}${file.separator}${jfx.deployment.base}_application.jnlp"/>
     </target>
     <target name="-check-jnlp-file" depends="-check-jnlp-file-fx,-check-jnlp-file-swing">
         <condition property="jnlp-file-exists">
@@ -3942,12 +3942,12 @@
     </target>
     
     <target name="-set-template-processed-html-file" depends="-check-template-processed-html-file" if="html-file-exists">
-        <property name="jfx.deployment.html" location="${javafx.run.htmltemplate.processed}"/>
+        <property name="jfx.deployment.html" locationProperty="${javafx.run.htmltemplate.processed}"/>
     </target>
     
     <target name="-set-html-file" depends="-set-template-processed-html-file" unless="html-file-exists">
         <basename property="jfx.deployment.base" file="${jfx.deployment.jar}" suffix=".jar"/>
-        <property name="jfx.deployment.html" location="${jfx.deployment.dir}${file.separator}${jfx.deployment.base}.html"/>
+        <property name="jfx.deployment.html" locationProperty="${jfx.deployment.dir}${file.separator}${jfx.deployment.base}.html"/>
         <condition property="html-file-exists">
             <available file="${jfx.deployment.html}"/>
         </condition>
