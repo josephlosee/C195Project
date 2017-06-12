@@ -3,6 +3,7 @@ package c195_jlosee;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 /**
@@ -68,9 +69,7 @@ public class SQLCustomer {
         if (customerAppointments.size() ==0){
             customerAppointments.add(appt);
             SQLManager.getInstance().addAppointment(appt);
-        }else if(customerAppointments.stream()
-                //if startDateTime of existing appointments is >= desiredStartDateTime and <= desiredEndDateTime
-                //OR if endDateTime of existing appointment is >= desiredStartDateTime and <= desiredEndDateTime
+        }else if(customerAppointments.parallelStream()
                     .filter(a->a.getStartDateTime().compareTo(appt.getStartDateTime())>=0&
                                a.getStartDateTime().compareTo(appt.getEndDateTime())<=0 ||
                                 a.getEndDateTime().compareTo(appt.getStartDateTime())>=0 &
@@ -84,6 +83,17 @@ public class SQLCustomer {
         }
     }
 
+    public boolean canUpdateAppointmentTime(SQLAppointment existing, ZonedDateTime start, ZonedDateTime end){
+        boolean canUpdate = false;
+        long countOfConflicting = customerAppointments.parallelStream()
+                        .filter(a->!(a.getApptID()==existing.getApptID())) //make sure it's not conflicting with itself
+                        .filter(a->a.getStartDateTime().compareTo(start)>=0&
+                                a.getStartDateTime().compareTo(end)<=0) //then check everything else
+                        .count();
+        System.out.println("# of conflicting appts for customer: " +countOfConflicting);
+        canUpdate= (countOfConflicting==0);
+        return canUpdate;
+    }
 
     public boolean setFullAddress(String address1, String address2, String postCode, String phone) throws Exception {
         boolean ret = false;

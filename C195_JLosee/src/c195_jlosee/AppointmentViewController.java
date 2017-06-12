@@ -19,6 +19,7 @@ import java.time.*;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 
@@ -38,24 +39,27 @@ public class AppointmentViewController implements Initializable, InvalidationLis
     private MenuButton startTimeSpecifier, endTimeSpecifier;
     @FXML Button saveButton;
 
-    private SQLAppointment current = new SQLAppointment();
+    private SQLAppointment current;// = new SQLAppointment();
 
     private final String REGEX_24H ="([01]?[0-9]|2[0-3]):[0-5][0-9]";
     private final String REGEX_24HTEST = "^([01]\\d|2[0-3]):?([0-5]\\d)$";
     private final String REGEX_12H ="([01]?[0-9]|2[0-3]):[0-5][0-9]";
     private final String EXCLUDE_ALL_NOT_TIME=".*[^0-9:]";
 
+    /**
+     * used for validating time input
+     * @param observable
+     */
     @Override
     public void invalidated(Observable observable){
         StringProperty timeString = (StringProperty)observable;
-        //System.out.println("Test value in overriden invalidated function"+test);
         String input = timeString.get();
         if (!input.isEmpty()) {
             if (input.matches(EXCLUDE_ALL_NOT_TIME)){
                 timeString.set(input.substring(0,input.length()-1));
             }
             if ( input.length()==5) {
-                if (!input.matches(REGEX_24HTEST)) {
+                if (!input.matches(REGEX_24HTEST) & !input.matches(REGEX_12H)) {
                     new Alert(Alert.AlertType.ERROR, "Enter a valid time").showAndWait();
                 }
             }else if(input.length()>5){
@@ -66,7 +70,6 @@ public class AppointmentViewController implements Initializable, InvalidationLis
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
         //zones = FXCollections.observableList(new ArrayList<>(ZoneId.getAvailableZoneIds()));
         cbCustomer.setItems(SQLManager.getInstance().getCustomerList());
         startTimeField.textProperty().addListener(this::invalidated);
@@ -74,15 +77,9 @@ public class AppointmentViewController implements Initializable, InvalidationLis
         endTimeField.textProperty().addListener(this::invalidated);
         endTimeField.setText(LocalTime.now().plus(30, ChronoUnit.MINUTES).toString());
         startDate.setValue(LocalDate.now());
-        //artDate.
-        /// startTimeField.
     }
 
     @FXML public void saveClicked(ActionEvent e){
-        //SQLManager.addAppt();
-        //startTimeField.textProperty().addListener((observable, oldValue, newValue) -> {oldValue.matches()});
-
-        //TODO: SQLAppointment.setAll
         try{
             ZonedDateTime start = constructStartDateTime();
             ZonedDateTime end = constructEndDateTime();
@@ -96,19 +93,69 @@ public class AppointmentViewController implements Initializable, InvalidationLis
                 throw new Exception("No customer selected to schedule the appointment with.");
             }
 
+            //Ensures all the fields have information
             String title = titleField.getText();
+            if (title== null || title.isEmpty()) throw new Exception("Enter a title.");
             String description = descriptionField.getText();
-            String url = urlField.getText();
-            String contact = contactField.getText();
+            if (description== null || description.isEmpty()) throw new Exception("Enter a description.");
             String location = locationField.getText();
+            if (location==null||location.isEmpty()) throw new Exception("Enter a location for the appointment.");
+            String contact = contactField.getText();
+            if (contact==null||contact.isEmpty()) throw new Exception("Enter contact information.");
+            String url = urlField.getText();
+            if (url==null||url.isEmpty()) throw new Exception("Enter a URL");
+
+
             SQLCustomer apptCustomer = SQLManager.getInstance().getCustomerList().get(customerIndex);
-            //public SQLAppointment(LocalDateTime startTime, LocalDateTime endTime, String title, String descrip,
-            //String location, String contact, String URL, int customerID, LocalDateTime createdDate, String createdBy)
-            SQLAppointment current = new SQLAppointment(start, end, title, description, location, contact, url, apptCustomer);
 
-            SQLManager.getInstance().getActiveUser().addAppointment(current);
-            apptCustomer.addAppointment(current);
+            //If this is a new appointment:
+            if (current==null) {
+                current = new SQLAppointment(start, end, title, description, location, contact, url, apptCustomer);
 
+                SQLManager.getInstance().getActiveUser().addAppointment(current);
+                apptCustomer.addAppointment(current);
+                /*Else: Edit the existing customer that's been set*/
+            } else {
+                //TODO:
+                //Check there's no conflict with existing customer appointments then update
+                if (!apptCustomer.canUpdateAppointmentTime(current, start, end)) {
+                    throw new ConflictingAppointmentException("An existing customer appointment conflicts with the requested times.");
+                }
+                //Check there's no conflict with the user that created the appointment
+                SQLUser appointmentContact;
+                 Optional<SQLUser> userOptional= SQLManager.getInstance().getUserList()
+                        .parallelStream()
+                        .filter(user->user.getUserName().equalsIgnoreCase(current.getCreatedBy()))
+                        .findFirst();
+                 if (userOptional.isPresent()){
+                     appointmentContact = userOptional.get();
+                     if (!appointmentContact.canUpdateAppointment(current, start, end)) {
+                         throw new ConflictingAppointmentException("An existing user appointment conflicts with the requested times");
+                     }
+                     else {
+                         //System.out.println("No conflicts for the appointment found. ");
+
+                         current.setTitle(title);
+                         current.setDescription(description);
+                         current.setLocationProperty(location);
+                         current.setContact(contact);
+                         current.setUrl(url);
+                         current.setStartDateTime(start);
+                         current.setEndDateTime(end);
+
+                         current.getCustomerRef().getCustomerAppointments().remove(current);
+                         current.setCustomerRef(apptCustomer);
+                         apptCustomer.getCustomerAppointments().add(current);
+                         SQLManager.getInstance().updateAppointment(current);
+                     }
+                 } else{
+                     new Alert(Alert.AlertType.ERROR, "createdBy user was not found in the user list.");
+                 }
+
+                //Select appointmentId where createdBy = current.getCreatedBy() and start between start and end
+                //Then update the database
+            }
+            //Close the window after everything is done
             (((Node)e.getSource()).getScene().getWindow()).hide();
 
         }catch (ConflictingAppointmentException cae){
@@ -116,7 +163,7 @@ public class AppointmentViewController implements Initializable, InvalidationLis
             new Alert(Alert.AlertType.ERROR, cae.getMessage())
                     .showAndWait();
         } catch(Exception exc){
-            new Alert(Alert.AlertType.ERROR, exc.getMessage()+exc.getStackTrace().toString())
+            new Alert(Alert.AlertType.ERROR, exc.getMessage())
                     .showAndWait();
         }
     }

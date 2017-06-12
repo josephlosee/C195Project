@@ -95,6 +95,8 @@ public class LoginController implements Initializable  {
                 //Write to the log file
                 logAction(true);
 
+                SQLManager.getInstance().getActiveUser().setLastUpdatedApptsFromSQL();
+
                 Alert welcome = new Alert(Alert.AlertType.INFORMATION, rb.getString("loginSuccess"));
                 welcome.showAndWait();
 
@@ -106,6 +108,7 @@ public class LoginController implements Initializable  {
                 Stage custStage = new Stage();
                 try {
                     custStage.setScene(new Scene(FXMLLoader.load(getClass().getResource("resources/MainView.fxml"))));
+                    custStage.setTitle("Appointment Calendar");
                     custStage.show();
                     (((Node)e.getSource()).getScene().getWindow()).hide();
                 } catch (IOException e1) {

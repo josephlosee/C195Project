@@ -2,6 +2,7 @@ package c195_jlosee;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -10,7 +11,10 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,9 +27,9 @@ import java.util.stream.Collectors;
  */
 public class ReportsController implements Initializable{
 
-    @FXML TextField apptTypeYearField, activeCustomerYearField;
-    @FXML DatePicker startDatePicker, endDatePicker;
-    @FXML ChoiceBox<String> apptTypesMonthCB = new ChoiceBox<>(), activeCustomersMonthCB = new ChoiceBox<>();
+    @FXML TextField apptTypeYearField, numCustomers;
+    @FXML DatePicker startConsultantDatePicker, endConsultantDatePicker, startActiveCustomersDatePicker, endActiveCustomersDatePicker;
+    @FXML ChoiceBox<String> apptTypesMonthCB = new ChoiceBox<>(), consultantCB = new ChoiceBox<>();
     @FXML GridPane apptTypeGrid, consSchedGrid, activeCustomersGrid;
     @FXML TableView consultScheduleTable=new TableView();
     @FXML ListView activeCustomerList=new ListView(), apptTypeCountList=new ListView();
@@ -41,8 +45,13 @@ public class ReportsController implements Initializable{
             monthsList.add(i, monthArray[i].toString());
         }
 
+        List<String> userList = new ArrayList<>();
+        SQLManager.getInstance().getUserMap().values()
+                .parallelStream()
+                .forEach(user->userList.add(user.getUserName()));
+
         apptTypesMonthCB.setItems(FXCollections.observableArrayList(monthsList));
-        activeCustomersMonthCB.setItems(FXCollections.observableArrayList(monthsList));
+        consultantCB.setItems(FXCollections.observableList(userList));
     }
 
     @FXML public void reportMonthlyAppointmentTypesClicked(){
@@ -84,34 +93,76 @@ public class ReportsController implements Initializable{
                 int iYear = Integer.parseInt(year);
                 List<String> appointmentTypesByMonth = reports.getAppointmentTypesByMonth(apptMonth, iYear);
                 apptTypeCountList.setItems(FXCollections.observableList(appointmentTypesByMonth));
+                apptTypeCountList.refresh();
             }catch (Exception e){
                 System.out.println("An exception occurred in ReportsController.generateAppointments: "+e);
                 new Alert(Alert.AlertType.ERROR, "Enter a valid year.").showAndWait();
             }
         }
-
-    }
+    }//End of generateAppointments method
 
     @FXML public void generateConsultantScheduleClicked(){
+        try {
+            LocalDate startDate = startConsultantDatePicker.getValue();
+            LocalDate endDate = endConsultantDatePicker.getValue();
+            if (startDate == null) {
+                throw new IllegalArgumentException("Select a start date.");
+            }
+            if (endDate == null) {
+                throw new IllegalArgumentException("Select an end date.");
+            } else if (endDate.compareTo(startDate) < 0) {
+                throw new IllegalArgumentException("Select an end date after the start date.");
+            }
+
+            String selectedConsultant = consultantCB.getSelectionModel().getSelectedItem();
+            if (selectedConsultant==null || selectedConsultant.isEmpty()) throw new IllegalArgumentException("Select a consultant");
+            /*int userId = -1;
+            */
+
+            List<SQLAppointment> consultantSchedule;
+
+            if (selectedConsultant.equalsIgnoreCase(SQLManager.getInstance().getActiveUser().getUserName())){
+                consultantSchedule = reports.getConsultantSchedule(selectedConsultant, startDate, endConsultantDatePicker.getValue());
+                //Minor optimization:
+                consultantSchedule = SQLManager.getInstance().getActiveUser().getUserAppts()
+                        .parallelStream()
+                        .filter(appt->appt.getStartDateTime().isAfter(startDate.minusDays(1).atTime(23,59,59).atZone(ZoneOffset.systemDefault()))
+                                && appt.getEndDateTime().isBefore(endDate.plusDays(1).atStartOfDay().atZone(ZoneOffset.systemDefault())))
+                        .collect(Collectors.toList());
+            }else{
+                consultantSchedule = reports.getConsultantSchedule(selectedConsultant, startDate, endDate);
+            }
+
+            consultScheduleTable.setItems(FXCollections.observableList(consultantSchedule));
+
+            if (consultantSchedule.isEmpty()){
+                new Alert(Alert.AlertType.INFORMATION, "No appointments were found for the selected consultant between "+startDate + " and " +endDate).showAndWait();
+            }
+        }catch (IllegalArgumentException e){
+            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+        }
+
 
     }
 
     @FXML public void generateActiveCustomersClicked(){
-        //List<String> customerActivity = reports.mostActiveCustomers(10, )
-        //activeCustomerList.setItems((FXCollections.observableList()));
-
-        if (startDatePicker.getValue()==null){
+        if (startActiveCustomersDatePicker.getValue()==null){
             new Alert(Alert.AlertType.ERROR, "Select a start date.").showAndWait();
         }
-        if (endDatePicker.getValue()==null){
+        if (endActiveCustomersDatePicker.getValue()==null){
             new Alert(Alert.AlertType.ERROR, "Select an end date.").showAndWait();
         }
 
-        List<String> activeCustomers = reports.mostActiveCustomers(10, startDatePicker.getValue(), endDatePicker.getValue());
+        List<String> activeCustomers = reports.mostActiveCustomers(10, startActiveCustomersDatePicker.getValue(), endActiveCustomersDatePicker.getValue());
 
         activeCustomerList.setItems(FXCollections.observableList(activeCustomers));
+        activeCustomerList.refresh();
     }
 
+    /**
+     * Toggle grid pane visibility
+     * @param visible
+     */
     private void setGridPaneVisibility(GridPane visible){
         apptTypeGrid.setVisible(false);
         consSchedGrid.setVisible(false);

@@ -14,10 +14,10 @@
   <rowConstraints>
     <RowConstraints fillHeight="true" maxHeight="385.0" minHeight="10.0" percentHeight="0.0" prefHeight="385.0" vgrow="SOMETIMES" />
     <RowConstraints maxHeight="150.0" minHeight="10.0" prefHeight="150.0" vgrow="ALWAYS" />
-    <RowConstraints maxHeight="50.0" minHeight="10.0" prefHeight="50.0" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="50.0" minHeight="10.0" prefHeight="50.0" vgrow="ALWAYS" />
   </rowConstraints>
    <children>
-      <HBox GridPane.columnIndex="1" GridPane.rowIndex="2">
+      <HBox alignment="TOP_RIGHT" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2">
          <children>
             <Button fx:id="addApptButton" mnemonicParsing="false" onAction="#addApptClicked" text="Add Appointment" />
             <Button fx:id="editApptButton" mnemonicParsing="false" onAction="#editApptClicked" text="Edit Appointment" />
@@ -31,8 +31,14 @@
             <Button fx:id="viewCustButton" mnemonicParsing="false" onAction="#viewCustClicked" text="View Customer" />
          </children>
       </HBox>
-      <Button fx:id="reportsButton" mnemonicParsing="false" onAction="#reportsClicked" text="Reports" GridPane.rowIndex="2" />
-      <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#logoutClicked" text="Logout" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+      <Button fx:id="reportsButton" mnemonicParsing="false" onAction="#reportsClicked" text="Reports" GridPane.halignment="RIGHT" GridPane.rowIndex="2" GridPane.valignment="BOTTOM">
+         <GridPane.margin>
+            <Insets right="5.0" />
+         </GridPane.margin></Button>
+      <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#logoutClicked" text="Logout" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="2" GridPane.valignment="BOTTOM">
+         <GridPane.margin>
+            <Insets left="5.0" />
+         </GridPane.margin></Button>
       <TableView fx:id="customerTable" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#customerSelected" prefHeight="150.0" prefWidth="200.0" GridPane.rowIndex="1">
         <columns>
           <TableColumn editable="false" prefWidth="121.0" text="Customer Name">

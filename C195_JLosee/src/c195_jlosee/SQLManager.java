@@ -3,6 +3,7 @@ package c195_jlosee;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
+import javafx.scene.control.Alert;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -40,6 +41,7 @@ public class SQLManager {
 
     private Map <String, PreparedStatement> mapOfStatements = new HashMap<>();
     private Map <Integer, SQLCustomer> customerMap = new HashMap<>();
+    private Map <Integer, SQLUser> userMap = new HashMap<>();
 
     private static SQLUser activeUser = null;
 
@@ -96,13 +98,8 @@ public class SQLManager {
                 String custAppt = "Select * from appointment where customerId = ?";
                 customerAppointment = sqlConnection.prepareStatement(custAppt);
 
-                //Debug code to check time of this operation
-            } /*catch (InterruptedException ie){
-                System.out.println("InterruptedException Encountered in SQLManager.getSQLConnection"+ie.getMessage());
-            } /*catch (ExecutionException ee){
-                System.out.println("ExecutionException Encountered in SQLManager.getSQLConnection"+ee.getMessage());
-            }*/catch(SQLException sqlE){
-                System.out.println("SQL Exception Encountered in SQLManager.getSQLConnection: "+sqlE.getMessage());
+            }catch(SQLException sqlE){
+                new Alert(Alert.AlertType.ERROR,"SQL Exception Encountered in SQLManager.getSQLConnection: "+sqlE.getMessage()).showAndWait();
             }
         }
         return sqlConnection;
@@ -142,6 +139,9 @@ public class SQLManager {
                 long start = System.currentTimeMillis();
                 populateCustomerMap();
                 System.out.println("Populating Customer List took: "+(System.currentTimeMillis()-start));
+                start=System.currentTimeMillis();
+                populateUserMap();
+                System.out.println("Populating User Map took: " + (System.currentTimeMillis()-start));
                 //This takes 3 seconds, can I speed it up?
                 success = true;
             }
@@ -156,9 +156,32 @@ public class SQLManager {
         return success;
     }
 
+    public void populateUserMap(){
+        String queryUserIDAndName = "Select userId, username from user";
+        try {
+            PreparedStatement users = sqlConnection.prepareStatement(queryUserIDAndName);
+            ResultSet rs = users.executeQuery();
+            while (rs.next()){
+                int id = rs.getInt("userId");
+                String name = rs.getString("username");
+                userMap.put(id, new SQLUser(id, name));
+            }
+        } catch (SQLException e) {
+            System.out.println("Exception while populating the user map: "+e.getMessage());
+        }
+    }
+
     public void logout(){
         activeUser = null;
         activeUserApptList = null;
+    }
+
+    public Map<Integer, SQLUser> getUserMap(){
+        return userMap;
+    }
+
+    public List<SQLUser> getUserList(){
+        return new ArrayList<>(userMap.values());
     }
 
     public boolean addCustomer(SQLCustomer inCustomer){
@@ -363,7 +386,27 @@ public class SQLManager {
         return customerMap;
     }
 
-    public ObservableList<SQLAppointment> getUserAppointmentList(){        return activeUserApptList;    }
+    public ObservableList<SQLAppointment> getActiveUserAppointmentList(){        return activeUserApptList;    }
+
+    public void populateUserAppointmentList(SQLUser user){
+        String appointmentQuery = "Select * from appointment where createdBy=?";
+        try {
+            List<SQLAppointment> usersAppointments = new ArrayList<>();
+            PreparedStatement pstPopulateUserAppointments = sqlConnection.prepareStatement(appointmentQuery);
+            pstPopulateUserAppointments.setString(1, user.getUserName());
+
+            ResultSet rs = pstPopulateUserAppointments.executeQuery();
+
+            while (rs.next()){
+                usersAppointments.add(new SQLAppointment(rs));
+            }
+
+            user.setApptList(FXCollections.observableList(usersAppointments));
+        } catch (SQLException e) {
+            new Alert(Alert.AlertType.ERROR, "An exception occurred when populating the appointment list for user " + user.getUserName() + e.getMessage()).showAndWait();
+        }
+        user.setLastUpdatedApptsFromSQL();
+    }
 
     private void populateCustomerMap(){
         String allCustQuery = "SELECT * FROM customer JOIN address USING (addressId) JOIN city USING (cityId) JOIN country USING(countryId)";
@@ -525,6 +568,8 @@ public class SQLManager {
                             assert true;
                         }
                     }
+
+                    apptCustomer.getCustomerAppointments().add(appt);
                 }
 
 
@@ -693,12 +738,41 @@ public class SQLManager {
                 System.out.println("SQLException in SQLManager.addAppointment while attempting to retrieve the appointmentID");
             }
 
-            //TODO: Replace activeUserApptList.add(appt);
             //activeUser.addAppointment(appt);
             success = true;
 
         }catch(SQLException sqle){
             System.out.println("SQL Error adding appointment: "+ sqle.getMessage());
+        }
+        return success;
+    }
+
+    public boolean updateAppointment(SQLAppointment updateAppt){
+        //TODO: Finish this and make sure its workable.
+        boolean success = false;
+
+        String queryUpdate = "Update appointment SET customerId=?, start=?, end=?, title=?, description=?, location=?, contact=?, url=?, lastUpdateBy=? WHERE appointmentId=?";
+
+        Timestamp tsStart = Timestamp.from(updateAppt.getStartDateTime().toInstant());
+        Timestamp tsEnd = Timestamp.from(updateAppt.getEndDateTime().toInstant());
+
+        try {
+            PreparedStatement pstUpdateAppt = sqlConnection.prepareStatement(queryUpdate);
+            pstUpdateAppt.setInt(1, updateAppt.getCustomerID());
+            pstUpdateAppt.setTimestamp(2, tsStart);
+            pstUpdateAppt.setTimestamp(3, tsEnd);
+            pstUpdateAppt.setString(4, updateAppt.getTitle());
+            pstUpdateAppt.setString(5, updateAppt.getDescription());
+            pstUpdateAppt.setString(6, updateAppt.getLocationProperty());
+            pstUpdateAppt.setString(7, updateAppt.getContact());
+            pstUpdateAppt.setString(8, updateAppt.getUrl());
+            pstUpdateAppt.setString(9, activeUser.getUserName());
+            pstUpdateAppt.setInt(10, updateAppt.getApptID());
+
+            pstUpdateAppt.executeUpdate();
+            success = true;
+        } catch (SQLException e) {
+            new Alert(Alert.AlertType.ERROR, "An exception occurred in SQLManager.updateAppointment(): " +e.getMessage()).showAndWait();
         }
         return success;
     }

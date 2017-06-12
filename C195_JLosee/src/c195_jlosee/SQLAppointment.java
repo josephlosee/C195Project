@@ -60,9 +60,14 @@ public class SQLAppointment {
     private LocalTime businessStart = LocalTime.of(8,0), businessEnd = LocalTime.of(18,0);
 
     public SQLAppointment(){
-
+        this.apptID=-1;
     }
 
+    /**
+     * Constructs an appointment from a resultset
+     * @param rs the resultset cursor
+     * @throws SQLException
+     */
     public SQLAppointment(ResultSet rs) throws SQLException {
         try {
             this.setApptID(rs.getInt("appointmentId"));
@@ -175,7 +180,7 @@ public class SQLAppointment {
 
     public void setEndDateTime(ZonedDateTime end) throws OutsideBusinessHoursException{
         if (isOutsideHours(end)){
-            throw new OutsideBusinessHoursException("Appointment end time is not within business hours of "+businessStart+"-"+businessEnd);
+            throw new OutsideBusinessHoursException("Appointment end time is not within business hours of Monday through Friday, "+businessStart+"-"+businessEnd);
         }else{
             this.endDate=end;
             setApptTime();
@@ -311,7 +316,7 @@ public class SQLAppointment {
     }
     public void setCustomerID(int customerID) {
         this.customerID = customerID;
-        if (customerRef==null | customerID!=customerRef.getCustomerID()){
+        if (customerRef==null || customerID!=customerRef.getCustomerID()){
             this.retrieveCustomerInfo();
         }
 
@@ -340,4 +345,4 @@ public class SQLAppointment {
             super(message);
         }
     }
-}
+}//END OF CLASS

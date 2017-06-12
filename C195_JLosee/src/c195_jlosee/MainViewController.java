@@ -53,12 +53,14 @@ public class MainViewController implements Initializable{
         this.setCalendarActions();
         this.weeklyAppts.getWeekScrollPane().setOnMouseClicked(event->{
             LocalDate yesterday = LocalDate.now().minusDays(1);
-            LocalDate endOfWeek = LocalDate.now().plusDays(1);
-            SQLManager.getInstance().getActiveUser().getUserAppts()
+            LocalDate endOfWeek = LocalDate.now().plusWeeks(1);
+            List<SQLAppointment> weekAppts = SQLManager.getInstance().getActiveUser().getUserAppts()
                     .parallelStream()
                     .filter(a->a.getStartDateTime().toLocalDate().isAfter(yesterday) &&
                             a.getStartDateTime().toLocalDate().isBefore(endOfWeek))
                     .collect(Collectors.toList());
+
+            appointmentTable.setItems(FXCollections.observableList(weekAppts));
         });
         gpMain.add(calendar.getCalendar(), 0,0);
         gpMain.add(weeklyAppts.getWeekScrollPane(), 1, 0);
@@ -101,7 +103,7 @@ public class MainViewController implements Initializable{
             //Resume setting up
             Stage secondaryStage = new Stage();
             secondaryStage.setScene(new Scene(modProdPane));
-
+            secondaryStage.setTitle("Edit Customer");
             //Show and Wait to take away input from the main window
             secondaryStage.showAndWait();
         }
@@ -129,6 +131,7 @@ public class MainViewController implements Initializable{
             Stage secondaryStage = new Stage();
             secondaryStage.setScene(new Scene(modProdPane));
             //Show and Wait to take away input from the main window
+            secondaryStage.setTitle("View Customer");
             secondaryStage.showAndWait();
         }
     }
@@ -195,7 +198,7 @@ public class MainViewController implements Initializable{
                 //Resume setting up
                 Stage secondaryStage = new Stage();
                 secondaryStage.setScene(new Scene(modProdPane));
-
+                secondaryStage.setTitle("Edit Appointment");
                 //Show and Wait to take away input from the main window
                 secondaryStage.showAndWait();
                 //TODO - nothing?
@@ -231,7 +234,7 @@ public class MainViewController implements Initializable{
             //Resume setting up
             Stage secondaryStage = new Stage();
             secondaryStage.setScene(new Scene(modProdPane));
-
+            secondaryStage.setTitle("View Appointment");
             //Show and Wait to take away input from the main window
             secondaryStage.showAndWait();
         }
@@ -265,7 +268,6 @@ public class MainViewController implements Initializable{
         System.out.println("Reports button clicked");
         SQLReports reports = new SQLReports();
         List<String> apptTypes = reports.getAppointmentTypesByMonth(6, 2017);
-        List<SQLAppointment> apptList = reports.getConsultantSchedule(SQLManager.getInstance().getActiveUser().getUserID(), LocalDate.now());
 
         Parent modProdPane = new Region();
 
@@ -273,18 +275,13 @@ public class MainViewController implements Initializable{
         try {
             //Setup the parent
             modProdPane = (Parent)loader.load();
-            //Get the reference to the controller class so
-            //AppointmentViewController controller =loader.<AppointmentViewController>getController();
-            //We can populate the view with the part to be modified.
-            //controller.viewAppointment(viewAppt);
-
         }catch (IOException ioExc){
             ioExc.printStackTrace();
         }
         //Resume setting up
         Stage secondaryStage = new Stage();
         secondaryStage.setScene(new Scene(modProdPane));
-
+        secondaryStage.setTitle("Reports");
         //Show and Wait to take away input from the main window
         secondaryStage.showAndWait();
     }
