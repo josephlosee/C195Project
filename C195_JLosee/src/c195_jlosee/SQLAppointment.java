@@ -3,7 +3,6 @@ package c195_jlosee;
 import com.sun.istack.internal.NotNull;
 import javafx.beans.property.SimpleStringProperty;
 
-import javax.xml.transform.Result;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.*;

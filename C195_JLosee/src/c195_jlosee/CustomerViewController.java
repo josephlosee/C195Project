@@ -7,8 +7,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -57,13 +55,6 @@ public class CustomerViewController implements Initializable{
 
         countryField.setItems(countryList);
         countryField.getSelectionModel().select(indexOfDefault);
-
-        /*Debug Customer Informatino
-        custNameField.setText("Alan Smithee");
-        AddressLine1Field.setText("123 Main St.");
-        CityField.setText("Anytown");
-        PostalCodeField.setText("11111");
-        PhoneField.setText("888-555-5555");*/
     }
 
     @FXML void saveClicked(ActionEvent e){

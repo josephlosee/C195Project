@@ -2,23 +2,20 @@ package c195_jlosee;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 import javafx.scene.control.Alert;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import java.security.*;
+import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.*;
-import java.sql.Timestamp;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * $SQLManager
@@ -66,7 +63,8 @@ public class SQLManager {
             try {
                 Class.forName(driver);
             } catch (ClassNotFoundException cnfe){
-                System.out.println("Class not found exception encountered: " + cnfe.getMessage());
+                new Alert(Alert.AlertType.ERROR,"Class not found exception encountered: " + cnfe.getMessage())
+                        .showAndWait();
             }
 
             try {
@@ -120,7 +118,8 @@ public class SQLManager {
         //LOGIN QUERY
         String loginSQLString = "select * from user where userName = ? and password = ?";
 
-        //TODO: It would be best to not transmit these UN/PW, but the requirement isn't there and the DB isn't properly set up (pw length 50, instead of 256+).
+        //It would be best to not transmit these UN/PW, but the requirement isn't there and
+        // the DB isn't properly set up (pw length 50, instead of 256+).
         // byte[] passHashed =  hashPassword(pass.toCharArray(), user.to)
 
         try {
@@ -136,22 +135,17 @@ public class SQLManager {
                 String userName = res.getString(2);
                 activeUser = new SQLUser(userID, userName);
 
-                long start = System.currentTimeMillis();
                 populateCustomerMap();
-                System.out.println("Populating Customer List took: "+(System.currentTimeMillis()-start));
-                start=System.currentTimeMillis();
+
                 populateUserMap();
-                System.out.println("Populating User Map took: " + (System.currentTimeMillis()-start));
                 //This takes 3 seconds, can I speed it up?
                 success = true;
             }
 
         }catch (SQLException sqlE){
-            System.out.println("Error creating statement in : "+ sqlE.getMessage());
-            System.out.println(sqlE.getStackTrace());
-        }/*catch (Exception e){
-            System.out.println("An generic exception occurred during the prepared statement of login. "+e.getMessage());
-        }*/
+            new Alert(Alert.AlertType.ERROR,"Error creating statement in : "+ sqlE.getMessage())
+                    .showAndWait();
+        }
 
         return success;
     }
@@ -167,7 +161,8 @@ public class SQLManager {
                 userMap.put(id, new SQLUser(id, name));
             }
         } catch (SQLException e) {
-            System.out.println("Exception while populating the user map: "+e.getMessage());
+            new Alert(Alert.AlertType.ERROR,"Exception while populating the user map: "+e.getMessage())
+                    .showAndWait();
         }
     }
 
@@ -219,8 +214,8 @@ public class SQLManager {
                 rs.close();
             }
         } catch(SQLException sqlE){
-            System.out.println("Error creating statement in addCustomer: "+ sqlE.getMessage());
-            System.out.println(sqlE.getStackTrace());
+            new Alert(Alert.AlertType.ERROR,"Error creating statement in addCustomer: "+ sqlE.getMessage())
+                    .showAndWait();
         }
         return addSucceed;
     }
@@ -258,8 +253,8 @@ public class SQLManager {
             }
         }catch (SQLException e){
             //Handle the sql exception
-
-            System.out.println("SQLException in addCountry: "+ e.getMessage());
+            new Alert(Alert.AlertType.ERROR,"SQLException in addCountry: "+ e.getMessage())
+                    .showAndWait();
         }
 
         return countryID;
@@ -295,9 +290,8 @@ public class SQLManager {
                 }
             }
         }catch (SQLException e){
-            System.out.println("SQLException in addCity: "+e.getMessage());
+            new Alert(Alert.AlertType.ERROR,"SQLException in addCity: "+e.getMessage()).showAndWait();
         }
-
         return cityID;
     }
 
@@ -340,7 +334,6 @@ public class SQLManager {
         String addAddress="INSERT INTO address (address, address2, cityID, postalCode, phone, createDate, createdBy, lastUpdateBy)"+
                 " VALUES (? , ?, ?, ?, ?, ?, ?, ?)";
 
-
         try(PreparedStatement pstAddrExists = sqlConnection.prepareStatement(selectAddress)){
             pstAddrExists.setString(1,addressLine1);
             pstAddrExists.setString(2, addressLine2);
@@ -371,7 +364,8 @@ public class SQLManager {
                 }
             }
         }catch (SQLException e){
-            System.out.println("SQLException in addAddres: "+e.getMessage());
+            new Alert(Alert.AlertType.ERROR, "SQLException in addAddress: "+e.getMessage())
+                    .showAndWait();
         }
 
         return addressID;
@@ -385,8 +379,6 @@ public class SQLManager {
     public Map<Integer, SQLCustomer> getCustomerMap(){
         return customerMap;
     }
-
-    public ObservableList<SQLAppointment> getActiveUserAppointmentList(){        return activeUserApptList;    }
 
     public void populateUserAppointmentList(SQLUser user){
         String appointmentQuery = "Select * from appointment where createdBy=?";
@@ -429,18 +421,19 @@ public class SQLManager {
                 current.setPhone(rs.getString("phone"));
                 current.setPostalCode(rs.getString("postalCode"));
                 current.setActive(rs.getInt("active"));
-                //Get the customer's apointments
-                long test = System.currentTimeMillis();
-                //System.out.println("Appt list for "+current.getCustomerName()+" took: "+(System.currentTimeMillis()-test));
+                //Get the customer's appointments
+
                 //Add the customer to the lists
                 customerMap.put(customerID, current);
 
             }
         }catch (SQLException e){
-            System.out.println("Error in SQLManager.populateCustomerList() resultSet : "+e.getMessage());
+            new Alert(Alert.AlertType.ERROR,"Error in SQLManager.populateCustomerList() resultSet : "+e.getMessage())
+                    .showAndWait();
         } catch (Exception e) {
-            System.out.println("Change in the database parameters parsing customer records: "+e.getMessage());
-            e.printStackTrace();
+            new Alert(Alert.AlertType.ERROR,
+                    "Change in the database parameters parsing customer records: "+ e.getMessage())
+                    .showAndWait();
         }
 
         retrieveAllCustomerAppointments();
@@ -449,46 +442,6 @@ public class SQLManager {
     /**
      * Populates the customer list for the table view and other uses
      */
-    private void populateCustomerList(){
-        String allCustQuery = "SELECT * FROM customer JOIN address USING (addressId) JOIN city USING (cityId) JOIN country USING(countryId)";
-        SQLCustomer current;
-        try{
-            ResultSet rs = sqlConnection.createStatement().executeQuery(allCustQuery);
-            while(rs.next()){
-                //Get all the customer information
-                current=new SQLCustomer();
-                current.setCustomerID(rs.getInt("customerId"));
-                current.setCustomerName(rs.getString("customerName"));
-                current.setAddressID(rs.getInt("addressId"));
-                current.setAddress1(rs.getString("address"));
-                current.setAddress2(rs.getString("address2"));
-                current.setCityID(rs.getInt("cityId"));
-                current.setCity(rs.getString ("city"));
-                current.setCountryID(rs.getInt("countryId"));
-                current.setCountry(rs.getString("country"));
-                current.setPhone(rs.getString("phone"));
-                current.setPostalCode(rs.getString("postalCode"));
-                current.setActive(rs.getInt("active"));
-                //Get the customer's apointments
-                long test = System.currentTimeMillis();
-
-                current.setAppointmentList((getCustomersAppointments(current)));
-                System.out.println("Appt list for "+current.getCustomerName()+" took: "+(System.currentTimeMillis()-test));
-                //Add the customer to the lists
-                customerList.add(current);
-
-            }
-        }catch (SQLException e){
-            System.out.println("Error in SQLManager.populateCustomerList() resultSet : "+e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Change in the database parameters parsing customer records: "+e.getMessage());
-            e.printStackTrace();
-        }
-
-        //customerList.stream()
-        //        .forEach(System.out::println);
-    }
-
     public void updateCustomer(SQLCustomer toUpdate){
         String strUdateQuery = "UPDATE customer SET customerName=?, addressId=?, active=?, lastUpdateBy=? WHERE customerId=?";
 
@@ -503,21 +456,18 @@ public class SQLManager {
             int i = psUpdate.executeUpdate();
 
         }catch (SQLException sqle){
-            System.out.println("SQLException in sqlmanager.updateCustomer: " +sqle.getMessage());
+            new Alert(Alert.AlertType.ERROR,"SQLException in sqlmanager.updateCustomer: " +sqle.getMessage())
+                    .showAndWait();
         }
     }
 
     public void retrieveAllCustomerAppointments(){
         String apptQueryString = "Select * from appointment";
 
-        long queryTimer = System.currentTimeMillis();
         try{
             PreparedStatement apptQuery = sqlConnection.prepareStatement(apptQueryString);
 
             ResultSet rs = apptQuery.executeQuery();
-            System.out.println("Execute Query for  retrieveAllcustomerAppointments took " + (System.currentTimeMillis()-queryTimer)+"ms");
-            int apptCount = 0;
-            queryTimer = System.currentTimeMillis();
 
             while (rs.next()){
                 //In case the appointment somehow has a null customer:
@@ -533,7 +483,6 @@ public class SQLManager {
                         assert true: "PlaceholderCustomer Name "+apptCustomer.getCustomerName() +"caused an exception. This should never be reached.";
                     }
                 }
-                long timer = System.currentTimeMillis();
                     SQLAppointment appt = new SQLAppointment();
                     appt.setApptID(rs.getInt("appointmentId"));
                     appt.setCustomerRef(apptCustomer);
@@ -556,9 +505,9 @@ public class SQLManager {
                         appt.setEndDateTime(endLocal);
                         appt.setBusinessStart(startHolder);
                         appt.setBusinessEnd(endHolder);
-                        //appt.setCustomerRef(in);
                     }catch (Exception e){
-                        System.out.println("This is a test of the retrieveAllAppointments method, this should not be reached");//Discard this because we're pulling the information from the database so we don't really care
+                        assert true: "This is a test of the retrieveAllAppointments method, this should not be reached";
+                        //Discard this because we're pulling the information from the database so we don't really care
                     }
 
                     if (appt.getCreatedBy().equalsIgnoreCase(activeUser.getUserName())){
@@ -571,76 +520,10 @@ public class SQLManager {
 
                     apptCustomer.getCustomerAppointments().add(appt);
                 }
-
-
             }catch (SQLException e){
-            System.out.println("SQLException occurred in SQLManager.getCustomersAppointments: "+e.getMessage());
+            new Alert(Alert.AlertType.ERROR, "SQLException occurred in SQLManager.getCustomersAppointments: "+e.getMessage())
+                .showAndWait();
         }
-        System.out.println("Parsing the appointment result set took: " +(System.currentTimeMillis()-queryTimer));
-    }
-
-    public ArrayList<SQLAppointment> getCustomersAppointments(SQLCustomer in){
-        ArrayList<SQLAppointment> customerAppointmentsList= new ArrayList<>();
-        String apptQuery = "Select * from appointment where customerId=?";
-
-        int custID = in.getCustomerID();
-        try{
-
-            this.customerAppointment.setInt(1, custID);
-            long queryTimer = System.currentTimeMillis();
-            ResultSet rs = this.customerAppointment.executeQuery();
-            System.out.println("Execute Query for "+in.getCustomerName()+" took " + (System.currentTimeMillis()-queryTimer)+"ms");
-            int apptCount = 0;
-            while (rs.next()){
-                //DEBUG testing:
-                apptCount++;
-                long timer = System.currentTimeMillis();
-
-                SQLAppointment appt = new SQLAppointment();
-                appt.setApptID(rs.getInt("appointmentId"));
-                appt.setCustomerRef(in);
-                appt.setTitle(rs.getString("title"));
-                appt.setDescription(rs.getString("description"));
-                appt.setLocationProperty(rs.getString("location"));
-                appt.setContact(rs.getString("contact"));
-                appt.setUrl(rs.getString("url"));
-                appt.setCreatedBy(rs.getString("createdBy"));
-                appt.setCreatedDate(rs.getTimestamp("createdate").toLocalDateTime());
-                ZonedDateTime startLocal = rs.getTimestamp("start").toInstant().atZone(ZoneId.systemDefault());
-                ZonedDateTime endLocal = rs.getTimestamp("end").toInstant().atZone(ZoneId.systemDefault());
-
-                try{
-                    LocalTime endHolder = appt.getBusinessEnd();
-                    LocalTime startHolder = appt.getBusinessStart();
-                    appt.setBusinessStart(LocalTime.of(0,0));
-                    appt.setBusinessEnd(LocalTime.of(23,59));
-                    appt.setStartDateTime(startLocal);
-                    appt.setEndDateTime(endLocal);
-                    appt.setBusinessStart(startHolder);
-                    appt.setBusinessEnd(endHolder);
-                    //appt.setCustomerRef(in);
-                }catch (Exception e){
-                    //Discard this because we're pulling the information from the database so we don't really care
-                }
-                customerAppointmentsList.add(appt);
-                long timer2 = System.currentTimeMillis();
-                System.out.print(in.getCustomerName() + "Appt #"+apptCount+" took "+(timer2-timer));
-                if (appt.getCreatedBy().equalsIgnoreCase(activeUser.getUserName())){
-                    try {
-                        activeUser.addAppointment(appt);
-                    } catch (ConflictingAppointmentException cae){
-                        assert true;
-                        //System.out.println("A conflicting user appointment was generated on loading from the database. "+cae.getMessage());
-                    }
-                }
-                System.out.print(" adding to user took " + (System.currentTimeMillis()-timer2)+"\n");
-
-            }
-        }catch (SQLException e){
-            System.out.println("SQLException occurred in SQLManager.getCustomersAppointments: "+e.getMessage());
-        }
-
-        return customerAppointmentsList;
     }
 
     /**
@@ -689,7 +572,8 @@ public class SQLManager {
                         " \nLocation: "+location;
             }
         }catch (SQLException e){
-            System.out.println("Exception encountered in SQLManager.checkForApptAtLogin: "+ e.getMessage());
+            new Alert(Alert.AlertType.ERROR,"Exception encountered in SQLManager.checkForApptAtLogin: "+ e.getMessage())
+                    .showAndWait();
         }
         return appointmentDetails;
     }
@@ -735,20 +619,22 @@ public class SQLManager {
                     appt.setApptID(id);
                 }
             }catch (SQLException e){
-                System.out.println("SQLException in SQLManager.addAppointment while attempting to retrieve the appointmentID");
+                new Alert(Alert.AlertType.ERROR,
+                        "SQLException in SQLManager.addAppointment while attempting to retrieve the appointmentID")
+                        .showAndWait();
             }
 
             //activeUser.addAppointment(appt);
             success = true;
 
         }catch(SQLException sqle){
-            System.out.println("SQL Error adding appointment: "+ sqle.getMessage());
+            new Alert(Alert.AlertType.ERROR,"SQL Error adding appointment: "+ sqle.getMessage())
+                    .showAndWait();
         }
         return success;
     }
 
     public boolean updateAppointment(SQLAppointment updateAppt){
-        //TODO: Finish this and make sure its workable.
         boolean success = false;
 
         String queryUpdate = "Update appointment SET customerId=?, start=?, end=?, title=?, description=?, location=?, contact=?, url=?, lastUpdateBy=? WHERE appointmentId=?";
@@ -772,7 +658,8 @@ public class SQLManager {
             pstUpdateAppt.executeUpdate();
             success = true;
         } catch (SQLException e) {
-            new Alert(Alert.AlertType.ERROR, "An exception occurred in SQLManager.updateAppointment(): " +e.getMessage()).showAndWait();
+            new Alert(Alert.AlertType.ERROR, "An exception occurred in SQLManager.updateAppointment(): " +e.getMessage())
+                    .showAndWait();
         }
         return success;
     }
